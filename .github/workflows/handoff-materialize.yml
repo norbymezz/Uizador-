@@ -1,0 +1,53 @@
+name: materialize handoff sources
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  materialize:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Materialize handoff files
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+
+          mappings = {
+              '_handoff/fuentes/core__permutation.md': 'core/permutation.js',
+              '_handoff/fuentes/core__slice-renderer.md': 'core/slice-renderer.js',
+              '_handoff/fuentes/web__encoder-preview__index-html.md': 'web/encoder-preview/index.html',
+              '_handoff/fuentes/web__encoder-preview__src__main.md': 'web/encoder-preview/src/main.js',
+          }
+
+          def extract(text):
+              fence = '```'
+              a = text.find(fence)
+              if a < 0:
+                  return text.strip() + '\n'
+              a = text.find('\n', a) + 1
+              b = text.find(fence, a)
+              if b < 0:
+                  return text[a:].strip() + '\n'
+              return text[a:b].strip() + '\n'
+
+          for src, dst in mappings.items():
+              source = Path(src)
+              if not source.exists():
+                  continue
+              target = Path(dst)
+              target.parent.mkdir(parents=True, exist_ok=True)
+              target.write_text(extract(source.read_text(encoding='utf-8')), encoding='utf-8')
+          PY
+
+      - name: Commit materialized files
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add core web
+          git diff --cached --quiet || git commit -m "Materialize handoff sources"
+          git push

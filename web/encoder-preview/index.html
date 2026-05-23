@@ -4,22 +4,88 @@
   <meta charset="utf-8" />
   <title>Uizador Preview</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <style>
+    body {
+      margin: 0;
+      background: #111;
+      color: #eee;
+      font-family: system-ui, sans-serif;
+    }
+
+    main {
+      max-width: 1200px;
+      margin: auto;
+      padding: 24px;
+    }
+
+    .controls {
+      display: grid;
+      gap: 12px;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      margin-bottom: 20px;
+    }
+
+    input,
+    button {
+      font: inherit;
+      padding: 10px;
+    }
+
+    .grid {
+      display: grid;
+      gap: 18px;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    }
+
+    section {
+      background: #1b1b1b;
+      border: 1px solid #333;
+      border-radius: 12px;
+      padding: 12px;
+    }
+
+    canvas,
+    video {
+      width: 100%;
+      background: #000;
+      border-radius: 8px;
+    }
+
+    #status {
+      margin-bottom: 18px;
+      color: #9ad1ff;
+    }
+  </style>
 </head>
 <body>
   <main>
     <h1>Uizador Preview</h1>
 
-    <input id="file" type="file" accept="video/*" />
-    <input id="perm" value="3,1,4,0,2" />
-    <button id="render">Render</button>
+    <div class="controls">
+      <input id="file" type="file" accept="video/*" />
+      <input id="perm" value="3,1,4,0,2,7,5,6" />
+      <button id="render">Aplicar permutacion</button>
+    </div>
 
-    <video id="video" controls muted></video>
+    <div id="status"></div>
 
-    <h2>Codificado</h2>
-    <canvas id="encoded"></canvas>
+    <div class="grid">
+      <section>
+        <h2>Original</h2>
+        <video id="video" controls muted loop></video>
+      </section>
 
-    <h2>Reinterpretado</h2>
-    <canvas id="decoded"></canvas>
+      <section>
+        <h2>Codificado</h2>
+        <canvas id="encoded"></canvas>
+      </section>
+
+      <section>
+        <h2>Reinterpretado</h2>
+        <canvas id="decoded"></canvas>
+      </section>
+    </div>
   </main>
 
   <script type="module" src="./src/main.js"></script>

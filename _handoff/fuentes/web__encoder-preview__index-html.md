@@ -1,0 +1,31 @@
+# web/encoder-preview/index.html
+
+```html
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <title>Uizador Preview</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+</head>
+<body>
+  <main>
+    <h1>Uizador Preview</h1>
+
+    <input id="file" type="file" accept="video/*" />
+    <input id="perm" value="3,1,4,0,2" />
+    <button id="render">Render</button>
+
+    <video id="video" controls muted></video>
+
+    <h2>Codificado</h2>
+    <canvas id="encoded"></canvas>
+
+    <h2>Reinterpretado</h2>
+    <canvas id="decoded"></canvas>
+  </main>
+
+  <script type="module" src="./src/main.js"></script>
+</body>
+</html>
+```

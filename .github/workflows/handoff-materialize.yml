@@ -12,7 +12,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Materialize handoff files
+      - name: Materialize handoff files without overwriting
         run: |
           python3 - <<'PY'
           from pathlib import Path
@@ -37,11 +37,18 @@ jobs:
 
           for src, dst in mappings.items():
               source = Path(src)
+              target = Path(dst)
+
               if not source.exists():
                   continue
-              target = Path(dst)
+
+              if target.exists():
+                  print(f'SKIP existing target: {dst}')
+                  continue
+
               target.parent.mkdir(parents=True, exist_ok=True)
               target.write_text(extract(source.read_text(encoding='utf-8')), encoding='utf-8')
+              print(f'CREATED: {dst}')
           PY
 
       - name: Commit materialized files

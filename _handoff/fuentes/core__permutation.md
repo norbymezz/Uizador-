@@ -1,6 +1,9 @@
 # core/permutation.js
 
 ```js
+export const MIN_COLUMNS = 2;
+export const MAX_COLUMNS = 20;
+
 export function parsePermutation(text) {
   return String(text)
     .split(',')
@@ -11,32 +14,48 @@ export function parsePermutation(text) {
 export function validatePermutation(p) {
   const n = p.length;
   const seen = new Set(p);
-  if (n < 1) return false;
+
+  if (n < MIN_COLUMNS) return false;
+  if (n > MAX_COLUMNS) return false;
   if (seen.size !== n) return false;
+
   return p.every((x) => Number.isInteger(x) && x >= 0 && x < n);
 }
 
 export function assertPermutation(p) {
   if (!validatePermutation(p)) {
-    throw new Error('La permutacion debe contener cada indice una sola vez, desde 0 hasta N-1.');
+    throw new Error(
+      `La permutacion debe tener entre ${MIN_COLUMNS} y ${MAX_COLUMNS} columnas y contener cada indice una sola vez.`
+    );
   }
+
   return p;
 }
 
 export function invertPermutation(p) {
   assertPermutation(p);
+
   const inv = new Array(p.length);
-  for (let i = 0; i < p.length; i += 1) inv[p[i]] = i;
+
+  for (let i = 0; i < p.length; i += 1) {
+    inv[p[i]] = i;
+  }
+
   return inv;
 }
 
 export function identityPermutation(n) {
+  if (n < MIN_COLUMNS || n > MAX_COLUMNS) {
+    throw new Error(`N debe estar entre ${MIN_COLUMNS} y ${MAX_COLUMNS}`);
+  }
+
   return Array.from({ length: n }, (_, i) => i);
 }
 
 export function seededShuffle(n, seed = 123456789) {
   const p = identityPermutation(n);
   let s = seed >>> 0;
+
   const random = () => {
     s = (1664525 * s + 1013904223) >>> 0;
     return s / 4294967296;

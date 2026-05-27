@@ -1,0 +1,70 @@
+{
+  "conversation_id": "seguro_movil_01",
+  "source_type": "phone_prank_fragment",
+  "locale": "es-ES",
+  "secondary_language": "en-US",
+  "notes": {
+    "experimental": true,
+    "reveal_removed": true,
+    "usable_range": "00:04-03:13",
+    "guideline_alignment": "ABAB exploratory mapping"
+  },
+  "segments": [
+    {
+      "segment_id": 1,
+      "start_time": "00:04",
+      "end_time": "00:13",
+      "speaker": "A",
+      "role": "agent",
+      "language": "es",
+      "text": "Parece que ha tenido usted un incidente con el móvil.",
+      "text_codeswitch": "Parece que ha tenido usted un incident with the mobile device.",
+      "annotation_notes": [
+        "claim verification",
+        "formal support tone"
+      ]
+    },
+    {
+      "segment_id": 2,
+      "start_time": "00:13",
+      "end_time": "00:31",
+      "speaker": "B",
+      "role": "customer",
+      "language": "es",
+      "text": "Estábamos por casa y los niños estaban jugando. La empujaron y se cayó el móvil.",
+      "text_codeswitch": "Estábamos por casa y los niños estaban jugando. They pushed her and the mobile phone fell down.",
+      "annotation_notes": [
+        "incident explanation",
+        "natural speech reconstruction"
+      ]
+    },
+    {
+      "segment_id": 3,
+      "start_time": "01:29",
+      "end_time": "01:54",
+      "speaker": "A",
+      "role": "agent",
+      "language": "es",
+      "text": "Hay que hacer una investigación.",
+      "text_codeswitch": "Tenemos que perform an investigation for the insurance claim.",
+      "annotation_notes": [
+        "fraud suspicion",
+        "insurance support vocabulary"
+      ]
+    },
+    {
+      "segment_id": 4,
+      "start_time": "02:44",
+      "end_time": "02:55",
+      "speaker": "A",
+      "role": "agent",
+      "language": "es",
+      "text": "Estamos hartos de tanto engaño y tanta mentira.",
+      "text_codeswitch": "Estamos cansados de so many false insurance claims.",
+      "annotation_notes": [
+        "emotional escalation",
+        "accusatory tone"
+      ]
+    }
+  ]
+}

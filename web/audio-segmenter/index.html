@@ -1,0 +1,548 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Uizador · Segmentador de audio</title>
+  <style>
+    :root { color-scheme: dark; }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: #111;
+      color: #eee;
+      font-family: system-ui, sans-serif;
+    }
+    main {
+      width: min(1180px, 100%);
+      margin: auto;
+      padding: 20px;
+    }
+    h1 { margin: 0 0 16px; font-size: 1.35rem; }
+    .controls {
+      display: grid;
+      grid-template-columns: minmax(240px, 1fr) 150px auto auto;
+      gap: 10px;
+      align-items: end;
+      margin-bottom: 14px;
+    }
+    label { display: grid; gap: 5px; font-size: .86rem; color: #bbb; }
+    input, button {
+      min-height: 42px;
+      border: 1px solid #444;
+      border-radius: 8px;
+      background: #202020;
+      color: #eee;
+      padding: 8px 10px;
+      font: inherit;
+    }
+    button { cursor: pointer; }
+    button:hover { background: #2a2a2a; }
+    button:disabled { opacity: .45; cursor: default; }
+    .panel {
+      background: #181818;
+      border: 1px solid #333;
+      border-radius: 10px;
+      padding: 12px;
+      margin-bottom: 12px;
+    }
+    audio { width: 100%; margin-bottom: 10px; }
+    canvas {
+      display: block;
+      width: 100%;
+      height: 190px;
+      background: #0b0b0b;
+      border: 1px solid #333;
+      border-radius: 8px;
+      touch-action: none;
+      cursor: crosshair;
+    }
+    .help, #status { color: #aaa; font-size: .86rem; margin-top: 8px; }
+    #status { color: #9ad1ff; min-height: 1.2em; }
+    .segments {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(155px, 1fr));
+      gap: 8px;
+    }
+    .segment {
+      text-align: left;
+      padding: 10px;
+      border: 1px solid #3a3a3a;
+      border-radius: 8px;
+      background: #202020;
+    }
+    .segment.playing { outline: 2px solid #9ad1ff; }
+    .segment strong, .segment span { display: block; }
+    .segment span { margin-top: 4px; color: #aaa; font-size: .8rem; }
+    details { margin-top: 10px; }
+    pre {
+      overflow: auto;
+      max-height: 320px;
+      background: #0d0d0d;
+      border: 1px solid #333;
+      padding: 10px;
+      border-radius: 8px;
+      font-size: .8rem;
+    }
+    @media (max-width: 760px) {
+      .controls { grid-template-columns: 1fr 120px; }
+    }
+  </style>
+</head>
+<body>
+<main>
+  <h1>Segmentador temporal por silencios</h1>
+
+  <div class="controls">
+    <label>
+      Audio o video local
+      <input id="file" type="file" accept="audio/*,video/*" />
+    </label>
+    <label>
+      Cantidad de partes
+      <input id="parts" type="number" min="2" max="200" value="10" />
+    </label>
+    <button id="analyze" disabled>Detectar y dividir</button>
+    <button id="reset" disabled>Restablecer</button>
+  </div>
+
+  <section class="panel">
+    <audio id="player" controls></audio>
+    <canvas id="timeline"></canvas>
+    <div class="help">
+      Las líneas azules son fronteras seleccionadas. Arrastralas para ajustarlas. Un clic entre dos líneas reproduce solamente ese segmento.
+    </div>
+    <div id="status"></div>
+  </section>
+
+  <section class="panel">
+    <div id="segments" class="segments"></div>
+    <details>
+      <summary>JSON temporal</summary>
+      <pre id="json"></pre>
+    </details>
+  </section>
+</main>
+
+<script>
+const fileInput = document.querySelector('#file');
+const partsInput = document.querySelector('#parts');
+const analyzeButton = document.querySelector('#analyze');
+const resetButton = document.querySelector('#reset');
+const player = document.querySelector('#player');
+const canvas = document.querySelector('#timeline');
+const ctx = canvas.getContext('2d');
+const status = document.querySelector('#status');
+const segmentsBox = document.querySelector('#segments');
+const jsonBox = document.querySelector('#json');
+
+let audioBuffer = null;
+let samples = null;
+let silenceCandidates = [];
+let boundaries = [];
+let stopAt = null;
+let animationFrame = null;
+let draggingBoundary = -1;
+let sourceName = '';
+
+function clamp(value, min, max) {
+  return Math.max(min, Math.min(max, value));
+}
+
+function resizeCanvas() {
+  const ratio = window.devicePixelRatio || 1;
+  const rect = canvas.getBoundingClientRect();
+  canvas.width = Math.max(1, Math.floor(rect.width * ratio));
+  canvas.height = Math.max(1, Math.floor(rect.height * ratio));
+  ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
+  draw();
+}
+
+window.addEventListener('resize', resizeCanvas);
+
+fileInput.addEventListener('change', async () => {
+  const file = fileInput.files?.[0];
+  if (!file) return;
+
+  sourceName = file.name;
+  player.src = URL.createObjectURL(file);
+  analyzeButton.disabled = false;
+  resetButton.disabled = false;
+  status.textContent = 'Archivo cargado. Falta analizar.';
+
+  const context = new AudioContext();
+  const bytes = await file.arrayBuffer();
+  audioBuffer = await context.decodeAudioData(bytes.slice(0));
+  samples = mixToMono(audioBuffer);
+  await context.close();
+
+  boundaries = [];
+  silenceCandidates = [];
+  renderAll();
+});
+
+analyzeButton.addEventListener('click', analyze);
+resetButton.addEventListener('click', () => {
+  if (!audioBuffer) return;
+  analyze();
+});
+partsInput.addEventListener('change', () => {
+  if (audioBuffer) analyze();
+});
+
+player.addEventListener('timeupdate', () => {
+  if (stopAt !== null && player.currentTime >= stopAt) {
+    player.pause();
+    player.currentTime = stopAt;
+    stopAt = null;
+    updatePlayingCards(-1);
+  }
+});
+
+function mixToMono(buffer) {
+  const mono = new Float32Array(buffer.length);
+  for (let channel = 0; channel < buffer.numberOfChannels; channel++) {
+    const data = buffer.getChannelData(channel);
+    for (let i = 0; i < data.length; i++) mono[i] += data[i] / buffer.numberOfChannels;
+  }
+  return mono;
+}
+
+function analyze() {
+  if (!audioBuffer || !samples) return;
+
+  const requestedParts = clamp(Number(partsInput.value) || 10, 2, 200);
+  partsInput.value = requestedParts;
+
+  silenceCandidates = detectSilences(samples, audioBuffer.sampleRate, audioBuffer.duration);
+  boundaries = selectBoundaries(silenceCandidates, audioBuffer.duration, requestedParts);
+
+  status.textContent = `${requestedParts} partes · ${silenceCandidates.length} silencios detectados · ${boundaries.length - 2} fronteras automáticas seleccionadas.`;
+  renderAll();
+}
+
+function detectSilences(signal, sampleRate, duration) {
+  const frameMs = 20;
+  const frameSize = Math.max(1, Math.round(sampleRate * frameMs / 1000));
+  const rms = [];
+
+  for (let start = 0; start < signal.length; start += frameSize) {
+    let sum = 0;
+    const end = Math.min(signal.length, start + frameSize);
+    for (let i = start; i < end; i++) sum += signal[i] * signal[i];
+    rms.push(Math.sqrt(sum / Math.max(1, end - start)));
+  }
+
+  const sorted = [...rms].sort((a, b) => a - b);
+  const noiseFloor = sorted[Math.floor(sorted.length * 0.20)] || 0;
+  const threshold = Math.max(0.006, noiseFloor * 2.4);
+  const minSilentFrames = Math.max(2, Math.round(80 / frameMs));
+  const candidates = [];
+  let runStart = null;
+
+  for (let i = 0; i <= rms.length; i++) {
+    const silent = i < rms.length && rms[i] <= threshold;
+    if (silent && runStart === null) runStart = i;
+
+    if ((!silent || i === rms.length) && runStart !== null) {
+      const runEnd = i;
+      if (runEnd - runStart >= minSilentFrames) {
+        const t0 = runStart * frameMs / 1000;
+        const t1 = Math.min(duration, runEnd * frameMs / 1000);
+        candidates.push({
+          id: `S${String(candidates.length + 1).padStart(4, '0')}`,
+          start: t0,
+          end: t1,
+          center: (t0 + t1) / 2,
+          duration: t1 - t0,
+          threshold,
+          selected: false
+        });
+      }
+      runStart = null;
+    }
+  }
+
+  return candidates;
+}
+
+function selectBoundaries(candidates, duration, partCount) {
+  const selected = [{ time: 0, source: 'audio_start', silenceId: null, idealTime: 0 }];
+  const available = candidates.map(item => ({ ...item }));
+
+  for (let i = 1; i < partCount; i++) {
+    const idealTime = duration * i / partCount;
+    let bestIndex = -1;
+    let bestScore = Infinity;
+
+    for (let j = 0; j < available.length; j++) {
+      if (available[j].selected) continue;
+      const distance = Math.abs(available[j].center - idealTime);
+      const durationBonus = Math.min(available[j].duration, 1.0) * 0.08;
+      const score = distance - durationBonus;
+      if (score < bestScore) {
+        bestScore = score;
+        bestIndex = j;
+      }
+    }
+
+    if (bestIndex >= 0) {
+      available[bestIndex].selected = true;
+      selected.push({
+        time: available[bestIndex].center,
+        source: 'nearest_detected_silence',
+        silenceId: available[bestIndex].id,
+        idealTime,
+        silenceStart: available[bestIndex].start,
+        silenceEnd: available[bestIndex].end,
+        offsetFromIdeal: available[bestIndex].center - idealTime
+      });
+    } else {
+      selected.push({
+        time: idealTime,
+        source: 'ideal_fallback',
+        silenceId: null,
+        idealTime,
+        offsetFromIdeal: 0
+      });
+    }
+  }
+
+  selected.push({ time: duration, source: 'audio_end', silenceId: null, idealTime: duration });
+  return selected.sort((a, b) => a.time - b.time);
+}
+
+function renderAll() {
+  resizeCanvas();
+  renderSegments();
+  renderJson();
+}
+
+function draw() {
+  const width = canvas.clientWidth;
+  const height = canvas.clientHeight;
+  ctx.clearRect(0, 0, width, height);
+
+  if (!audioBuffer || !samples) {
+    ctx.fillStyle = '#777';
+    ctx.fillText('Cargá un archivo de audio o video.', 18, 28);
+    return;
+  }
+
+  drawWaveform(width, height);
+  drawBoundaries(width, height);
+  drawPlayhead(width, height);
+}
+
+function drawWaveform(width, height) {
+  const middle = height / 2;
+  const step = Math.max(1, Math.floor(samples.length / width));
+  ctx.strokeStyle = '#8f8f8f';
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+
+  for (let x = 0; x < width; x++) {
+    const start = x * step;
+    const end = Math.min(samples.length, start + step);
+    let min = 1;
+    let max = -1;
+    for (let i = start; i < end; i++) {
+      if (samples[i] < min) min = samples[i];
+      if (samples[i] > max) max = samples[i];
+    }
+    ctx.moveTo(x, middle + min * middle * 0.88);
+    ctx.lineTo(x, middle + max * middle * 0.88);
+  }
+  ctx.stroke();
+}
+
+function drawBoundaries(width, height) {
+  if (boundaries.length < 2) return;
+  const duration = audioBuffer.duration;
+
+  boundaries.forEach((boundary, index) => {
+    const x = boundary.time / duration * width;
+    ctx.strokeStyle = index === 0 || index === boundaries.length - 1 ? '#666' : '#4da3ff';
+    ctx.lineWidth = index === 0 || index === boundaries.length - 1 ? 1 : 2;
+    ctx.beginPath();
+    ctx.moveTo(x, 0);
+    ctx.lineTo(x, height);
+    ctx.stroke();
+
+    if (index > 0 && index < boundaries.length - 1) {
+      ctx.fillStyle = '#4da3ff';
+      ctx.fillRect(x - 4, 0, 8, 12);
+      ctx.fillStyle = '#d8ebff';
+      ctx.font = '11px system-ui';
+      ctx.fillText(`P${index}`, x + 5, 14);
+    }
+  });
+}
+
+function drawPlayhead(width, height) {
+  if (!audioBuffer || !Number.isFinite(player.currentTime)) return;
+  const x = player.currentTime / audioBuffer.duration * width;
+  ctx.strokeStyle = '#ffcc66';
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.moveTo(x, 0);
+  ctx.lineTo(x, height);
+  ctx.stroke();
+
+  cancelAnimationFrame(animationFrame);
+  if (!player.paused) animationFrame = requestAnimationFrame(draw);
+}
+
+function pointerTime(event) {
+  const rect = canvas.getBoundingClientRect();
+  const x = clamp(event.clientX - rect.left, 0, rect.width);
+  return x / rect.width * audioBuffer.duration;
+}
+
+function nearestInternalBoundary(time) {
+  if (boundaries.length < 3) return -1;
+  const tolerance = audioBuffer.duration * 0.012;
+  let best = -1;
+  let bestDistance = Infinity;
+
+  for (let i = 1; i < boundaries.length - 1; i++) {
+    const distance = Math.abs(boundaries[i].time - time);
+    if (distance < bestDistance && distance <= tolerance) {
+      best = i;
+      bestDistance = distance;
+    }
+  }
+  return best;
+}
+
+canvas.addEventListener('pointerdown', event => {
+  if (!audioBuffer || boundaries.length < 2) return;
+  const time = pointerTime(event);
+  draggingBoundary = nearestInternalBoundary(time);
+
+  if (draggingBoundary >= 0) {
+    canvas.setPointerCapture(event.pointerId);
+    return;
+  }
+
+  const segmentIndex = findSegmentIndex(time);
+  if (segmentIndex >= 0) playSegment(segmentIndex);
+});
+
+canvas.addEventListener('pointermove', event => {
+  if (draggingBoundary < 0) return;
+  const minGap = Math.max(0.02, audioBuffer.duration / 10000);
+  const previous = boundaries[draggingBoundary - 1].time + minGap;
+  const next = boundaries[draggingBoundary + 1].time - minGap;
+  const time = clamp(pointerTime(event), previous, next);
+
+  boundaries[draggingBoundary] = {
+    ...boundaries[draggingBoundary],
+    time,
+    source: 'user_adjusted',
+    offsetFromIdeal: time - boundaries[draggingBoundary].idealTime
+  };
+  renderAll();
+});
+
+canvas.addEventListener('pointerup', event => {
+  if (draggingBoundary >= 0) canvas.releasePointerCapture(event.pointerId);
+  draggingBoundary = -1;
+});
+canvas.addEventListener('pointercancel', () => draggingBoundary = -1);
+
+function findSegmentIndex(time) {
+  for (let i = 0; i < boundaries.length - 1; i++) {
+    if (time >= boundaries[i].time && time < boundaries[i + 1].time) return i;
+  }
+  return boundaries.length - 2;
+}
+
+function playSegment(index) {
+  if (index < 0 || index >= boundaries.length - 1) return;
+  const start = boundaries[index].time;
+  const end = boundaries[index + 1].time;
+  player.currentTime = start;
+  stopAt = end;
+  player.play();
+  updatePlayingCards(index);
+  draw();
+}
+
+function updatePlayingCards(index) {
+  document.querySelectorAll('.segment').forEach((element, i) => {
+    element.classList.toggle('playing', i === index);
+  });
+}
+
+function renderSegments() {
+  segmentsBox.innerHTML = '';
+  if (boundaries.length < 2) return;
+
+  for (let i = 0; i < boundaries.length - 1; i++) {
+    const start = boundaries[i].time;
+    const end = boundaries[i + 1].time;
+    const button = document.createElement('button');
+    button.className = 'segment';
+    button.innerHTML = `<strong>I${i}: ${formatTime(start)} → ${formatTime(end)}</strong><span>${(end - start).toFixed(3)} s · clic para reproducir</span>`;
+    button.addEventListener('click', () => playSegment(i));
+    segmentsBox.appendChild(button);
+  }
+}
+
+function renderJson() {
+  if (!audioBuffer || boundaries.length < 2) {
+    jsonBox.textContent = '';
+    return;
+  }
+
+  const points = boundaries.map((boundary, index) => ({
+    id: `P${index}`,
+    time_sec: round(boundary.time),
+    source: boundary.source,
+    ideal_time_sec: round(boundary.idealTime),
+    offset_from_ideal_sec: round(boundary.time - boundary.idealTime),
+    silence_id: boundary.silenceId ?? null
+  }));
+
+  const intervals = points.slice(0, -1).map((point, index) => ({
+    id: `I${index}`,
+    start_point: point.id,
+    end_point: points[index + 1].id,
+    start_sec: point.time_sec,
+    end_sec: points[index + 1].time_sec,
+    duration_sec: round(points[index + 1].time_sec - point.time_sec)
+  }));
+
+  jsonBox.textContent = JSON.stringify({
+    schema: 'uizador.timeline.v0.1',
+    source: {
+      file_name: sourceName,
+      duration_sec: round(audioBuffer.duration),
+      sample_rate_hz: audioBuffer.sampleRate,
+      channels: audioBuffer.numberOfChannels
+    },
+    partition: {
+      requested_parts: intervals.length,
+      selection_method: 'nearest_detected_silence_to_equal_ideal_divisions'
+    },
+    points,
+    intervals,
+    annotations: []
+  }, null, 2);
+}
+
+function round(value) {
+  return Number(Number(value).toFixed(6));
+}
+
+function formatTime(seconds) {
+  const minutes = Math.floor(seconds / 60);
+  const rest = seconds - minutes * 60;
+  return `${String(minutes).padStart(2, '0')}:${rest.toFixed(3).padStart(6, '0')}`;
+}
+
+resizeCanvas();
+</script>
+</body>
+</html>

@@ -1,0 +1,261 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Uizador · Segmentador YouTube</title>
+  <style>
+    :root { color-scheme: dark; }
+    * { box-sizing: border-box; }
+    body { margin:0; background:#111; color:#eee; font-family:system-ui,sans-serif; }
+    main { width:min(1050px,100%); margin:auto; padding:18px; }
+    h1 { font-size:1.3rem; margin:0 0 14px; }
+    .controls { display:grid; grid-template-columns:minmax(260px,1fr) 130px auto; gap:10px; align-items:end; }
+    label { display:grid; gap:5px; color:#bbb; font-size:.86rem; }
+    input,button { min-height:42px; border:1px solid #444; border-radius:8px; background:#202020; color:#eee; padding:8px 10px; font:inherit; }
+    button { cursor:pointer; }
+    button:hover { background:#2b2b2b; }
+    .panel { background:#181818; border:1px solid #333; border-radius:10px; padding:12px; margin-top:12px; }
+    #player { width:100%; aspect-ratio:16/9; background:#000; }
+    #timeline { position:relative; height:58px; margin-top:12px; background:#0b0b0b; border:1px solid #333; border-radius:8px; overflow:hidden; }
+    .boundary { position:absolute; top:0; bottom:0; width:2px; background:#4da3ff; transform:translateX(-1px); }
+    .boundary::before { content:attr(data-label); position:absolute; top:3px; left:5px; font-size:11px; color:#d8ebff; }
+    .playhead { position:absolute; top:0; bottom:0; width:1px; background:#ffcc66; pointer-events:none; }
+    .segments { display:grid; grid-template-columns:repeat(auto-fit,minmax(190px,1fr)); gap:8px; margin-top:12px; }
+    .segment { text-align:left; }
+    .segment.playing { outline:2px solid #9ad1ff; }
+    .segment small { display:block; margin-top:3px; color:#aaa; }
+    .edit { display:grid; grid-template-columns:1fr 1fr auto; gap:8px; margin-top:8px; }
+    .status { min-height:1.2em; color:#9ad1ff; margin-top:8px; font-size:.86rem; }
+    pre { max-height:280px; overflow:auto; background:#0d0d0d; border:1px solid #333; border-radius:8px; padding:10px; font-size:.78rem; }
+    @media(max-width:700px){ .controls{grid-template-columns:1fr 110px;} .controls button{grid-column:1/-1;} }
+  </style>
+</head>
+<body>
+<main>
+  <h1>Segmentador temporal · YouTube</h1>
+
+  <div class="controls">
+    <label>URL de YouTube
+      <input id="url" value="https://www.youtube.com/watch?v=V2E3pv487_Q" />
+    </label>
+    <label>Partes
+      <input id="parts" type="number" min="2" max="100" value="10" />
+    </label>
+    <button id="load">Cargar y dividir</button>
+  </div>
+
+  <section class="panel">
+    <div id="player"></div>
+    <div id="timeline"><div id="playhead" class="playhead"></div></div>
+    <div class="status" id="status">Pegá una URL y cargá el video.</div>
+  </section>
+
+  <section class="panel">
+    <div id="segments" class="segments"></div>
+    <details>
+      <summary>JSON temporal</summary>
+      <pre id="json"></pre>
+    </details>
+  </section>
+</main>
+
+<script src="https://www.youtube.com/iframe_api"></script>
+<script>
+let player;
+let ready = false;
+let duration = 0;
+let boundaries = [];
+let stopAt = null;
+let timer = null;
+let currentSegment = -1;
+
+const urlInput = document.querySelector('#url');
+const partsInput = document.querySelector('#parts');
+const loadButton = document.querySelector('#load');
+const timeline = document.querySelector('#timeline');
+const playhead = document.querySelector('#playhead');
+const segmentsBox = document.querySelector('#segments');
+const statusBox = document.querySelector('#status');
+const jsonBox = document.querySelector('#json');
+
+window.onYouTubeIframeAPIReady = () => {
+  ready = true;
+  statusBox.textContent = 'YouTube listo. Pegá una URL y cargá el video.';
+};
+
+function videoIdFromUrl(value) {
+  const text = value.trim();
+  const direct = text.match(/^[A-Za-z0-9_-]{11}$/);
+  if (direct) return text;
+  try {
+    const u = new URL(text);
+    if (u.hostname.includes('youtu.be')) return u.pathname.split('/').filter(Boolean)[0] || null;
+    if (u.pathname.startsWith('/shorts/')) return u.pathname.split('/')[2] || null;
+    return u.searchParams.get('v');
+  } catch { return null; }
+}
+
+loadButton.addEventListener('click', () => {
+  if (!ready) { statusBox.textContent = 'Todavía está cargando la API de YouTube.'; return; }
+  const id = videoIdFromUrl(urlInput.value);
+  if (!id) { statusBox.textContent = 'La URL no parece válida.'; return; }
+
+  stopPlaybackLoop();
+  if (player?.destroy) player.destroy();
+  player = new YT.Player('player', {
+    videoId: id,
+    playerVars: { playsinline: 1, controls: 1 },
+    events: {
+      onReady: () => {
+        duration = player.getDuration();
+        buildIdealBoundaries();
+        statusBox.textContent = `${duration.toFixed(2)} s · ${boundaries.length - 1} segmentos iniciales.`;
+        startPlaybackLoop();
+      },
+      onStateChange: event => {
+        if (event.data === YT.PlayerState.ENDED || event.data === YT.PlayerState.PAUSED) {
+          if (stopAt === null) setPlaying(-1);
+        }
+      }
+    }
+  });
+});
+
+partsInput.addEventListener('change', () => {
+  if (duration > 0) buildIdealBoundaries();
+});
+
+function buildIdealBoundaries() {
+  const count = Math.max(2, Math.min(100, Number(partsInput.value) || 10));
+  partsInput.value = count;
+  boundaries = Array.from({length: count + 1}, (_, i) => ({
+    id: `P${i}`,
+    time: duration * i / count,
+    source: i === 0 ? 'video_start' : i === count ? 'video_end' : 'ideal_division',
+    ideal_time: duration * i / count
+  }));
+  render();
+}
+
+function render() {
+  renderTimeline();
+  renderSegments();
+  renderJson();
+}
+
+function renderTimeline() {
+  timeline.querySelectorAll('.boundary').forEach(x => x.remove());
+  if (!duration) return;
+  boundaries.forEach((point, i) => {
+    if (i === 0 || i === boundaries.length - 1) return;
+    const mark = document.createElement('div');
+    mark.className = 'boundary';
+    mark.dataset.label = point.id;
+    mark.style.left = `${point.time / duration * 100}%`;
+    timeline.appendChild(mark);
+  });
+}
+
+function renderSegments() {
+  segmentsBox.innerHTML = '';
+  for (let i = 0; i < boundaries.length - 1; i++) {
+    const start = boundaries[i].time;
+    const end = boundaries[i + 1].time;
+    const wrapper = document.createElement('div');
+    const button = document.createElement('button');
+    button.className = 'segment';
+    button.dataset.index = i;
+    button.innerHTML = `<strong>I${i}</strong><small>${fmt(start)} → ${fmt(end)} · ${(end-start).toFixed(2)} s</small>`;
+    button.addEventListener('click', () => playSegment(i));
+
+    const edit = document.createElement('div');
+    edit.className = 'edit';
+    const startInput = document.createElement('input');
+    const endInput = document.createElement('input');
+    const apply = document.createElement('button');
+    startInput.type = endInput.type = 'number';
+    startInput.step = endInput.step = '0.01';
+    startInput.value = start.toFixed(2);
+    endInput.value = end.toFixed(2);
+    apply.textContent = 'Ajustar';
+    apply.addEventListener('click', () => {
+      const a = Number(startInput.value);
+      const b = Number(endInput.value);
+      if (!(a >= 0 && b <= duration && b > a)) return;
+      if (i > 0) boundaries[i].time = Math.max(boundaries[i-1].time + 0.01, Math.min(a, boundaries[i+1].time - 0.01));
+      if (i + 1 < boundaries.length - 1) boundaries[i+1].time = Math.max(boundaries[i].time + 0.01, Math.min(b, boundaries[i+2].time - 0.01));
+      render();
+    });
+    edit.append(startInput, endInput, apply);
+    wrapper.append(button, edit);
+    segmentsBox.appendChild(wrapper);
+  }
+}
+
+function playSegment(index) {
+  if (!player || !duration) return;
+  const start = boundaries[index].time;
+  stopAt = boundaries[index + 1].time;
+  currentSegment = index;
+  player.seekTo(start, true);
+  player.playVideo();
+  setPlaying(index);
+}
+
+function startPlaybackLoop() {
+  stopPlaybackLoop();
+  timer = setInterval(() => {
+    if (!player || !duration || typeof player.getCurrentTime !== 'function') return;
+    const t = player.getCurrentTime();
+    playhead.style.left = `${Math.max(0, Math.min(100, t / duration * 100))}%`;
+    if (stopAt !== null && t >= stopAt) {
+      player.pauseVideo();
+      player.seekTo(stopAt, true);
+      stopAt = null;
+      setPlaying(-1);
+    }
+  }, 50);
+}
+
+function stopPlaybackLoop() {
+  if (timer) clearInterval(timer);
+  timer = null;
+  stopAt = null;
+}
+
+function setPlaying(index) {
+  currentSegment = index;
+  document.querySelectorAll('.segment').forEach((el, i) => el.classList.toggle('playing', i === index));
+}
+
+function renderJson() {
+  const intervals = [];
+  for (let i = 0; i < boundaries.length - 1; i++) {
+    intervals.push({
+      id: `I${i}`,
+      start_point: boundaries[i].id,
+      end_point: boundaries[i+1].id,
+      start_sec: Number(boundaries[i].time.toFixed(3)),
+      end_sec: Number(boundaries[i+1].time.toFixed(3)),
+      duration_sec: Number((boundaries[i+1].time - boundaries[i].time).toFixed(3))
+    });
+  }
+  jsonBox.textContent = JSON.stringify({
+    source_type: 'youtube',
+    source_url: urlInput.value.trim(),
+    duration_sec: Number(duration.toFixed(3)),
+    points: boundaries.map(p => ({...p, time:Number(p.time.toFixed(3))})),
+    intervals,
+    annotations: []
+  }, null, 2);
+}
+
+function fmt(seconds) {
+  const m = Math.floor(seconds / 60);
+  const s = seconds - m * 60;
+  return `${m}:${s.toFixed(2).padStart(5,'0')}`;
+}
+</script>
+</body>
+</html>

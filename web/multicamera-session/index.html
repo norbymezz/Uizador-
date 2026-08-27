@@ -6,21 +6,21 @@
 <script src="https://unpkg.com/peerjs@1.5.5/dist/peerjs.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <style>
-:root{color-scheme:dark;--a:#54d8ff;--ok:#6dff9b;--bad:#ff6b78;--panel:rgba(18,24,33,.9)}
-*{box-sizing:border-box}body{margin:0;background:#080a0f;color:#f3f6f8;font-family:system-ui,sans-serif}
+:root{color-scheme:dark;--a:#ff79bd;--b:#a98cff;--ok:#7ff0c5;--bad:#ff6f8f;--panel:rgba(39,25,52,.92)}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at 80% 0%,#43265d 0,#1b1228 38%,#0d0a15 80%);color:#fff7fc;font-family:system-ui,sans-serif}
 main{width:min(780px,100%);margin:auto;padding:12px}h1{font-size:1.08rem;margin:4px 0 12px}
 .card{padding:16px;border:1px solid #323b48;border-radius:16px;background:var(--panel);margin-bottom:10px}
 h2{font-size:1.15rem;margin:0 0 7px}p{color:#b6c0cb;line-height:1.38;margin:5px 0 14px}
 button,input{width:100%;min-height:46px;border:1px solid #3b4654;border-radius:10px;background:#1b222c;color:#fff;padding:9px;font:inherit}
-button{font-weight:700;cursor:pointer}.primary{background:#08677f;border-color:#1597b9}.danger{background:#811a26}.grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+button{font-weight:700;cursor:pointer}.primary{background:linear-gradient(135deg,#e84f9a,#8b69e8);border-color:#ff8cc6}.danger{background:#811a26}.grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .screen{display:none}.screen.on{display:block}.status{font-size:.84rem;color:#aeb9c6;margin-top:9px;min-height:1.2em}
 #qr{width:230px;height:230px;margin:14px auto;background:#fff;padding:10px;border-radius:10px}#qr img,#qr canvas{width:100%!important;height:100%!important}
 .code{text-align:center;font-size:1.25rem;letter-spacing:.12em;color:var(--a);word-break:break-all}
 .devices{display:grid;gap:6px;margin:10px 0}.device{display:flex;justify-content:space-between;padding:9px;border-radius:9px;background:#1b222c}.ready{color:var(--ok)}
 .stage{position:relative;overflow:hidden;border-radius:14px;background:#111;min-height:56vh;border:1px solid #303946}
 video{width:100%;height:56vh;object-fit:cover}.guide{position:absolute;inset:0;pointer-events:none}
-.face{position:absolute;top:17%;width:32%;height:65%;border:3px dashed rgba(84,216,255,.75);border-radius:48%}.face.a{left:10%}.face.b{right:10%}
-.horizon{position:absolute;left:5%;right:5%;top:45%;border-top:2px dashed rgba(255,209,102,.75)}
+.face{position:absolute;top:17%;width:32%;height:65%;border:3px dashed rgba(255,121,189,.88);border-radius:48%}.face.a{left:10%}.face.b{right:10%}
+.horizon{position:absolute;left:5%;right:5%;top:45%;border-top:2px dashed rgba(191,157,255,.82)}
 .hud{position:absolute;top:10px;left:10px;right:10px;display:flex;justify-content:space-between;text-shadow:0 2px 4px #000}
 .big{position:absolute;inset:0;display:grid;place-items:center;font-size:min(30vw,160px);font-weight:900;text-shadow:0 3px 18px #000}
 .prompt{position:absolute;left:5%;right:5%;bottom:5%;background:rgba(0,0,0,.72);padding:10px;border-radius:10px;text-align:center}
@@ -30,11 +30,11 @@ video{width:100%;height:56vh;object-fit:cover}.guide{position:absolute;inset:0;p
 </style>
 </head>
 <body><main>
-<h1>Uizador · Multicámara</h1>
+<h1>Uizador · Grabemos juntas</h1>
 
 <section id="home" class="screen on">
-<div class="card"><h2>¿Qué teléfono es este?</h2><p>El director crea la sesión y muestra el QR. Las demás cámaras lo escanean para entrar.</p>
-<div class="grid"><button id="create" class="primary">Crear sesión</button><button id="manual">Ingresar código</button></div>
+<div class="card"><h2>Armemos la escena</h2><p>El director crea la sesión y muestra el QR. Las demás cámaras lo escanean para entrar.</p>
+<div class="grid"><button id="create" class="primary">Crear mi sesión</button><button id="manual">Ingresar código</button></div>
 <div id="manualBox" hidden style="margin-top:8px"><input id="codeInput" placeholder="Código de sesión"><button id="joinCode" style="margin-top:6px">Unirme</button></div>
 <div class="status" id="homeStatus"></div></div>
 </section>

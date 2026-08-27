@@ -10,7 +10,7 @@
 main{width:min(900px,100%);margin:auto;padding:12px}.top{display:flex;gap:8px;align-items:center;justify-content:space-between}
 h1{font-size:1.05rem;margin:4px 0 10px}.stage{position:relative;overflow:hidden;border-radius:14px;background:#171020;aspect-ratio:16/9;border:1px solid #303640}
 video{width:100%;height:100%;object-fit:cover;transform:scaleX(-1)}
-.overlay{position:absolute;inset:0;pointer-events:none}.subject{position:absolute;border:3px dashed rgba(255,121,189,.9);border-radius:48% 48% 38% 38%;transition:.2s}
+.overlay{position:absolute;inset:0;pointer-events:none}.reference-frame{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:.28;display:none;mix-blend-mode:screen}.subject{position:absolute;border:3px dashed rgba(255,121,189,.9);border-radius:48% 48% 38% 38%;transition:.2s}
 .subject.a{left:10%;top:16%;width:31%;height:72%}.subject.b{right:10%;top:16%;width:31%;height:72%}
 .horizon{position:absolute;left:4%;right:4%;top:45%;border-top:2px dashed rgba(191,157,255,.82)}
 .move{position:absolute;left:44%;top:16%;font-size:2.2rem;color:var(--warn);opacity:.9}
@@ -59,6 +59,11 @@ body.shooting #configBtn{display:block}
 <p>Esto define las líneas punteadas, el encuadre y el movimiento que vas a seguir.</p>
 <label>Tipo de escena
 <select id="wPreset"><option value="two">Plano de dos · acercamiento</option><option value="reverse">Plano / contraplano</option><option value="orbit">Rotación alrededor de protagonista</option><option value="sitcom">Sitcom multicámara</option><option value="sitcom">Sitcom multicámara</option></select></label>
+<label style="margin-top:10px">Imagen de referencia del plano
+<input id="wReference" type="file" accept="image/*"></label>
+<label style="margin-top:10px">Transparencia de la referencia
+<input id="wReferenceOpacity" type="range" min="5" max="70" value="28"></label>
+<div class="hint">La imagen se superpone a la cámara para hacer coincidir composición, posiciones y ángulo.</div>
 <div class="nav"><button class="next full" data-next>Continuar</button></div>
 </div>
 <div class="step">
@@ -99,6 +104,7 @@ A|13|Mirá a cámara.</textarea>
 <section class="stage">
 <video id="camera" autoplay muted playsinline></video>
 <div class="overlay">
+<img id="referenceOverlay" class="reference-frame" alt="">
 <div class="subject a"></div><div class="subject b"></div><div class="horizon"></div>
 <div class="move" id="move">↔</div><div class="hud"><span id="shot">Plano de dos</span><span id="zoom">1.0×</span></div>
 <div class="count" id="count"></div>
@@ -162,6 +168,7 @@ document.querySelectorAll('[data-next]').forEach(b=>b.onclick=()=>showWizardStep
 document.querySelectorAll('[data-back]').forEach(b=>b.onclick=()=>showWizardStep(wizardStep-1));
 function syncWizard(){
  $('#preset').value=$('#wPreset').value;$('#duration').value=$('#wDuration').value;$('#countdown').value=$('#wCountdown').value;$('#zoomTarget').value=$('#wZoom').value;$('#script').value=$('#wScript').value;
+ const ref=$('#wReference').files?.[0];if(ref){const oldRef=$('#referenceOverlay').dataset.url;if(oldRef)URL.revokeObjectURL(oldRef);const refUrl=URL.createObjectURL(ref);$('#referenceOverlay').src=refUrl;$('#referenceOverlay').dataset.url=refUrl;$('#referenceOverlay').style.display='block';}$('#referenceOverlay').style.opacity=(Number($('#wReferenceOpacity').value)||28)/100;
  const file=$('#wGuideFile').files?.[0];if(file){const old=$('#guideAudio').dataset.url;if(old)URL.revokeObjectURL(old);const url=URL.createObjectURL(file);$('#guideAudio').src=url;$('#guideAudio').dataset.url=url;}
  renderTimeline();setAt(0)
 }

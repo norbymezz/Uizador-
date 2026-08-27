@@ -1,5 +1,19 @@
 # Prueba con dos teléfonos
 
+## Diagnóstico previo de cada teléfono
+
+Antes de reunir los dispositivos, abrir `web/preflight/index.html` mediante HTTPS en cada uno:
+
+1. ejecutar la revisión automática;
+2. conceder cámara y micrófono;
+3. comprobar la imagen y el medidor de audio;
+4. grabar cinco segundos;
+5. reproducir el archivo de prueba completo;
+6. guardar el informe JSON;
+7. nombrar los informes como teléfono A y teléfono B.
+
+El informe no contiene dirección IP, ubicación ni contactos. Sirve para comparar codec, resolución, almacenamiento, batería y red.
+
 ## Preparación
 
 - Usar dos teléfonos Android con batería suficiente.
@@ -43,6 +57,7 @@
 
 ## Datos a anotar
 
+- Informes de diagnóstico A/B:
 - Modelos de teléfono:
 - Navegadores y versiones:
 - Distancia entre teléfonos:

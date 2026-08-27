@@ -160,6 +160,43 @@ La señal sonora no necesita iniciar físicamente todas las cámaras al mismo mi
 
 En futuras versiones se puede combinar con timestamps monotónicos, correlación del audio ambiente, flash visual o detección de movimiento común.
 
+## Pre-edición multicámara
+
+Al terminar una toma, la aplicación genera una pre-edición no destructiva. No modifica ni recodifica inmediatamente los archivos originales: guarda una lista de decisiones que indica qué cámara o rol debe verse en cada intervalo.
+
+La pantalla mínima de pre-edición incluye:
+
+- reproducción sincronizada de todas las cámaras;
+- vista principal del corte actual;
+- miniaturas de los demás ángulos;
+- timeline común con los cambios de cámara;
+- selección de la toma que se está editando;
+- posibilidad de comparar tomas;
+- botones para cambiar el ángulo durante la reproducción;
+- ajuste posterior de cada punto de corte;
+- deshacer, rehacer y volver al montaje sugerido.
+
+Si la escena utiliza una plantilla, la aplicación crea primero un montaje sugerido con los cortes previstos: plano general, rotación, plano, contraplano e insertos. En el modo libre puede comenzar con una sola cámara o con decisiones manuales.
+
+Una decisión de montaje puede representarse así:
+
+```json
+{
+  "scene_id": "S01",
+  "take_id": "T02",
+  "t0_sec": 4.0,
+  "t1_sec": 7.0,
+  "camera_role": "B",
+  "source_device": "device-02"
+}
+```
+
+El usuario puede realizar una primera edición tocando las miniaturas mientras la escena se reproduce. Cada toque cierra el intervalo anterior y abre uno nuevo con la cámara seleccionada. Después puede arrastrar los límites para afinar el montaje.
+
+La pre-edición también funciona en el modo de un solo teléfono: las pasadas sucesivas A, B y C se alinean sobre la misma timeline y se presentan como ángulos alternativos.
+
+Sólo cuando el usuario confirma el montaje se realiza la exportación final, aplicando sincronización, cortes, audio elegido, transiciones y efectos.
+
 ## Relación con el Uizador existente
 
 La estructura de puntos, fronteras e intervalos del segmentador temporal puede extenderse a varias cámaras. Cada archivo conserva su timeline local y se añade una transformación hacia un timeline común.

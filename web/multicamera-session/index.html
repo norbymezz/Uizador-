@@ -24,7 +24,7 @@ video{width:100%;height:56vh;object-fit:cover}.guide{position:absolute;inset:0;p
 .hud{position:absolute;top:10px;left:10px;right:10px;display:flex;justify-content:space-between;text-shadow:0 2px 4px #000}
 .big{position:absolute;inset:0;display:grid;place-items:center;font-size:min(30vw,160px);font-weight:900;text-shadow:0 3px 18px #000}
 .prompt{position:absolute;left:5%;right:5%;bottom:5%;background:rgba(0,0,0,.72);padding:10px;border-radius:10px;text-align:center}.motion{position:absolute;left:8%;right:8%;top:49%;height:5px;border-radius:9px;background:rgba(255,255,255,.18);overflow:hidden}.motion i{display:block;width:0;height:100%;background:linear-gradient(90deg,var(--a),var(--b));}.motion-label{position:absolute;top:43%;left:0;right:0;text-align:center;font-size:1.6rem;text-shadow:0 2px 5px #000}
-.controls{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:9px}.help{font-size:.8rem;color:#aab6c4;line-height:1.4;margin-top:8px}
+.controls{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:9px}.take-list{display:grid;gap:7px;margin-top:9px}.take-item{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center;padding:9px;border-radius:9px;background:#1b222c}.take-item button{width:auto;min-height:38px}.help{font-size:.8rem;color:#aab6c4;line-height:1.4;margin-top:8px}
 .pulse{animation:pulse .45s ease}@keyframes pulse{50%{box-shadow:inset 0 0 0 12px rgba(255,209,102,.7)}}
 @media(max-width:520px){.grid{grid-template-columns:1fr}.stage,video{height:61vh;min-height:61vh}}
 </style>
@@ -61,13 +61,14 @@ video{width:100%;height:56vh;object-fit:cover}.guide{position:absolute;inset:0;p
 <div class="big" id="big"></div><div class="prompt" id="prompt">Ubicá a las dos personas dentro de las guías.</div>
 </div></div>
 <div class="controls"><button id="startTake" class="primary">Iniciar toma</button><button id="backLobby">Sesión</button></div>
-<div class="help"><strong>Director:</strong> inicia la toma. Todos comienzan a grabar; después suenan tres beeps. Al terminar, suena el clac y se descargan los archivos locales.</div>
+<div class="help"><strong>Director:</strong> inicia la toma. Todos comienzan a grabar; después suenan tres beeps. Cada toma se conserva localmente sin abrir descargas entre repeticiones. Al finalizar elegís qué descargar.</div>
 <div class="status" id="cameraStatus"></div>
+<div class="card" id="savedPanel" hidden style="margin-top:10px"><h2>Tomas conservadas</h2><p id="savedSummary">Las grabaciones quedaron guardadas localmente. Descargalas cuando termine la secuencia.</p><div class="take-list" id="takeList"></div><button id="downloadAll" class="primary" style="margin-top:9px">Descargar todas</button></div>
 </section>
 </main>
 <script>
 const $=s=>document.querySelector(s), screens=[...document.querySelectorAll('.screen')];
-let peer=null,connections=[],director=false,stream=null,recorder=null,chunks=[],take=0,currentCfg=null,audioCtx=null;const readyPeers=new Set();let motionTimer=null;
+let peer=null,connections=[],director=false,stream=null,recorder=null,chunks=[],take=0,currentCfg=null,audioCtx=null,recordedTakes=[],stopPromise=Promise.resolve(),stopResolve=null,currentSequenceIndex=0,currentSequenceTotal=0;const readyPeers=new Set();let motionTimer=null;
 const joinId=new URLSearchParams(location.search).get('join');
 function show(id){screens.forEach(x=>x.classList.toggle('on',x.id===id))}
 function short(id){return id?String(id).slice(-8).toUpperCase():'—'}
@@ -112,18 +113,24 @@ async function handleMessage(m,conn){
  if(m.type==='welcome'){$('#role').textContent=m.role}
  if(m.type==='prepare'){currentCfg=m.cfg;const ok=await openCamera();if(ok){show('cameraScreen');$('#startTake').style.display='none';$('#role').textContent='Cámara remota';connections[0]?.send({type:'ready'})}}
  if(m.type==='ready'&&director){if(conn)readyPeers.add(conn.peer);renderDevices();const online=connections.filter(c=>c.open);const all=online.length>0&&online.every(c=>readyPeers.has(c.peer));$('#startTake').disabled=!all;$('#cameraStatus').textContent=all?'Todas las cámaras están listas.':'Preparadas '+readyPeers.size+' de '+online.length+'.'}
- if(m.type==='record'){await beginRecording(m.take);$('#state').textContent='Grabando'}
+ if(m.type==='record'){if(m.sequenceIndex===1){recordedTakes=[];$('#savedPanel').hidden=true}currentSequenceIndex=m.sequenceIndex||1;currentSequenceTotal=m.total||1;await beginRecording(m.take);$('#state').textContent='Grabando'}
  if(m.type==='action'){startMotion(m.duration,m.movement);$('#prompt').textContent='ACCIÓN · seguí la guía';$('#state').textContent='ACCIÓN'}
- if(m.type==='stop'){stopMotion();stopRecording();$('#state').textContent='Finalizada'}
+ if(m.type==='stop'){stopMotion();await stopRecording();$('#state').textContent='Finalizada';if(currentSequenceIndex>=currentSequenceTotal)showSavedTakes()}
 }
 function beginRecording(n){
  return new Promise(resolve=>{
-  chunks=[];recorder=new MediaRecorder(stream);recorder.ondataavailable=e=>e.data.size&&chunks.push(e.data);
-  recorder.onstop=()=>download(n);recorder.start(400);$('#stage').classList.add('recording');resolve()
+  chunks=[];recorder=new MediaRecorder(stream);stopPromise=new Promise(r=>stopResolve=r);recorder.ondataavailable=e=>e.data.size&&chunks.push(e.data);
+  recorder.onstop=async()=>{await retainTake(n);stopResolve?.();stopResolve=null};recorder.start(400);$('#stage').classList.add('recording');resolve()
  })
 }
-function stopRecording(){if(recorder?.state==='recording')recorder.stop();$('#stage').classList.remove('recording')}
-function download(n){const blob=new Blob(chunks,{type:recorder.mimeType}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='uizador-toma-'+String(n).padStart(2,'0')+'-'+(director?'director':'camera')+'.webm';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1500);$('#cameraStatus').textContent='Archivo de la toma '+n+' descargado en este teléfono.'}
+function stopRecording(){if(recorder?.state==='recording')recorder.stop();$('#stage').classList.remove('recording');return stopPromise}
+function openTakeDb(){return new Promise((resolve,reject)=>{const req=indexedDB.open('uizador-recordings',1);req.onupgradeneeded=()=>req.result.createObjectStore('takes',{keyPath:'id'});req.onsuccess=()=>resolve(req.result);req.onerror=()=>reject(req.error)})}
+async function persistTake(item){try{const db=await openTakeDb();await new Promise((resolve,reject)=>{const tx=db.transaction('takes','readwrite');tx.objectStore('takes').put(item);tx.oncomplete=resolve;tx.onerror=()=>reject(tx.error)});db.close();return true}catch{return false}}
+async function retainTake(n){const mime=recorder.mimeType||'video/webm',ext=mime.includes('mp4')?'mp4':'webm',session=short(director?peer?.id:connections[0]?.peer),name='uizador-'+session+'-toma-'+String(n).padStart(2,'0')+'-'+(director?'director':'camera')+'.'+ext,blob=new Blob(chunks,{type:mime}),item={id:name,name,blob,size:blob.size,type:mime,take:n,role:director?'director':'camera',session,savedAt:new Date().toISOString()};recordedTakes.push(item);const persisted=await persistTake(item);$('#cameraStatus').textContent='Toma '+n+' conservada '+(persisted?'en almacenamiento local.':'en esta sesión.');renderTakeList()}
+function downloadTake(item){const a=document.createElement('a');a.href=URL.createObjectURL(item.blob);a.download=item.name;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1500)}
+function renderTakeList(){const box=$('#takeList');box.innerHTML='';recordedTakes.forEach(item=>{const row=document.createElement('div');row.className='take-item';const info=document.createElement('span');info.textContent=item.name+' · '+(item.size/1048576).toFixed(1)+' MB';const b=document.createElement('button');b.textContent='Descargar';b.onclick=()=>downloadTake(item);row.append(info,b);box.appendChild(row)});$('#savedSummary').textContent=recordedTakes.length+' toma'+(recordedTakes.length===1?'':'s')+' guardada'+(recordedTakes.length===1?'':'s')+'. Ninguna descarga interrumpió la grabación.'}
+function showSavedTakes(){renderTakeList();$('#savedPanel').hidden=false;$('#cameraStatus').textContent='Secuencia terminada. Elegí cuándo descargar las tomas.'}
+$('#downloadAll').onclick=async()=>{for(const item of recordedTakes){downloadTake(item);await wait(350)}$('#cameraStatus').textContent='Se solicitaron todas las descargas. Conservá esta página hasta verificarlas.'}
 function ctx(){audioCtx=audioCtx||new (window.AudioContext||window.webkitAudioContext)();return audioCtx}
 function tone(freq,dur,vol=.85){
  const ac=ctx(),o=ac.createOscillator(),g=ac.createGain();o.frequency.value=freq;o.type='sine';g.gain.setValueAtTime(.001,ac.currentTime);g.gain.exponentialRampToValueAtTime(vol,ac.currentTime+.015);g.gain.exponentialRampToValueAtTime(.001,ac.currentTime+dur);o.connect(g).connect(ac.destination);o.start();o.stop(ac.currentTime+dur+.02);$('#stage').classList.remove('pulse');void $('#stage').offsetWidth;$('#stage').classList.add('pulse')
@@ -139,16 +146,16 @@ async function runOneTake(sequenceIndex,total){
  sendAll({type:'record',take,sequenceIndex,total});await beginRecording(take);
  await countdown(currentCfg.preroll);await startSignature();sendAll({type:'action',duration:currentCfg.duration,movement:currentCfg.movement});startMotion(currentCfg.duration,currentCfg.movement);$('#prompt').textContent='ACCIÓN · toma '+sequenceIndex;$('#state').textContent='ACCIÓN';
  await countdown(currentCfg.duration);stopMotion();$('#prompt').textContent='FIN';await endSignature();
- await wait(800);sendAll({type:'stop',take});stopRecording();$('#state').textContent='Toma '+sequenceIndex+' terminada'
+ await wait(800);sendAll({type:'stop',take,sequenceIndex,total});await stopRecording();$('#state').textContent='Toma '+sequenceIndex+' terminada'
 }
 $('#startTake').onclick=async()=>{
- if(!director||!currentCfg)return;$('#startTake').disabled=true;
+ if(!director||!currentCfg)return;$('#startTake').disabled=true;recordedTakes=[];$('#savedPanel').hidden=true;
  const total=currentCfg.repetitions||1;
  for(let i=1;i<=total;i++){
   await runOneTake(i,total);
   if(i<total){$('#prompt').textContent='Volvé a posición · próxima toma en '+currentCfg.pauseBetween+' s';$('#state').textContent='Pausa';await countdown(currentCfg.pauseBetween)}
  }
- $('#big').textContent='';$('#prompt').textContent='Secuencia completa';$('#state').textContent='Finalizada';$('#startTake').disabled=false;$('#startTake').textContent='Grabar otra secuencia'
+ $('#big').textContent='';$('#prompt').textContent='Secuencia completa';$('#state').textContent='Finalizada';showSavedTakes();$('#startTake').disabled=false;$('#startTake').textContent='Grabar otra secuencia'
 };
 $('#backLobby').onclick=()=>show('lobby');
 renderDevices();

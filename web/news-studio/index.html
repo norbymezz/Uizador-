@@ -68,5 +68,13 @@ $('#template').onchange=()=>{const t=$('#template').value;$('#urgent').checked=t
 $('#export').onclick=()=>{
  const data={schema:'uizador.news-preset.v0.1',template:$('#template').value,recording_mode:$('#mode').value,duration_sec:+$('#duration').value,aspect_ratio:$('#ratio').value,graphics:{logo:$('#logo').value,headline:$('#title').value,breaking:$('#urgent').checked},roles:[{camera:'A',name:$('#personA').value,location:$('#locationA').value},{camera:'B',name:$('#personB').value,location:$('#locationB').value}],composition:{layout:'split-screen',sync:$('#mode').value==='separate'?'duration-and-cues':'common-clock'}};
  const a=document.createElement('a'),blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});a.href=URL.createObjectURL(blob);a.download='uizador-noticiero.json';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);
-};apply();
+};
+const initialTemplate=new URLSearchParams(location.search).get('template');
+if(initialTemplate&&[...$('#template').options].some(o=>o.value===initialTemplate)){
+  $('#template').value=initialTemplate;
+  const titles={breaking:'Último momento: información en desarrollo',interview:'Conversación especial',correspondent:'Informe desde el lugar',debate:'Dos miradas, un tema'};
+  $('#urgent').checked=initialTemplate==='breaking';
+  $('#title').value=titles[initialTemplate]||$('#title').value;
+}
+apply();
 </script></body></html>

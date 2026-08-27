@@ -307,6 +307,23 @@ La aplicación puede ofrecer familias de puesta en escena como:
 
 Una misma categoría, como **plano de dos**, debe admitir variantes de composición: frontal o lateral, personajes simétricos o dominancia de uno, cuerpo entero o primer plano, cámara fija o movimiento. El preset describe relaciones espaciales y temporales, no solamente una captura estática.
 
+### Preset de sitcom multicámara
+
+El formato de sitcom multicámara utiliza un decorado abierto hacia varias cámaras y permite representar la escena de manera continua. Referencias culturales conocidas son series como *Friends* o *Seinfeld*, pero el preset describe la técnica general y utiliza actores, texto y escenografía propios.
+
+Configuración básica:
+
+- cámara general que conserva la geografía de la escena;
+- cámara dedicada al personaje A;
+- cámara dedicada al personaje B;
+- posiciones de actores compatibles con las tres líneas de visión;
+- teleprompter o pista de diálogo compartida;
+- grabación simultánea o repetición por roles con un solo teléfono;
+- montaje inicial que alterna general, A y B;
+- pista opcional de reacciones o ambiente incorporada posteriormente.
+
+Este preset resulta especialmente adecuado para conversaciones, comedia, reuniones, cumpleaños y actuaciones familiares porque permite ejecutar la escena completa sin detenerse en cada cambio de plano.
+
 ### Escenas famosas y derechos
 
 La aplicación puede identificar y explicar patrones cinematográficos conocidos y permitir que el usuario cree una interpretación propia. Para distribuir diálogos completos de películas protegidas se necesitarían licencias.

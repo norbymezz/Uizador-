@@ -186,5 +186,5 @@ $('#savePreset').onclick=()=>{const blob=new Blob([JSON.stringify(presetData(),n
 $('#loadPreset').onchange=async()=>{const file=$('#loadPreset').files?.[0];if(!file)return;try{const x=JSON.parse(await file.text());$('#wPreset').value=x.scene_type||'two';$('#wDuration').value=x.duration_sec||15;$('#wCountdown').value=x.countdown_sec??3;$('#wZoom').value=String(x.zoom_target||1.5);$('#wGuideMode').value=x.guide_mode||'choreo';$('#wTheme').value=x.theme||'pop';$('#wScript').value=x.script||'';document.body.dataset.theme=$('#wTheme').value;}catch(e){alert('El preset no parece válido.')}}
 $('#startCamera').onclick=async()=>{syncWizard();await enableCamera();if(stream){document.body.classList.add('shooting');statusBox.textContent='Cámara lista. Podés ensayar o grabar.'}};
 $('#configBtn').onclick=()=>{document.body.classList.remove('shooting');showWizardStep(0)};
-document.body.dataset.theme='pop';renderTimeline();setAt(0);
+const launch=new URLSearchParams(location.search);if(launch.get('preset')&&[...$('#wPreset').options].some(o=>o.value===launch.get('preset')))$('#wPreset').value=launch.get('preset');if(launch.get('theme')&&[...$('#wTheme').options].some(o=>o.value===launch.get('theme')))$('#wTheme').value=launch.get('theme');document.body.dataset.theme=$('#wTheme').value;renderTimeline();setAt(0);
 </script></body></html>

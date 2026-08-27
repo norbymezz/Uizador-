@@ -1,0 +1,83 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://uizador.app/schemas/project-v1.schema.json",
+  "title": "Uizador Project Manifest v1",
+  "type": "object",
+  "required": ["schema", "format_version", "project", "scenes", "media", "tracks"],
+  "properties": {
+    "schema": { "const": "com.uizador.project" },
+    "format_version": { "const": 1 },
+    "project": {
+      "type": "object",
+      "required": ["id", "title", "created_at", "updated_at"],
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "title": { "type": "string", "minLength": 1 },
+        "created_at": { "type": "string", "format": "date-time" },
+        "updated_at": { "type": "string", "format": "date-time" },
+        "locale": { "type": "string" },
+        "aspect_ratio": { "enum": ["16:9", "9:16", "1:1"] },
+        "duration_us": { "type": "integer", "minimum": 0 }
+      },
+      "additionalProperties": true
+    },
+    "scenes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "name"],
+        "properties": {
+          "id": { "type": "string" },
+          "name": { "type": "string" },
+          "duration_us": { "type": "integer", "minimum": 0 },
+          "takes": { "type": "array", "items": { "type": "object" } }
+        },
+        "additionalProperties": true
+      }
+    },
+    "media": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "kind"],
+        "properties": {
+          "id": { "type": "string" },
+          "kind": { "enum": ["video", "audio", "image", "proxy", "thumbnail"] },
+          "mime_type": { "type": "string" },
+          "package_path": { "type": "string" },
+          "external_name": { "type": "string" },
+          "sha256": { "type": "string", "pattern": "^[a-fA-F0-9]{64}$" },
+          "size_bytes": { "type": "integer", "minimum": 0 },
+          "duration_us": { "type": "integer", "minimum": 0 },
+          "camera_role": { "type": "string" },
+          "common_offset_us": { "type": "integer" },
+          "drift_ppm": { "type": "number" },
+          "sync_confidence": { "type": "number", "minimum": 0, "maximum": 1 }
+        },
+        "additionalProperties": true
+      }
+    },
+    "tracks": {
+      "type": "object",
+      "properties": {
+        "captions": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["id", "language", "format", "path"],
+            "properties": {
+              "id": { "type": "string" },
+              "language": { "type": "string" },
+              "format": { "enum": ["webvtt", "srt"] },
+              "path": { "type": "string" }
+            }
+          }
+        },
+        "effects": { "type": "object" },
+        "edit_decisions": { "type": "object" }
+      },
+      "additionalProperties": true
+    }
+  },
+  "additionalProperties": true
+}

@@ -1,0 +1,36 @@
+<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Uizador · Escenas</title><style>
+:root{color-scheme:dark;--pink:#ff79bd;--purple:#a98cff;--ink:#fff8fc;--muted:#c4b9ca}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at 85% 0,#482461 0,#21142f 40%,#0e0a16 82%);color:var(--ink);font-family:system-ui,sans-serif}
+main{width:min(1050px,100%);margin:auto;padding:16px}h1{font-size:1.4rem;margin:4px 0}header p{color:var(--muted);margin:6px 0 18px}
+.filters{display:flex;gap:7px;overflow:auto;padding-bottom:6px}.filter{width:auto;white-space:nowrap;border:1px solid #5b4869;background:#281a35;color:#fff;border-radius:99px;padding:8px 13px}.filter.on{background:linear-gradient(135deg,#e84f9a,#8568df)}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:15px}.card{position:relative;min-height:250px;border:1px solid #4a3956;border-radius:18px;overflow:hidden;background:linear-gradient(150deg,rgba(65,38,78,.95),rgba(24,18,35,.96));padding:18px;display:flex;flex-direction:column}
+.visual{height:88px;position:relative;margin-bottom:14px}.head{position:absolute;width:52px;height:70px;border:2px dashed var(--pink);border-radius:48%;top:8px}.head.a{left:18%}.head.b{right:18%}.arrow{position:absolute;inset:26px 0 auto;text-align:center;color:#ffc774;font-size:28px}
+.card h2{font-size:1.08rem;margin:0 0 7px}.card p{color:var(--muted);font-size:.86rem;line-height:1.4;margin:0 0 14px}.meta{font-size:.76rem;color:#e9cbea;margin-top:auto}.actions{display:grid;grid-template-columns:1fr 42px;gap:7px;margin-top:11px}
+button,a{min-height:42px;border:1px solid #684f76;border-radius:10px;background:#2c1d38;color:#fff;padding:9px;text-decoration:none;font:inherit;font-weight:700;text-align:center;cursor:pointer}.start{background:linear-gradient(135deg,#e84f9a,#8568df)}.fav.on{color:#ff87c4;background:#4b2548}
+.empty{display:none;text-align:center;color:var(--muted);padding:70px 10px}@media(max-width:760px){.grid{grid-template-columns:1fr 1fr}}@media(max-width:480px){.grid{grid-template-columns:1fr}}
+</style></head><body><main><header><h1>Elegí cómo querés contarla</h1><p>Escenas listas para adaptar con tus actores, tu texto y tu ambiente.</p></header>
+<div class="filters"><button class="filter on" data-filter="all">Todas</button><button class="filter" data-filter="one">1 teléfono</button><button class="filter" data-filter="multi">Varios teléfonos</button><button class="filter" data-filter="dialogue">Diálogo</button><button class="filter" data-filter="movement">Movimiento</button><button class="filter" data-filter="montage">Montaje</button><button class="filter" data-filter="fantasy">Fantasía</button><button class="filter" data-filter="music">Música</button><button class="filter" data-filter="news">Noticias y notas</button><button class="filter" data-filter="remote">A distancia</button><button class="filter" data-filter="fav">Favoritas</button></div>
+<section class="grid" id="grid"></section><div class="empty" id="empty">No hay escenas en este filtro todavía.</div>
+</main><script>
+const scenes=[
+{id:'two',title:'Dos en cuadro',desc:'Dos personajes comparten el encuadre con acercamiento progresivo.',tags:['one','multi','dialogue'],phones:'1 o más',move:'↔'},
+{id:'reverse',title:'Enfrentados · plano y contraplano',desc:'Dos personas frente a frente; alterna A y B manteniendo mirada y línea de 180°.',tags:['one','multi','dialogue'],phones:'Ideal: 2',move:'A ⇆ B'},
+{id:'moveab',title:'Moverse de A hasta B',desc:'Marcas de salida y llegada con recorrido y duración visibles durante la toma.',tags:['one','multi','movement'],phones:'1 o más',move:'A → B'},
+{id:'followback',title:'Seguir por la espalda',desc:'La cámara acompaña al protagonista desde atrás manteniendo distancia y altura.',tags:['one','multi','movement'],phones:'1 o más',move:'↑ detrás'},
+{id:'walkfront',title:'Caminar de frente',desc:'El protagonista avanza mientras la cámara retrocede conservando el encuadre.',tags:['one','multi','movement'],phones:'1 o más',move:'↓ cámara'},
+{id:'walktalk',title:'Caminar y conversar',desc:'Dos personas dialogan en movimiento mientras la cámara las acompaña.',tags:['one','multi','dialogue','movement'],phones:'1 o más',move:'A+B →'},
+{id:'sitcom',title:'Sitcom multicámara',desc:'General, personaje A y personaje B durante una actuación continua.',tags:['one','multi','dialogue'],phones:'Ideal: 3',move:'A · G · B'},
+{id:'news',title:'Último momento',desc:'Conductor y movilero en pantalla partida, con logo, titular, ubicación y banda urgente.',tags:['multi','dialogue','news','remote'],phones:'Ideal: 2',move:'▣ URGENTE'},
+{id:'interview',title:'Entrevista remota',desc:'Dos personas pueden grabarse por separado; duración y guion comunes para unirlas después.',tags:['multi','dialogue','news','remote'],phones:'Ideal: 2',move:'A │ B'},
+{id:'orbit',title:'Giro protagonista',desc:'La cámara rota alrededor del centro mientras la acción continúa.',tags:['one','multi','movement'],phones:'1 o más',move:'⟳'},
+{id:'montage',title:'Montaje breve',desc:'Serie de plano general, acción media, detalle y reacción para comprimir una secuencia.',tags:['one','multi','montage'],phones:'1 o más',move:'G · M · D · R'},
+{id:'fantasy',title:'Mundo dibujado',desc:'Actuación guiada para integrar después un escenario ilustrado o fantástico.',tags:['one','multi','fantasy','movement'],phones:'1 o más',move:'◇ fondo',theme:'pastel'},
+{id:'two',title:'Coreografía musical',desc:'Audio guía para seguir pasos, entradas y movimientos; sonido final después.',tags:['one','multi','movement','music'],phones:'1 o más',move:'♪'},
+{id:'two',title:'Escena con croma',desc:'Encuadre preparado para reemplazar el fondo durante la edición.',tags:['one','multi','movement'],phones:'1 o más',move:'◇'}
+];
+let active='all';const favs=new Set(JSON.parse(localStorage.getItem('uizador-favs')||'[]'));
+function key(s,i){return s.title+'-'+i}
+function render(){const box=document.querySelector('#grid');box.innerHTML='';let count=0;scenes.forEach((s,i)=>{const k=key(s,i),show=active==='all'||(active==='fav'?favs.has(k):s.tags.includes(active));if(!show)return;count++;const e=document.createElement('article');e.className='card';e.innerHTML=`<div class="visual"><span class="head a"></span><span class="arrow">${s.move}</span><span class="head b"></span></div><h2>${s.title}</h2><p>${s.desc}</p><div class="meta">📱 ${s.phones}</div><div class="actions"><a class="start" href="${s.tags.includes('news')?'../news-studio/index.html?template='+s.id:'../scene-rehearsal/index.html?preset='+s.id+'&theme='+(s.theme||'pop')}">Usar escena</a><button class="fav ${favs.has(k)?'on':''}" aria-label="Favorita">♥</button></div>`;e.querySelector('.fav').onclick=()=>{favs.has(k)?favs.delete(k):favs.add(k);localStorage.setItem('uizador-favs',JSON.stringify([...favs]));render()};box.appendChild(e)});document.querySelector('#empty').style.display=count?'none':'block'}
+document.querySelectorAll('.filter').forEach(b=>b.onclick=()=>{active=b.dataset.filter;document.querySelectorAll('.filter').forEach(x=>x.classList.toggle('on',x===b));render()});render();
+</script></body></html>

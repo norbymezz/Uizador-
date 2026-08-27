@@ -1,0 +1,36 @@
+<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Uizador · Ayuda</title><style>
+:root{color-scheme:dark;--p:#ff79bd;--v:#a98cff;--c:#58dce0;--ink:#fff8fc;--muted:#c7bacd}*{box-sizing:border-box}
+body{margin:0;background:radial-gradient(circle at 84% 0,#482461 0,#20132d 40%,#0d0a14 82%);color:var(--ink);font-family:system-ui,sans-serif}main{width:min(760px,100%);margin:auto;padding:17px}
+header{display:flex;align-items:center;gap:12px}header a{font-size:1.8rem;color:#fff;text-decoration:none}h1{font-size:1.4rem}.intro{color:var(--muted);line-height:1.5}
+.quick{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:18px 0}.q{padding:13px;border:1px solid #584363;border-radius:14px;background:#21162d;text-align:center}.q b,.q small{display:block}.q b{font-size:1.3rem}.q small{color:var(--muted);margin-top:5px}
+details{border:1px solid #4c3a57;border-radius:14px;background:rgba(33,22,45,.92);margin:9px 0;overflow:hidden}summary{cursor:pointer;padding:15px;font-weight:800;list-style:none}summary::-webkit-details-marker{display:none}summary:after{content:'+';float:right;color:var(--p);font-size:1.2rem}details[open] summary:after{content:'−'}
+.content{border-top:1px solid #43324d;padding:4px 15px 15px;color:var(--muted);line-height:1.5}.content strong{color:#fff}.content li{margin:7px 0}.notice{margin-top:18px;padding:14px;border:1px solid #58dce055;border-radius:14px;background:#58dce012;color:#dffeff}
+.actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:15px}.actions a{min-height:46px;display:grid;place-items:center;border:1px solid #654f72;border-radius:11px;color:#fff;text-decoration:none;font-weight:800;background:#281b35}.actions a:first-child{background:linear-gradient(135deg,#e84f9a,#8064dc)}
+@media(max-width:520px){.quick{grid-template-columns:1fr}.actions{grid-template-columns:1fr}}
+</style></head><body><main>
+<header><a href="../app-home/index.html">‹</a><h1>Ayuda y privacidad</h1></header>
+<p class="intro">La idea básica es simple: preparás una escena, cada teléfono graba su archivo y después Uizador organiza las tomas para editarlas.</p>
+<section class="quick"><div class="q"><b>1</b><small>Elegí una escena</small></div><div class="q"><b>2</b><small>Prepará los teléfonos</small></div><div class="q"><b>3</b><small>Grabá y revisá</small></div></section>
+
+<details open><summary>¿Cómo hago mi primera grabación?</summary><div class="content"><ol><li>Elegí un preset o un ensayo rápido.</li><li>Indicá duración, cuenta regresiva y cantidad de tomas.</li><li>Activá cámara y micrófono cuando la app explique para qué los necesita.</li><li>Acomodá el teléfono usando las líneas semitransparentes.</li><li>Grabá y conservá la toma que prefieras.</li></ol></div></details>
+
+<details><summary>¿Cómo agrego otro teléfono?</summary><div class="content"><p>El teléfono director crea una sesión y muestra un QR. El otro teléfono lo escanea, entra y aparece como una nueva cámara. Antes de grabar, ambos deben mostrar <strong>Listo</strong>.</p><p>No hace falta compartir contraseñas ni escribir direcciones de red.</p></div></details>
+
+<details><summary>¿Qué significan los beeps y el clac?</summary><div class="content"><p>Los tres pulsos iniciales y el clac final quedan dentro del audio del video. Sirven para encontrar el comienzo y el final real de cada toma y alinear las cámaras sin separar su sonido de la imagen.</p><p>No silencies el teléfono que emite el clock durante la prueba local.</p></div></details>
+
+<details><summary>¿Pueden grabar desde lugares distintos?</summary><div class="content"><p>Sí. El director envía duración, guion, encuadre y una hora programada. Cada participante confirma y graba localmente. Después se suben las tomas para componerlas.</p><p>Si la conversación se graba por separado, una persona puede escuchar la pista de referencia de la otra o seguir pausas marcadas en el teleprompter.</p></div></details>
+
+<details><summary>¿Por qué pide cámara y micrófono?</summary><div class="content"><p><strong>Cámara:</strong> para encuadrar y grabar la escena. <strong>Micrófono:</strong> para conservar diálogo, ambiente y marcas de sincronización.</p><p>Uizador no debe pedirlos al abrir ni activarlos a distancia sin una confirmación visible del participante. Podés rechazarlos; solamente quedarán deshabilitadas las funciones que los necesitan.</p></div></details>
+
+<details><summary>¿Dónde quedan mis grabaciones?</summary><div class="content"><p>En el modo local, permanecen en el teléfono hasta que decidís exportarlas o compartirlas. Una sesión remota deberá avisar antes de cualquier subida, indicar progreso y ofrecer eliminación.</p><p>Los prototipos actuales guardan preferencias y proyectos de demostración en este navegador.</p></div></details>
+
+<details><summary>¿Cómo borro mis datos?</summary><div class="content"><p>Desde Preferencias podés borrar los datos locales de los prototipos. La aplicación Android tendrá eliminación por proyecto y limpieza general. Antes de habilitar nube se agregará también eliminación remota.</p></div></details>
+
+<details><summary>La cámara no funciona</summary><div class="content"><ul><li>Comprobá que el permiso esté concedido.</li><li>Cerrá otra aplicación que esté usando cámara o micrófono.</li><li>Revisá espacio libre y temperatura del teléfono.</li><li>Probá una resolución menor.</li><li>Si se interrumpió una toma, no borres el archivo parcial hasta revisarlo.</li></ul></div></details>
+
+<details><summary>Material de películas, canales o música</summary><div class="content"><p>Los presets describen técnicas, posiciones, ritmos y composiciones. No incluyen automáticamente diálogos, logos, música ni fragmentos protegidos. Usá material propio, autorizado, licenciado o de dominio público.</p></div></details>
+
+<div class="notice"><strong>Privado por defecto.</strong> Nada debe publicarse automáticamente. Antes de grabar a otra persona, avisale qué se va a hacer con el material.</div>
+<div class="actions"><a href="../preset-library/index.html">Elegir una escena</a><a href="../settings/index.html">Abrir Preferencias</a></div>
+</main></body></html>

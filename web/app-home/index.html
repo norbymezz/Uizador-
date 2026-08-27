@@ -1,0 +1,35 @@
+<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Uizador</title><style>
+:root{color-scheme:dark;--pink:#ff79bd;--violet:#a98cff;--ink:#fff8fc;--muted:#c2b7c9}
+*{box-sizing:border-box}body{margin:0;min-height:100vh;background:radial-gradient(circle at 80% 0,#4b2864 0,#21142f 40%,#0d0a14 82%);color:var(--ink);font-family:system-ui,sans-serif}
+main{width:min(760px,100%);margin:auto;padding:18px}.brand{display:flex;align-items:center;justify-content:space-between;margin-bottom:28px}.logo{font-weight:900;letter-spacing:.08em}.avatar{width:42px;height:42px;border-radius:50%;display:grid;place-items:center;background:linear-gradient(135deg,var(--pink),var(--violet));font-weight:900}
+.hero h1{font-size:clamp(2rem,8vw,3.8rem);line-height:1.02;margin:0 0 12px}.hero p{color:var(--muted);font-size:1.02rem;line-height:1.45;margin:0 0 24px}
+.primary{display:grid;grid-template-columns:1fr 1fr;gap:10px}.choice{min-height:145px;border:1px solid #604b6d;border-radius:19px;background:linear-gradient(150deg,rgba(67,39,80,.96),rgba(29,20,40,.96));padding:17px;color:#fff;text-decoration:none;display:flex;flex-direction:column}
+.choice strong{font-size:1.18rem}.choice span{color:var(--muted);font-size:.86rem;line-height:1.35;margin-top:7px}.icon{font-size:2rem;margin-bottom:auto}.choice.main{background:linear-gradient(145deg,#bd397d,#7555cc);border-color:#ff8bc5}.choice.main span{color:#fff0f8}
+.section-title{font-size:.88rem;color:#bcaec4;margin:25px 0 9px}.list{display:grid;gap:8px}.row{display:flex;align-items:center;gap:12px;min-height:66px;padding:10px 13px;border:1px solid #44364f;border-radius:13px;background:rgba(25,18,34,.78);color:#fff;text-decoration:none}.row .ri{width:42px;height:42px;border-radius:11px;background:#362443;display:grid;place-items:center;font-size:1.25rem}.row div{flex:1}.row strong,.row small{display:block}.row small{color:var(--muted);margin-top:3px}.chev{color:#9c8da5;font-size:1.3rem}
+.join{display:grid;grid-template-columns:1fr 110px;gap:7px;margin-top:9px}input,button{min-height:46px;border:1px solid #554361;border-radius:10px;background:#201629;color:#fff;padding:9px;font:inherit}button{background:#68469b;font-weight:800}
+.tip{margin-top:22px;padding:14px;border-radius:14px;background:rgba(255,121,189,.1);border:1px solid rgba(255,121,189,.25);color:#e7dce9;font-size:.85rem;line-height:1.45}
+@media(max-width:520px){.primary{grid-template-columns:1fr}.choice{min-height:125px}}
+</style></head><body><main>
+<header class="brand"><div class="logo">UIZADOR</div><a class="avatar" href="../settings/index.html" style="color:#fff;text-decoration:none" aria-label="Preferencias">⚙</a></header>
+<section class="hero"><h1 data-i18n="home_question">¿Qué querés grabar hoy?</h1><p data-i18n="home_intro">Elegí una escena, seguí las guías y convertí uno o varios teléfonos en tu equipo de cámara.</p></section>
+<section class="primary">
+<a class="choice main" href="../preset-library/index.html"><span class="icon">✦</span><strong data-i18n="create_scene">Crear una escena</strong><span data-i18n="create_scene_help">Empezá por una composición, diálogo o coreografía.</span></a>
+<a class="choice" href="../multicamera-session/index.html"><span class="icon">⌁</span><strong data-i18n="multi_record">Grabar con varios teléfonos</strong><span data-i18n="multi_record_help">Creá una sesión, mostrales el QR y graben juntas.</span></a>
+</section>
+<div class="section-title">TU TRABAJO</div><nav class="list">
+<a class="row" href="../projects/index.html"><span class="ri">▣</span><div><strong data-i18n="my_projects">Mis proyectos</strong><small>Escenas, tomas y formatos guardados</small></div><span class="chev">›</span></a>
+</nav>
+<div class="section-title">ATAJOS</div><nav class="list">
+<a class="row" href="../preflight/index.html"><span class="ri">✓</span><div><strong>Revisar este teléfono</strong><small>Cámara, micrófono, espacio y grabación corta</small></div><span class="chev">›</span></a>
+<a class="row" href="../test-center/index.html"><span class="ri">☑</span><div><strong>Centro de pruebas</strong><small>Lista, resultados, notas y evidencia de cada versión</small></div><span class="chev">›</span></a>
+<a class="row" href="../scene-rehearsal/index.html"><span class="ri">◉</span><div><strong data-i18n="quick_rehearsal">Ensayo rápido</strong><small>Cámara, guías y teleprompter</small></div><span class="chev">›</span></a>
+<a class="row" href="../sync-preview/index.html"><span class="ri">≋</span><div><strong data-i18n="sync_takes">Sincronizar tomas</strong><small>Cargá dos videos y elegí los cortes</small></div><span class="chev">›</span></a>
+<a class="row" href="../effects-lab/index.html"><span class="ri">✦</span><div><strong data-i18n="effects">Efectos y sonidos</strong><small>Sobreimpresiones, transiciones y audio</small></div><span class="chev">›</span></a>
+<a class="row" href="../help/index.html"><span class="ri">?</span><div><strong>Ayuda y privacidad</strong><small>Primeros pasos, permisos, archivos y sesiones</small></div><span class="chev">›</span></a>
+</nav>
+<div class="section-title">ENTRAR A UNA SESIÓN</div><div class="join"><input id="code" placeholder="Código completo"><button id="join">Entrar</button></div>
+<div class="tip"><strong data-i18n="privacy_local">Privado por defecto.</strong> Tus grabaciones permanecen en cada teléfono hasta que decidís compartirlas o exportarlas.</div>
+</main><script>
+document.querySelector('#join').onclick=()=>{const id=document.querySelector('#code').value.trim();if(id)location.href='../multicamera-session/index.html?join='+encodeURIComponent(id)};
+</script><script type="module">import{applyLanguage,applyTheme}from'../../core/i18n.js';applyLanguage();applyTheme();</script></body></html>

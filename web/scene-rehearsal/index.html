@@ -1,0 +1,199 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Uizador · Ensayo de escena</title>
+<style>
+:root{color-scheme:dark;--accent:#ff79bd;--accent2:#a98cff;--warn:#ffca7a;--ok:#7ff0c5}
+body[data-theme="pastel"]{--accent:#ff8fbd;--accent2:#c7a8ff;--warn:#ffd39a;background:radial-gradient(circle at 80% 0%,#6a456e 0,#30223e 40%,#17131f 82%)}
+body[data-theme="cinema"]{--accent:#e7b95f;--accent2:#8f98a8;--warn:#d96754;background:radial-gradient(circle at 80% 0%,#3b3427 0,#171718 45%,#080808 85%)}
+body[data-theme="neutral"]{--accent:#72d6e8;--accent2:#8495aa;--warn:#f0b96b;background:radial-gradient(circle at 80% 0%,#293747 0,#141b24 45%,#090c10 85%)}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at 85% 0%,#40245b 0,#1c132b 34%,#0e0b17 78%);color:#fff7fc;font-family:system-ui,sans-serif}
+main{width:min(900px,100%);margin:auto;padding:12px}.top{display:flex;gap:8px;align-items:center;justify-content:space-between}
+h1{font-size:1.05rem;margin:4px 0 10px}.stage{position:relative;overflow:hidden;border-radius:14px;background:#171020;aspect-ratio:16/9;border:1px solid #303640}
+video{width:100%;height:100%;object-fit:cover;transform:scaleX(-1)}
+.overlay{position:absolute;inset:0;pointer-events:none}.reference-frame{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:.28;display:none;mix-blend-mode:screen}.subject{position:absolute;border:3px dashed rgba(255,121,189,.9);border-radius:48% 48% 38% 38%;transition:.2s}
+.subject.a{left:10%;top:16%;width:31%;height:72%}.subject.b{right:10%;top:16%;width:31%;height:72%}
+.horizon{position:absolute;left:4%;right:4%;top:45%;border-top:2px dashed rgba(191,157,255,.82)}
+.move{position:absolute;left:44%;top:16%;font-size:2.2rem;color:var(--warn);opacity:.9}
+.hud{position:absolute;left:10px;right:10px;top:8px;display:flex;justify-content:space-between;text-shadow:0 1px 4px #000}
+.count{position:absolute;inset:0;display:grid;place-items:center;font-size:min(25vw,150px);font-weight:800;text-shadow:0 4px 18px #000;background:rgba(0,0,0,.18)}
+.prompt{position:absolute;left:5%;right:5%;bottom:5%;padding:9px 12px;border-radius:9px;background:rgba(0,0,0,.72);text-align:center;font-size:clamp(16px,3.8vw,26px);text-shadow:0 1px 2px #000}
+.prompt small{display:block;color:var(--accent);font-size:.65em;margin-bottom:3px}.direction{position:absolute;left:5%;right:5%;top:9%;text-align:center;color:#fff;background:rgba(20,12,28,.7);border:1px solid rgba(255,121,189,.45);border-radius:99px;padding:7px;font-weight:750}.path-guide{display:none;position:absolute;left:18%;right:18%;bottom:27%;align-items:center;color:var(--warn);font-weight:900}.path-guide i{flex:1;border-top:3px dotted var(--warn);margin:0 8px}.path-guide span{width:28px;height:28px;border:2px solid var(--warn);border-radius:50%;display:grid;place-items:center;background:#171020bb}
+.panel{margin-top:10px;padding:10px;border:1px solid #303640;border-radius:12px;background:#121720}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}label{display:grid;gap:4px;color:#aeb7c3;font-size:.78rem}
+input,select,button,textarea{width:100%;border:1px solid #3a4350;background:#1a202a;color:#fff;border-radius:8px;padding:9px;font:inherit}
+button{cursor:pointer;font-weight:650}.primary{background:linear-gradient(135deg,#e84f9a,#8b69e8);border-color:#ff8cc6}.recording{background:#8b1824}
+.actions{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:9px}.timeline{display:flex;height:38px;margin-top:10px;border-radius:8px;overflow:hidden}
+.seg{border:0;border-right:1px solid #111;border-radius:0;padding:4px;font-size:.72rem;background:#283444}.seg.active{background:#087b99}
+textarea{min-height:120px;resize:vertical}.status{min-height:1.2em;margin-top:7px;color:#9ba9b8;font-size:.82rem}
+@media(max-width:560px){.grid{grid-template-columns:1fr}.actions{grid-template-columns:1fr 1fr}.actions button:last-child{grid-column:1/-1}}
+
+.wizard{min-height:72vh;display:grid;place-items:center;padding:12px 0}
+.wizard-card{width:min(560px,100%);padding:20px;border:1px solid rgba(130,160,190,.35);border-radius:18px;background:linear-gradient(145deg,rgba(50,30,67,.94),rgba(24,20,40,.94));backdrop-filter:blur(14px)}
+.progress{display:flex;gap:7px;margin-bottom:18px}.dot{height:6px;flex:1;border-radius:9px;background:#37404c}.dot.on{background:var(--accent)}
+.step{display:none}.step.on{display:block}.step h2{margin:0 0 7px;font-size:1.25rem}.step p{color:#b8c1cc;line-height:1.4;margin:0 0 18px}
+.nav{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:16px}.nav .next{background:linear-gradient(135deg,#e84f9a,#8b69e8);border-color:#ff8cc6}.full{grid-column:1/-1}
+body:not(.shooting) .stage,body:not(.shooting) .controls-panel,body:not(.shooting) .script-panel{display:none}
+body.shooting .wizard,body.shooting .script-panel{display:none}
+body.shooting .controls-panel{display:block;background:transparent;border:0;padding:0}
+body.shooting .controls-panel .grid{display:none}
+body.shooting #cameraBtn{display:none}
+.camera-help{display:none;margin:8px 2px 0;color:#aeb7c3;font-size:.8rem;line-height:1.35}
+body.shooting .camera-help{display:block}
+body.shooting .stage{min-height:52vh;aspect-ratio:auto}
+body.shooting video{min-height:52vh}
+body.shooting .actions{grid-template-columns:1fr 1fr 44px}
+body.shooting #configBtn{display:block}
+#configBtn{display:none;padding:7px}
+.hint{color:#8fa0b2;font-size:.78rem;margin-top:6px}
+@media(max-width:560px){.wizard-card{padding:16px}.wizard{min-height:76vh}body.shooting .actions{grid-template-columns:1fr 1fr 44px}.actions button:last-child{grid-column:auto}}
+</style>
+</head>
+<body><main>
+<div class="top"><h1>Uizador · Tu escena</h1><span id="clock">00:00.0</span></div>
+
+<section class="wizard" id="wizard">
+<div class="wizard-card">
+<div class="progress"><span class="dot on"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div>
+<div class="step on">
+<h2>1 · Elegí tu escena</h2>
+<p>Esto define las líneas punteadas, el encuadre y el movimiento que vas a seguir.</p>
+<label>Tipo de escena
+<select id="wPreset"><option value="two">Plano de dos · acercamiento</option><option value="reverse">Enfrentados · plano / contraplano</option><option value="moveab">Marca A → B</option><option value="followback">Seguimiento por espalda</option><option value="walkfront">Caminata frontal</option><option value="sidetrack">Seguimiento lateral</option><option value="walktalk">Dos caminando y hablando</option><option value="orbit">Rotación alrededor de protagonista</option><option value="montage">Montaje breve</option><option value="fantasy">Mundo dibujado</option><option value="sitcom">Sitcom multicámara</option></select></label>
+<label style="margin-top:10px">Imagen de referencia del plano
+<input id="wReference" type="file" accept="image/*"></label>
+<label style="margin-top:10px">Transparencia de la referencia
+<input id="wReferenceOpacity" type="range" min="5" max="70" value="28"></label>
+<label style="margin-top:10px">Estilo visual
+<select id="wTheme"><option value="pop">Pop violeta</option><option value="pastel">Pastel</option><option value="cinema">Cine</option><option value="neutral">Neutro</option></select></label>
+<div class="hint">La imagen se superpone a la cámara para hacer coincidir composición, posiciones y ángulo.</div>
+<div class="nav"><button class="next full" data-next>Continuar</button></div>
+</div>
+<div class="step">
+<h2>2 · Prepará la toma</h2>
+<p>Indicá cuánto dura la actuación, cuánto tiempo necesitás para acomodarte y cómo cambia el zoom.</p>
+<div class="grid">
+<label>Duración de la escena<input id="wDuration" type="number" min="6" max="60" value="15"></label>
+<label>Cuenta regresiva<input id="wCountdown" type="number" min="0" max="10" value="3"></label>
+<label>Zoom
+<select id="wZoom"><option value="1.0">Fijo 1.0×</option><option value="1.5" selected>1.0× → 1.5×</option><option value="2.0">1.0× → 2.0×</option></select></label>
+<label>Pista de referencia
+<input id="wGuideFile" type="file" accept="audio/*,video/*"></label>
+<label>Uso de la pista
+<select id="wGuideMode"><option value="choreo">Sólo coreografía y ritmo</option><option value="dialogue">Diálogo de ensayo</option><option value="music">Música de referencia</option></select></label>
+</div>
+<div class="hint" id="movementHint">La pista guía acompaña el ensayo y la toma. Después puede reemplazarse por el audio definitivo.</div>
+<div class="nav"><button data-back>Volver</button><button class="next" data-next>Continuar</button></div>
+</div>
+<div class="step">
+<h2>3 · Escribí el diálogo</h2>
+<p>Cada línea indica personaje, segundo de entrada y texto. Podés reemplazarlo por tu propia parodia.</p>
+<textarea id="wScript">A|0|No llegamos tarde: llegamos exactamente cuando empieza.
+B|3|Eso lo decís cada vez que llegamos tarde.
+A|6|Entonces ya tenemos una tradición.
+B|10|Una tradición necesita testigos.
+A|13|Mirá a cámara.</textarea>
+<div class="hint">Formato: PERSONA | segundo | parlamento</div>
+<div class="nav"><button data-back>Volver</button><button class="next" data-next>Continuar</button></div>
+</div>
+<div class="step">
+<h2>4 · Lista para grabar</h2>
+<p>Al continuar, el teléfono pedirá permiso para usar cámara y micrófono. Después verás solamente la imagen, las guías y los botones de ensayo y grabación.</p>
+<div class="grid" style="margin-top:12px"><button id="savePreset">Guardar preset</button><label>Cargar preset<input id="loadPreset" type="file" accept=".json,application/json"></label></div>
+<div class="hint">El preset guarda escena, tiempos, zoom, diálogo y estilo. Los archivos multimedia se vuelven a elegir por seguridad.</div>
+<div class="nav"><button data-back>Volver</button><button id="startCamera" class="next">Abrir cámara</button></div>
+</div>
+</div>
+</section>
+
+<section class="stage">
+<video id="camera" autoplay muted playsinline></video>
+<div class="overlay">
+<img id="referenceOverlay" class="reference-frame" alt="">
+<div class="subject a"></div><div class="subject b"></div><div class="horizon"></div>
+<div class="direction" id="direction">Mantené a las dos personas dentro de sus guías.</div><div class="path-guide" id="pathGuide"><span>A</span><i></i><span>B</span></div><div class="move" id="move">↔</div><div class="hud"><span id="shot">Plano de dos</span><span id="zoom">1.0×</span></div>
+<div class="count" id="count"></div>
+<div class="prompt" id="prompt"><small>PERSONA A · preparada</small>El texto aparecerá sincronizado acá.</div>
+</div>
+</section>
+<div class="camera-help"><strong>Ensayar:</strong> reproduce las guías y el teleprompter sin guardar. · <strong>Grabar:</strong> hace la cuenta regresiva y descarga la toma. · <strong>⚙</strong> vuelve a la configuración.</div>
+
+<section class="panel controls-panel">
+<div class="grid">
+<label>Preset
+<select id="preset"><option value="two">Plano de dos · acercamiento</option><option value="reverse">Enfrentados · plano / contraplano</option><option value="moveab">Marca A → B</option><option value="followback">Seguimiento por espalda</option><option value="walkfront">Caminata frontal</option><option value="sidetrack">Seguimiento lateral</option><option value="walktalk">Dos caminando y hablando</option><option value="orbit">Rotación alrededor de protagonista</option><option value="montage">Montaje breve</option><option value="fantasy">Mundo dibujado</option><option value="sitcom">Sitcom multicámara</option></select></label>
+<label>Duración
+<input id="duration" type="number" min="6" max="60" value="15"></label>
+<label>Cuenta regresiva
+<input id="countdown" type="number" min="0" max="10" value="3"></label>
+<label>Zoom previsto
+<select id="zoomTarget"><option value="1.0">Fijo 1.0×</option><option value="1.5" selected>1.0× → 1.5×</option><option value="2.0">1.0× → 2.0×</option></select></label>
+</div>
+<div class="actions">
+<button id="cameraBtn">Activar cámara</button><button id="rehearse" class="primary" title="Reproduce la escena sin guardar video">Ensayar</button><button id="record" title="Cuenta regresiva, graba y descarga la toma">Grabar</button><button id="configBtn" title="Volver a configurar la escena">⚙</button>
+</div>
+<div class="timeline" id="timeline"></div>
+<div class="status" id="status">Editá el texto, activá la cámara y ensayá.</div>
+</section>
+
+<section class="panel script-panel">
+<label>Texto segmentado — una intervención por línea
+<textarea id="script">A|0|No llegamos tarde: llegamos exactamente cuando empieza.
+B|3|Eso lo decís cada vez que llegamos tarde.
+A|6|Entonces ya tenemos una tradición.
+B|10|Una tradición necesita testigos.
+A|13|Mirá a cámara.</textarea></label>
+<div class="status">Formato: PERSONA | segundo de entrada | texto. El diálogo es original y reemplazable.</div>
+</section>
+<audio id="guideAudio" playsinline></audio>
+</main>
+<script>
+const $=s=>document.querySelector(s),video=$('#camera'),promptBox=$('#prompt'),countBox=$('#count'),statusBox=$('#status');
+let stream=null,runTimer=null,recorder=null,chunks=[],startedAt=0;
+const presets={
+ two:{name:'Plano de dos',move:'↔',help:'Mantené a ambas personas equilibradas y acercate suavemente.',cue:p=>p<.2?'Composición de dos · sostené':p<.85?'Acercate sin cortar cabezas':'Terminá el acercamiento',apply:p=>{document.querySelector('.a').style.transform=`scale(${1+p*.12})`;document.querySelector('.b').style.transform=`scale(${1+p*.12})`}},
+ reverse:{name:'Enfrentados · plano / contraplano',move:'⇆',help:'Las cámaras quedan del mismo lado de la línea entre las personas. Conservá miradas opuestas.',cue:p=>p<.48?'Plano A · aire hacia B':p<.52?'Prepará el corte':'Contraplano B · aire hacia A',apply:p=>{document.querySelector('.a').style.opacity=p<.5?1:.22;document.querySelector('.b').style.opacity=p<.5?.22:1}},
+ moveab:{name:'Marca A → B',move:'A → B',marks:true,help:'Marcá físicamente dos puntos. El actor va de A a B durante toda la duración.',cue:p=>p<.15?'Salí de la marca A':p<.85?'Desplazate hacia B':'Llegá y frená en B',apply:p=>{document.querySelector('.a').style.left=`${8+p*50}%`;document.querySelector('.b').style.opacity=0}},
+ followback:{name:'Seguimiento por espalda',move:'↑ detrás',help:'Caminá detrás del protagonista manteniendo distancia y altura constantes.',cue:p=>p<.15?'Ubicate detrás · misma distancia':p<.85?'Seguí el centro de la espalda':'Reducí velocidad y cerrá',apply:p=>{document.querySelector('.a').style.left='34%';document.querySelector('.a').style.transform=`scale(${1+p*.08})`;document.querySelector('.b').style.opacity=0}},
+ walkfront:{name:'Caminata frontal',move:'↓ cámara',help:'La cámara retrocede mientras el protagonista avanza de frente. Usar recorrido despejado y asistente.',cue:p=>p<.15?'Empezá a retroceder':p<.85?'Mantené rostro y distancia':'Frená con suavidad',apply:p=>{document.querySelector('.a').style.left='34%';document.querySelector('.a').style.transform=`scale(${.9+p*.18})`;document.querySelector('.b').style.opacity=0}},
+ sidetrack:{name:'Seguimiento lateral',move:'→ paralelo',marks:true,help:'Actor y cámara avanzan en paralelo conservando tamaño y dirección de marcha.',cue:p=>p<.15?'Salgan juntos desde A':p<.85?'Avancen paralelos':'Cierren juntos en B',apply:p=>{document.querySelector('.a').style.left=`${8+p*48}%`;document.querySelector('.b').style.opacity=0}},
+ walktalk:{name:'Dos caminando y hablando',move:'A+B →',marks:true,help:'Dos personas caminan juntas mientras la cámara acompaña de frente o de costado.',cue:p=>p<.15?'Entren juntas desde A':p<.85?'Mismo paso · diálogo continuo':'Lleguen a B y sostengan',apply:p=>{document.querySelector('.a').style.left=`${6+p*18}%`;document.querySelector('.b').style.right=`${42-p*18}%`}},
+ orbit:{name:'Rotación protagonista',move:'⟳',help:'Rodeá el centro sin cambiar bruscamente la distancia ni cruzar obstáculos.',cue:p=>p<.15?'Comenzá el arco':p<.85?'Misma distancia · seguí girando':'Completá y sostené',apply:p=>{document.querySelector('.a').style.left=`${10+p*18}%`;document.querySelector('.b').style.right=`${10+p*18}%`}},
+ montage:{name:'Montaje breve',move:'G · M · D · R',help:'Grabá una serie corta: plano general, acción media, detalle y reacción.',cue:p=>p<.25?'1 · Plano general':p<.5?'2 · Acción en plano medio':p<.75?'3 · Detalle de manos u objeto':'4 · Reacción final',apply:p=>{const scale=p<.25?.82:p<.5?1:p<.75?1.28:1.12;document.querySelector('.a').style.transform=`scale(${scale})`;document.querySelector('.b').style.opacity=p<.75?.7:1}},
+ fantasy:{name:'Mundo dibujado',move:'◇ fondo',help:'Grabá con separación clara del fondo. El escenario ilustrado se aplica después.',cue:p=>p<.2?'Separación del fondo · luz pareja':p<.8?'Actuá mirando las marcas imaginarias':'Sostené para el recorte final',apply:p=>{document.querySelector('.a').style.left='13%';document.querySelector('.b').style.right='13%'}},
+ sitcom:{name:'Sitcom multicámara',move:'A · G · B',help:'Actuación continua con plano general y coberturas de cada personaje.',cue:p=>p<.25?'Plano general':p<.62?'Cobertura de diálogo':'Reacciones y cierre',apply:p=>{document.querySelector('.a').style.left='12%';document.querySelector('.b').style.right='12%'}}
+};
+function resetGuides(){const a=document.querySelector('.a'),b=document.querySelector('.b');for(const x of[a,b]){x.style.left='';x.style.right='';x.style.opacity=1;x.style.transform='scale(1)'}$('#pathGuide').style.display='none'}
+function updatePresetHelp(){const p=presets[$('#wPreset').value]||presets.two;$('#movementHint').textContent=p.help}
+function lines(){return $('#script').value.split('\n').map(x=>{const [who,t,...rest]=x.split('|');return{who:(who||'').trim(),t:Number(t)||0,text:rest.join('|').trim()}}).filter(x=>x.text).sort((a,b)=>a.t-b.t)}
+function renderTimeline(){const d=+$('#duration').value||15,ls=lines(),box=$('#timeline');box.innerHTML='';ls.forEach((x,i)=>{const end=ls[i+1]?.t??d,b=document.createElement('button');b.className='seg';b.style.flex=Math.max(.2,end-x.t);b.textContent=`${x.who} · ${x.t}s`;box.appendChild(b)})}
+async function enableCamera(){try{stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:'environment'},audio:true});video.srcObject=stream;statusBox.textContent='Cámara preparada.'}catch(e){statusBox.textContent='No se pudo abrir la cámara: '+e.message}}
+function setAt(t){const d=+$('#duration').value||15,p=Math.min(1,t/d),ls=lines();let current=ls[0];ls.forEach(x=>{if(x.t<=t)current=x});promptBox.innerHTML=`<small>${current?.who||'—'} · ${Math.max(0,(ls.find(x=>x.t>t)?.t??d)-t).toFixed(1)} s</small>${current?.text||''}`;$('#clock').textContent=`00:${t.toFixed(1).padStart(4,'0')}`;const z=1+(Number($('#zoomTarget').value)-1)*p;$('#zoom').textContent=z.toFixed(2)+'×';const pr=presets[$('#preset').value]||presets.two;resetGuides();$('#shot').textContent=pr.name;$('#move').textContent=pr.move;$('#direction').textContent=pr.cue(p);$('#pathGuide').style.display=pr.marks?'flex':'none';pr.apply(p);document.querySelectorAll('.seg').forEach((e,i)=>e.classList.toggle('active',ls[i]===current))}
+async function start(recording=false){clearInterval(runTimer);renderTimeline();if(recording&&!stream){await enableCamera();if(!stream)return}const cd=Math.max(0,+$('#countdown').value||0);for(let i=cd;i>0;i--){countBox.textContent=i;await new Promise(r=>setTimeout(r,1000))}countBox.textContent='';if(recording){chunks=[];recorder=new MediaRecorder(stream);recorder.ondataavailable=e=>e.data.size&&chunks.push(e.data);recorder.onstop=download;recorder.start(500);$('#record').classList.add('recording');$('#record').textContent='Grabando…'}const guide=$('#guideAudio');if(guide.src){guide.currentTime=0;guide.play().catch(()=>{});}
+startedAt=performance.now();const d=+$('#duration').value||15;runTimer=setInterval(()=>{const t=(performance.now()-startedAt)/1000;setAt(Math.min(t,d));if(t>=d){clearInterval(runTimer);guide.pause();if(recorder?.state==='recording')recorder.stop();$('#record').classList.remove('recording');$('#record').textContent='Grabar toma';statusBox.textContent='Toma terminada.'}},50)}
+function download(){const blob=new Blob(chunks,{type:recorder.mimeType}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`uizador-toma-${Date.now()}.webm`;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000)}
+$('#cameraBtn').onclick=enableCamera;$('#rehearse').onclick=()=>start(false);$('#record').onclick=()=>start(true);
+['script','duration','preset'].forEach(id=>$('#'+id).addEventListener('input',renderTimeline));
+
+let wizardStep=0;
+const wizardSteps=[...document.querySelectorAll('.step')],dots=[...document.querySelectorAll('.dot')];
+function showWizardStep(index){wizardStep=Math.max(0,Math.min(wizardSteps.length-1,index));wizardSteps.forEach((x,i)=>x.classList.toggle('on',i===wizardStep));dots.forEach((x,i)=>x.classList.toggle('on',i<=wizardStep))}
+document.querySelectorAll('[data-next]').forEach(b=>b.onclick=()=>showWizardStep(wizardStep+1));
+document.querySelectorAll('[data-back]').forEach(b=>b.onclick=()=>showWizardStep(wizardStep-1));
+function syncWizard(){
+ $('#preset').value=$('#wPreset').value;$('#duration').value=$('#wDuration').value;$('#countdown').value=$('#wCountdown').value;$('#zoomTarget').value=$('#wZoom').value;$('#script').value=$('#wScript').value;
+ document.body.dataset.theme=$('#wTheme').value;
+ const ref=$('#wReference').files?.[0];if(ref){const oldRef=$('#referenceOverlay').dataset.url;if(oldRef)URL.revokeObjectURL(oldRef);const refUrl=URL.createObjectURL(ref);$('#referenceOverlay').src=refUrl;$('#referenceOverlay').dataset.url=refUrl;$('#referenceOverlay').style.display='block';}$('#referenceOverlay').style.opacity=(Number($('#wReferenceOpacity').value)||28)/100;
+ const file=$('#wGuideFile').files?.[0];if(file){const old=$('#guideAudio').dataset.url;if(old)URL.revokeObjectURL(old);const url=URL.createObjectURL(file);$('#guideAudio').src=url;$('#guideAudio').dataset.url=url;}
+ renderTimeline();setAt(0)
+}
+$('#wTheme').onchange=()=>document.body.dataset.theme=$('#wTheme').value;$('#wPreset').onchange=updatePresetHelp;
+function presetData(){return{schema:'uizador.scene-preset.v0.1',scene_type:$('#wPreset').value,duration_sec:Number($('#wDuration').value),countdown_sec:Number($('#wCountdown').value),zoom_target:Number($('#wZoom').value),guide_mode:$('#wGuideMode').value,theme:$('#wTheme').value,script:$('#wScript').value}}
+$('#savePreset').onclick=()=>{const blob=new Blob([JSON.stringify(presetData(),null,2)],{type:'application/json'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='uizador-preset-'+$('#wPreset').value+'.json';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000)}
+$('#loadPreset').onchange=async()=>{const file=$('#loadPreset').files?.[0];if(!file)return;try{const x=JSON.parse(await file.text());$('#wPreset').value=x.scene_type||'two';$('#wDuration').value=x.duration_sec||15;$('#wCountdown').value=x.countdown_sec??3;$('#wZoom').value=String(x.zoom_target||1.5);$('#wGuideMode').value=x.guide_mode||'choreo';$('#wTheme').value=x.theme||'pop';$('#wScript').value=x.script||'';document.body.dataset.theme=$('#wTheme').value;}catch(e){alert('El preset no parece válido.')}}
+$('#startCamera').onclick=async()=>{syncWizard();await enableCamera();if(stream){document.body.classList.add('shooting');statusBox.textContent='Cámara lista. Podés ensayar o grabar.'}};
+$('#configBtn').onclick=()=>{document.body.classList.remove('shooting');showWizardStep(0)};
+const launch=new URLSearchParams(location.search);if(launch.get('preset')&&[...$('#wPreset').options].some(o=>o.value===launch.get('preset')))$('#wPreset').value=launch.get('preset');if(launch.get('theme')&&[...$('#wTheme').options].some(o=>o.value===launch.get('theme')))$('#wTheme').value=launch.get('theme');document.body.dataset.theme=$('#wTheme').value;updatePresetHelp();renderTimeline();setAt(0);
+</script></body></html>

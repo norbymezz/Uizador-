@@ -1,0 +1,54 @@
+<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Uizador · Proyectos</title><style>
+:root{color-scheme:dark;--p:#ff79bd;--v:#a98cff;--ink:#fff8fc;--muted:#c4b8ca}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at 82% 0,#47265f 0,#21142f 40%,#0d0a14 82%);color:var(--ink);font-family:system-ui,sans-serif}
+main{width:min(850px,100%);margin:auto;padding:16px}header{display:flex;align-items:center;gap:11px;margin-bottom:20px}header a{color:#fff;text-decoration:none;font-size:1.7rem}h1{font-size:1.35rem;margin:0}
+button,input,select,textarea{width:100%;min-height:44px;border:1px solid #584563;border-radius:10px;background:#21172b;color:#fff;padding:9px;font:inherit}button{cursor:pointer;font-weight:800}.primary{background:linear-gradient(135deg,#e84f9a,#8568df)}
+.new{border:1px solid #4e3b59;border-radius:16px;background:rgba(36,24,47,.9);padding:14px}.new h2{font-size:1.05rem;margin:0 0 12px}.grid{display:grid;grid-template-columns:1fr 1fr;gap:9px}label{display:grid;gap:5px;color:var(--muted);font-size:.8rem}.full{grid-column:1/-1}
+.section{font-size:.82rem;color:#bbaec1;margin:24px 0 9px}.projects{display:grid;gap:10px}.project{border:1px solid #4e3d58;border-radius:16px;background:linear-gradient(145deg,rgba(61,36,72,.95),rgba(25,19,34,.95));padding:15px}
+.project-top{display:flex;justify-content:space-between;gap:12px}.project h3{font-size:1.1rem;margin:0}.project p{color:var(--muted);font-size:.85rem;margin:6px 0 12px}.stats{display:flex;gap:15px;color:#e8d9e9;font-size:.79rem}.actions{display:grid;grid-template-columns:1fr 1fr 1fr 44px;gap:7px;margin-top:13px}.delete{color:#ff8ea5}.empty{text-align:center;color:var(--muted);padding:50px 10px;border:1px dashed #4e3d58;border-radius:15px}
+dialog{width:min(520px,calc(100% - 28px));border:1px solid #5a4566;border-radius:16px;background:#1d1427;color:#fff;padding:16px}dialog::backdrop{background:rgba(6,4,10,.72)}
+.scene{display:flex;justify-content:space-between;gap:8px;padding:9px 0;border-bottom:1px solid #403247}.scene small{color:var(--muted)}
+@media(max-width:580px){.grid{grid-template-columns:1fr}.full{grid-column:auto}.actions{grid-template-columns:1fr 1fr}}
+</style></head><body><main>
+<header><a href="../app-home/index.html">‹</a><h1>Mis proyectos</h1></header>
+<section class="new"><h2>Nuevo proyecto</h2><div class="grid">
+<label>Nombre<input id="name" placeholder="Cumple, corto, videoclip…"></label>
+<label>Formato<select id="format"><option value="horizontal">Horizontal · 16:9</option><option value="vertical">Vertical · 9:16</option><option value="square">Cuadrado · 1:1</option></select></label>
+<label>Participantes<input id="people" type="number" min="1" max="100" value="2"></label>
+<label>Idioma principal<select id="projectLanguage"><option value="es">Español</option><option value="en">English</option><option value="pt">Português</option><option value="none">Sin diálogo</option></select></label>
+<label>Teléfonos previstos<input id="phones" type="number" min="1" max="100" value="1"></label>
+<label class="full">Idea o nota<textarea id="note" placeholder="Qué queremos grabar…" rows="2"></textarea></label>
+<button id="create" class="primary full">Crear proyecto</button>
+<label class="full">Abrir un archivo de Uizador<input id="importProject" type="file" accept=".uizador,application/vnd.uizador.project+zip"></label>
+</div></section>
+<div class="section">GUARDADOS EN ESTE DISPOSITIVO</div><section id="projects" class="projects"></section>
+</main>
+<dialog id="detail"><h2 id="detailTitle"></h2><div id="scenes"></div><button id="addScene" class="primary" style="margin-top:12px">Agregar escena</button><button id="close" style="margin-top:7px">Cerrar</button></dialog>
+<script type="module">
+import{downloadUizadorProject,readUizadorProject}from'../../core/uizador-package.js';
+const KEY='uizador-projects-v1';let projects=JSON.parse(localStorage.getItem(KEY)||'[]'),current=null;const $=s=>document.querySelector(s);
+function save(){localStorage.setItem(KEY,JSON.stringify(projects));render()}
+function esc(s){return String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
+$('#create').onclick=()=>{const name=$('#name').value.trim();if(!name)return;projects.unshift({id:crypto.randomUUID(),name,format:$('#format').value,people:+$('#people').value||1,phones:+$('#phones').value||1,note:$('#note').value.trim(),language:$('#projectLanguage').value,created:new Date().toISOString(),scenes:[]});$('#name').value='';$('#note').value='';save()}
+function render(){const box=$('#projects');box.innerHTML='';if(!projects.length){box.innerHTML='<div class="empty">Todavía no hay proyectos. Creá el primero arriba.</div>';return}projects.forEach(p=>{const takes=p.scenes.reduce((n,s)=>n+(s.takes||0),0),e=document.createElement('article');e.className='project';e.innerHTML=`<div class="project-top"><div><h3>${esc(p.name)}</h3><p>${esc(p.note||'Sin descripción')}</p></div><span>${p.format==='vertical'?'9:16':p.format==='square'?'1:1':'16:9'}</span></div><div class="stats"><span>🎬 ${p.scenes.length} escenas</span><span>◉ ${takes} tomas</span><span>📱 ${p.phones}</span><span>🌐 ${p.language||'es'}</span></div><div class="actions"><button class="open primary">Abrir</button><a href="../preset-library/index.html?project=${encodeURIComponent(p.id)}"><button>Elegir escena</button></a><button class="export">Exportar</button><button class="delete">×</button></div>`;e.querySelector('.open').onclick=()=>openProject(p.id);e.querySelector('.export').onclick=()=>exportProject(p);e.querySelector('.delete').onclick=()=>{if(confirm('¿Eliminar este proyecto y su metadata?')){projects=projects.filter(x=>x.id!==p.id);save()}};box.appendChild(e)})}
+async function exportProject(p){
+ const ratio=p.format==='vertical'?'9:16':p.format==='square'?'1:1':'16:9';
+ const manifest={project:{id:p.id,title:p.name,created_at:p.created,locale:p.language||'es',aspect_ratio:ratio},scenes:p.scenes.map(s=>({id:s.id,name:s.name,takes:Array.from({length:s.takes||0},(_,i)=>({id:s.id+'-take-'+(i+1),number:i+1}))})),media:[],tracks:{},notes:p.note||''};
+ await downloadUizadorProject({manifest},p.name);
+}
+$('#importProject').onchange=async()=>{
+ const file=$('#importProject').files?.[0];if(!file)return;
+ try{
+  const {manifest}=await readUizadorProject(file),m=manifest.project;
+  const format=m.aspect_ratio==='9:16'?'vertical':m.aspect_ratio==='1:1'?'square':'horizontal';
+  let id=m.id||crypto.randomUUID();if(projects.some(p=>p.id===id))id=crypto.randomUUID();
+  projects.unshift({id,name:m.title||'Proyecto importado',format,people:1,phones:1,note:manifest.notes||'',language:m.locale||'es',created:m.created_at||new Date().toISOString(),scenes:(manifest.scenes||[]).map(s=>({id:s.id||crypto.randomUUID(),name:s.name||'Escena',takes:Array.isArray(s.takes)?s.takes.length:0}))});
+  save();$('#importProject').value='';
+ }catch(error){alert('No se pudo abrir el proyecto: '+error.message)}
+};
+function openProject(id){current=projects.find(x=>x.id===id);$('#detailTitle').textContent=current.name;renderScenes();$('#detail').showModal()}
+function renderScenes(){const box=$('#scenes');box.innerHTML=current.scenes.length?'':'<p style="color:#c4b8ca">Todavía no hay escenas.</p>';current.scenes.forEach((s,i)=>{const e=document.createElement('div');e.className='scene';e.innerHTML=`<div><strong>Escena ${i+1} · ${esc(s.name)}</strong><small style="display:block">${s.takes||0} tomas</small></div><button style="width:72px" class="take">+ toma</button>`;e.querySelector('.take').onclick=()=>{s.takes=(s.takes||0)+1;save();renderScenes()};box.appendChild(e)})}
+$('#addScene').onclick=()=>{const name=prompt('Nombre de la escena','Nueva escena');if(name){current.scenes.push({id:crypto.randomUUID(),name,takes:0});save();renderScenes()}}
+$('#close').onclick=()=>$('#detail').close();render();
+</script></body></html>

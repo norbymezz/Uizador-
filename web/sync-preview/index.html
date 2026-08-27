@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Uizador · Elegí tus mejores tomas</title>
+<style>
+:root{color-scheme:dark;--a:#ff79bd;--b:#a98cff;--panel:rgba(39,25,52,.92)}*{box-sizing:border-box}
+body{margin:0;background:radial-gradient(circle at 80% 0%,#43265d 0,#1b1228 38%,#0d0a15 80%);color:#fff7fc;font-family:system-ui,sans-serif}main{width:min(1050px,100%);margin:auto;padding:12px}
+h1{font-size:1.08rem;margin:5px 0 12px}.card{background:var(--panel);border:1px solid #303946;border-radius:14px;padding:12px;margin-bottom:10px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:9px}label{display:grid;gap:5px;color:#b7c1cc;font-size:.82rem}
+input,button{width:100%;min-height:44px;border:1px solid #3a4654;border-radius:9px;background:#1c2430;color:#fff;padding:8px;font:inherit}
+button{cursor:pointer;font-weight:700}.primary{background:linear-gradient(135deg,#e84f9a,#8b69e8)}.orange{background:#744e9f}.status{font-size:.82rem;color:#a9b6c5;margin-top:8px;min-height:1.2em}
+.wave{width:100%;height:92px;background:#0b0e13;border:1px solid #303946;border-radius:8px;margin-top:7px}
+.videos{display:grid;grid-template-columns:1fr 1fr;gap:8px}.angle{position:relative;background:#000;border-radius:10px;overflow:hidden;border:3px solid transparent}
+.angle.live-a{border-color:var(--a)}.angle.live-b{border-color:var(--b)}video{display:block;width:100%;aspect-ratio:16/9;background:#000}
+.badge{position:absolute;top:7px;left:7px;padding:4px 8px;border-radius:7px;background:rgba(0,0,0,.72);font-weight:800}
+.transport{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:9px}.time{text-align:center;font-variant-numeric:tabular-nums;margin-top:7px}
+.timeline{position:relative;height:56px;background:#0c1016;border:1px solid #303946;border-radius:9px;overflow:hidden;margin-top:9px}
+.cut{position:absolute;top:0;bottom:0;border-right:1px solid #111;display:grid;place-items:center;font-size:.72rem;font-weight:800}.cut.a{background:#126477}.cut.b{background:#854a25}
+pre{max-height:230px;overflow:auto;background:#0a0d12;padding:9px;border-radius:8px;font-size:.75rem}
+.hint{font-size:.78rem;color:#99a8b9;line-height:1.4}.offset{display:grid;grid-template-columns:1fr 110px;gap:8px;align-items:end}
+@media(max-width:650px){.grid,.videos{grid-template-columns:1fr}.transport{grid-template-columns:1fr 1fr}.transport button:first-child{grid-column:1/-1}}
+</style></head>
+<body><main><h1>Uizador · Elegí tus mejores tomas</h1>
+<section class="card"><div class="grid">
+<label>Cámara A<input id="fileA" type="file" accept="video/*"></label>
+<label>Cámara B<input id="fileB" type="file" accept="video/*"></label>
+</div><button id="analyze" class="primary" style="margin-top:9px">Analizar audio y sincronizar</button>
+<div class="status" id="status">Cargá dos grabaciones de la misma toma.</div>
+<canvas id="waveA" class="wave"></canvas><canvas id="waveB" class="wave"></canvas>
+<div class="offset"><label>Ajuste manual de B respecto de A
+<input id="offsetRange" type="range" min="-3000" max="3000" step="1" value="0"></label>
+<label>Offset B (ms)<input id="offsetNumber" type="number" step="1" value="0"></label></div>
+<div class="hint">Offset positivo: B empieza más tarde en la timeline común. El análisis compara las envolventes de audio; después se puede afinar manualmente.</div>
+</section>
+
+<section class="card"><div class="videos">
+<div class="angle live-a" id="angleA"><video id="videoA" playsinline></video><span class="badge">A</span></div>
+<div class="angle" id="angleB"><video id="videoB" playsinline></video><span class="badge">B</span></div>
+</div>
+<div class="transport"><button id="play" class="primary">Reproducir juntas</button><button id="chooseA">Cortar a A</button><button id="chooseB" class="orange">Cortar a B</button></div>
+<div class="time" id="time">00:00.000</div><div class="timeline" id="timeline"></div>
+<div class="status" id="previewStatus">Los botones A/B guardan decisiones; no modifican los videos.</div>
+</section>
+<section class="card"><details><summary>Lista de decisiones de montaje</summary><pre id="json"></pre></details></section>
+</main><script>
+const $=s=>document.querySelector(s),videos={A:$('#videoA'),B:$('#videoB')};let env={A:null,B:null},offsetMs=0,playing=false,timer=null,cuts=[{t:0,camera:'A'}],duration=0;
+function loadFile(key,input){const f=input.files?.[0];if(!f)return;videos[key].src=URL.createObjectURL(f);videos[key].load();env[key]=null;$('#status').textContent='Archivos cargados. Falta analizar.'}
+$('#fileA').onchange=()=>loadFile('A',$('#fileA'));$('#fileB').onchange=()=>loadFile('B',$('#fileB'));
+async function envelope(file){
+ const ac=new AudioContext(),buf=await ac.decodeAudioData((await file.arrayBuffer()).slice(0)),data=new Float32Array(buf.length);
+ for(let c=0;c<buf.numberOfChannels;c++){const x=buf.getChannelData(c);for(let i=0;i<x.length;i++)data[i]+=x[i]/buf.numberOfChannels}
+ const hz=100,step=Math.max(1,Math.floor(buf.sampleRate/hz)),out=new Float32Array(Math.ceil(data.length/step));
+ for(let k=0;k<out.length;k++){let s=0,n=0;for(let i=k*step;i<Math.min(data.length,(k+1)*step);i++){s+=data[i]*data[i];n++}out[k]=Math.sqrt(s/Math.max(1,n))}
+ await ac.close();return{values:out,hz,duration:buf.duration}
+}
+function normalize(x){let mean=0;for(const v of x)mean+=v;mean/=x.length;let ss=0;for(const v of x)ss+=(v-mean)**2;const sd=Math.sqrt(ss/x.length)||1;return Float32Array.from(x,v=>(v-mean)/sd)}
+function estimate(a,b,maxSec=5){const x=normalize(a.values),y=normalize(b.values),max=Math.min(Math.floor(maxSec*a.hz),x.length-2,y.length-2);let best=0,bestScore=-Infinity;
+ for(let lag=-max;lag<=max;lag++){let s=0,n=0;const stride=2;for(let i=Math.max(0,-lag);i<Math.min(x.length,y.length-lag);i+=stride){s+=x[i]*y[i+lag];n++}const score=s/Math.max(1,n);if(score>bestScore){bestScore=score;best=lag}}
+ return{ms:-best/a.hz*1000,score:bestScore}
+}
+function drawWave(canvas,e,color){const r=devicePixelRatio||1,w=canvas.clientWidth,h=canvas.clientHeight;canvas.width=w*r;canvas.height=h*r;const c=canvas.getContext('2d');c.scale(r,r);c.clearRect(0,0,w,h);if(!e)return;let max=0;for(const v of e.values)max=Math.max(max,v);c.strokeStyle=color;c.beginPath();for(let x=0;x<w;x++){const i=Math.floor(x/w*e.values.length),y=h-(e.values[i]/(max||1))*(h-8)-4;x?c.lineTo(x,y):c.moveTo(x,y)}c.stroke()}
+$('#analyze').onclick=async()=>{const a=$('#fileA').files?.[0],b=$('#fileB').files?.[0];if(!a||!b){$('#status').textContent='Faltan uno o ambos videos.';return}try{$('#status').textContent='Decodificando audio…';[env.A,env.B]=await Promise.all([envelope(a),envelope(b)]);drawWave($('#waveA'),env.A,'#59d8ff');drawWave($('#waveB'),env.B,'#ff9e64');const r=estimate(env.A,env.B);setOffset(Math.round(r.ms));duration=Math.max(env.A.duration,env.B.duration+offsetMs/1000);$('#status').textContent='Offset estimado: '+offsetMs+' ms · coincidencia '+r.score.toFixed(2)+'. Verificá reproduciendo ambas.';render()}catch(e){$('#status').textContent='No se pudo decodificar el audio en este navegador: '+e.message}};
+function setOffset(v){offsetMs=Math.max(-3000,Math.min(3000,Number(v)||0));$('#offsetRange').value=offsetMs;$('#offsetNumber').value=offsetMs}
+$('#offsetRange').oninput=e=>setOffset(e.target.value);$('#offsetNumber').onchange=e=>setOffset(e.target.value);
+function commonTime(){return videos.A.currentTime||0}
+function seekCommon(t){videos.A.currentTime=Math.max(0,t);videos.B.currentTime=Math.max(0,t-offsetMs/1000)}
+$('#play').onclick=async()=>{if(!videos.A.src||!videos.B.src)return;if(playing){videos.A.pause();videos.B.pause();playing=false;$('#play').textContent='Reproducir juntas';clearInterval(timer);return}const t=commonTime();seekCommon(t);playing=true;$('#play').textContent='Pausar';await Promise.allSettled([videos.A.play(),videos.B.play()]);timer=setInterval(syncLoop,60)};
+function syncLoop(){const t=commonTime(),expected=Math.max(0,t-offsetMs/1000);if(Math.abs(videos.B.currentTime-expected)>.08)videos.B.currentTime=expected;$('#time').textContent=format(t);if(videos.A.ended){playing=false;clearInterval(timer)}}
+function addCut(camera){const t=commonTime();if(cuts.at(-1)?.camera===camera)return;cuts.push({t:Number(t.toFixed(3)),camera});cuts.sort((a,b)=>a.t-b.t);$('#angleA').classList.toggle('live-a',camera==='A');$('#angleB').classList.toggle('live-b',camera==='B');render()}
+$('#chooseA').onclick=()=>addCut('A');$('#chooseB').onclick=()=>addCut('B');
+function render(){const d=duration||Math.max(videos.A.duration||0,videos.B.duration||0,1),box=$('#timeline');box.innerHTML='';cuts.forEach((x,i)=>{const end=cuts[i+1]?.t??d,el=document.createElement('div');el.className='cut '+x.camera.toLowerCase();el.style.left=(x.t/d*100)+'%';el.style.width=(Math.max(0,end-x.t)/d*100)+'%';el.textContent=x.camera;box.appendChild(el)});$('#json').textContent=JSON.stringify({schema:'uizador.multicam.edl.v0.1',sync:{reference:'A',camera_b_offset_ms:offsetMs},cuts:cuts.map((x,i)=>({...x,end_sec:Number((cuts[i+1]?.t??d).toFixed(3))}))},null,2)}
+function format(t){const m=Math.floor(t/60),s=t-m*60;return String(m).padStart(2,'0')+':'+s.toFixed(3).padStart(6,'0')}
+videos.A.onloadedmetadata=()=>{duration=Math.max(duration,videos.A.duration);render()};videos.B.onloadedmetadata=()=>{duration=Math.max(duration,videos.B.duration);render()};render();
+</script></body></html>

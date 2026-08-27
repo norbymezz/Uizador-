@@ -89,3 +89,27 @@ Con los **seis archivos obtenidos —dos cámaras por tres tomas—** se probar�
 8. elección de la mejor toma.
 
 Exportar al terminar el informe JSON del Centro de pruebas. Si un control bloqueante falla, conservar los videos y describir el defecto antes de repetir.
+
+
+## Orden exacto para la primera ejecución
+
+Abrir el Centro de pruebas con **Mostrar primero la prueba principal** activado. Marcar los controles en este orden:
+
+| Momento | Casos | Cantidad | Regla |
+|---|---|---:|---|
+| Antes de reunir los teléfonos | `PRE-001` a `PRE-007` en A y B; exportar también `PRE-008` | 8 tipos | No crear la sesión si cámara, micrófono o grabación corta fallan. |
+| Primera grabación limpia | `LOC-001` a `LOC-012` | 12 | No provocar interrupciones todavía; primero hay que obtener las seis grabaciones. |
+| Revisión de los archivos | `SYN-001` a `SYN-006` y `SYN-009` | 7 | Conservar los originales y anotar un offset por pareja A/B. |
+| Recuperación controlada | `REC-001` a `REC-006` y `REC-008` | 7 | Ejecutar después de resguardar la primera sesión exitosa. |
+| Proyecto y selección | `EDT-001` a `EDT-005` | 5 | No modificar los seis archivos originales. |
+| Comprensión de uso | `UX-001`, `UX-002`, `UX-003`, `UX-007` | 4 | La otra persona debe intentar usarlo sin explicación previa. |
+
+Son **42 controles principales**. La primera sesión se divide en hitos:
+
+1. **Hito A:** dos diagnósticos válidos.
+2. **Hito B:** seis archivos válidos.
+3. **Hito C:** tres parejas A/B alineadas.
+4. **Hito D:** proyecto reabierto y cortes reversibles.
+5. **Hito E:** interrupciones recuperables.
+
+Detenerse al fallar un bloqueante. Registrar el defecto, conservar la evidencia y repetir desde el último hito válido. Los presets avanzados, croma, remoto, idiomas adicionales y publicación quedan visibles en el catálogo, pero no se mezclan con esta primera prueba.

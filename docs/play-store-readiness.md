@@ -2,6 +2,13 @@
 
 Actualizado: 2026-08-27.
 
+## Documentos operativos
+
+- `play-console-submission-pack.md`: cuenta, firma, formularios, pruebas y envío.
+- `data-safety-working-draft.md`: inventario provisional de datos y SDKs.
+- `store-listing-draft.md`: textos y capturas previstas para la ficha.
+- `privacy-policy-inputs.md`: decisiones necesarias antes de redactar la política publicable.
+
 ## Estrategia inicial recomendada
 
 - Aplicación Android nativa en Kotlin y Jetpack Compose.

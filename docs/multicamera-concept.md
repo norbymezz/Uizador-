@@ -158,6 +158,24 @@ Cada marca debería codificar el dispositivo emisor mediante frecuencia, patrón
 
 La señal sonora no necesita iniciar físicamente todas las cámaras al mismo microsegundo: sirve para alinear posteriormente las líneas temporales que ya estaban grabando.
 
+### Protocolo audible de inicio y final
+
+La secuencia de una toma debe preservar la unión entre sonido e imagen:
+
+1. el director ordena a todos los teléfonos comenzar a grabar;
+2. se espera un margen de seguridad;
+3. un único emisor acústico reproduce tres marcas de inicio, por ejemplo `beep · beep · BEEP`;
+4. comienza la actuación;
+5. al finalizar la duración prevista se reproduce una firma diferente, por ejemplo un `CLAC`;
+6. se espera otro margen de seguridad;
+7. recién entonces se detienen las grabaciones.
+
+Los tres pulsos iniciales permiten reconocer la firma y medir su cadencia; el último pulso puede ser más agudo, largo o fuerte. La marca final debe ser inequívocamente distinta. Distintos presets pueden usar diferentes ritmos, pero todos los dispositivos de una misma toma deben registrar la misma fuente acústica.
+
+La alineación posterior busca esas formas en cada pista mediante correlación. El video no se separa de su audio local: se desplaza el archivo o la pista audiovisual completa sobre la timeline común. De esta manera se conserva la sincronía interna entre imagen y sonido de cada teléfono.
+
+La propagación del sonido introduce aproximadamente 2,9 ms por metro, además de las latencias de parlante y micrófono. Para una primera prueba en una habitación puede medirse el error obtenido. Si luego se requiere precisión mayor, las marcas audibles se combinan con timestamps monotónicos, estimación de posición o una señal visual simultánea.
+
 En futuras versiones se puede combinar con timestamps monotónicos, correlación del audio ambiente, flash visual o detección de movimiento común.
 
 ## Presets visuales de escena y toma

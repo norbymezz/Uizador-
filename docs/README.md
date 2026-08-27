@@ -27,6 +27,7 @@ Este índice separa lo que define el producto actual, lo que sirve para probarlo
 | [Preparación para Play Store](play-store-readiness.md) | Requisitos técnicos y proceso general. |
 | [Paquete de Play Console](play-console-submission-pack.md) | Lista concreta para la presentación. |
 | [Borrador de ficha](store-listing-draft.md) | Textos que deberán reflejar la versión real. |
+| [Brief visual de Play Store](play-store-creative-brief.md) | Capturas, mensajes, feature graphic, icono y video. |
 | [Data Safety](data-safety-working-draft.md) | Declaración de datos que debe verificarse contra el código final. |
 | [Datos para privacidad](privacy-policy-inputs.md) | Decisiones pendientes para la política definitiva. |
 

@@ -66,6 +66,33 @@ crear sesión → mostrar QR → escanear → entrar → asignar cámara → pre
 
 Así ningún participante necesita escribir direcciones de red, códigos largos ni configurar manualmente cada teléfono.
 
+## Multicámara virtual con un solo teléfono
+
+La misma escena puede ejecutarse aunque exista un solo teléfono. En ese caso, la aplicación convierte las cámaras previstas por la plantilla en pasadas sucesivas.
+
+Ejemplo:
+
+1. el teléfono ocupa la posición de cámara A y graba la escena;
+2. la aplicación indica dónde ubicarlo para representar la cámara B;
+3. se repite la actuación siguiendo la misma timeline;
+4. el teléfono pasa a la posición C y realiza una tercera grabación;
+5. las tres pasadas se presentan en el editor como si procedieran de tres cámaras diferentes.
+
+Las guías predefinidas siguen funcionando: encuadre semitransparente, altura, inclinación, distancia, trayectoria, duración y momento de cada acción.
+
+Para conservar continuidad entre pasadas, la aplicación puede reproducir:
+
+- cuenta regresiva y clock común;
+- indicaciones habladas o auriculares;
+- diálogos o pista de referencia de la primera toma;
+- marcas de acciones y movimientos;
+- una silueta o imagen fantasma del encuadre anterior;
+- referencias para posición de actores y objetos.
+
+En el modelo de datos se distingue entre **cámara física** y **rol de cámara**. Un mismo dispositivo puede ejecutar sucesivamente los roles A, B y C. El montaje posterior utiliza los roles y la timeline, por lo que el editor funciona igual con uno o con muchos teléfonos.
+
+Este modo permite reutilizar gramáticas cinematográficas y plantillas de escenas conocidas —rotación alrededor del protagonista, plano/contraplano, plano general, inserto y otras interacciones frecuentes— sin requerir varios dispositivos.
+
 ## Organización del material
 
 ```text

@@ -160,6 +160,68 @@ La señal sonora no necesita iniciar físicamente todas las cámaras al mismo mi
 
 En futuras versiones se puede combinar con timestamps monotónicos, correlación del audio ambiente, flash visual o detección de movimiento común.
 
+## Presets visuales de escena y toma
+
+En este proyecto, la preparación principal ocurre antes de grabar. Un preset describe cómo debe encuadrarse y moverse cada cámara durante una escena determinada.
+
+Al elegir una escena, cada teléfono recibe el preset correspondiente a su rol. Sobre la vista de cámara aparecen guías semitransparentes y líneas punteadas que permiten hacer coincidir la imagen real con el encuadre previsto.
+
+Un preset puede definir:
+
+- contorno o caja donde debe ubicarse el protagonista;
+- líneas punteadas de composición, horizonte y dirección de mirada;
+- puntos de referencia para objetos y actores;
+- posición inicial y final del encuadre;
+- ángulo inicial y final de paneo o inclinación;
+- trayectoria de traslación de la cámara;
+- duración prevista del movimiento;
+- velocidad y aceleración aproximadas;
+- nivel inicial y final de zoom;
+- sentido y momento del zoom;
+- tolerancia admitida respecto de la guía;
+- instante de inicio y final de la toma.
+
+Conviene representar por separado:
+
+- la rotación física de la cámara en grados;
+- el desplazamiento físico en distancia o trayectoria;
+- el zoom como factor, por ejemplo `1.0x → 2.0x`, o como distancia focal equivalente;
+- la duración del cambio, que determina su velocidad.
+
+Durante la ejecución, la interfaz puede mostrar:
+
+- arco punteado con los grados pendientes;
+- flecha para indicar dirección y velocidad;
+- barra de progreso del movimiento;
+- marcos inicial y final superpuestos;
+- advertencia si el teléfono se aparta de la trayectoria;
+- confirmación por color cuando el encuadre coincide;
+- cuenta regresiva para comenzar el movimiento.
+
+Ejemplo conceptual:
+
+```json
+{
+  "preset_id": "shot-reverse-shot-01",
+  "camera_role": "B",
+  "framing": {
+    "subject_box": [0.55, 0.18, 0.30, 0.62],
+    "horizon_y": 0.46,
+    "tolerance": 0.04
+  },
+  "movement": {
+    "type": "pan_and_zoom",
+    "yaw_start_deg": -12,
+    "yaw_end_deg": 18,
+    "zoom_start": 1.0,
+    "zoom_end": 1.7,
+    "duration_sec": 4.0
+  }
+}
+```
+
+El preset no es solamente una imagen de referencia: es una secuencia temporal de objetivos visuales. En cada instante indica dónde debería estar el encuadre y cuánto debería haberse completado el movimiento.
+
 ## Pre-edición multicámara
 
 Al terminar una toma, la aplicación genera una pre-edición no destructiva. No modifica ni recodifica inmediatamente los archivos originales: guarda una lista de decisiones que indica qué cámara o rol debe verse en cada intervalo.

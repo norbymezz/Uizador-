@@ -388,6 +388,34 @@ Comprobar que varios teléfonos pueden pertenecer a una sesión, repetir tomas a
 
 Después de una sesión de tres tomas, ambas grabaciones deben poder reproducirse alineadas de manera repetible. Primero se medirá el error observado; todavía no se fija una tolerancia definitiva.
 
+## Croma key y escenarios virtuales
+
+Una extensión prevista es el reemplazo de fondos mediante croma verde. Con una manta o pared verde, cada cámara puede separar a las personas del fondo y ubicarlas dentro de un escenario virtual.
+
+Casos de uso:
+
+- videos musicales caseros;
+- escenas fantásticas o de películas;
+- fondos de cumpleaños;
+- actuaciones infantiles;
+- escenarios animados;
+- integración de participantes grabados por separado;
+- composiciones multicámara dentro de un mismo ambiente virtual.
+
+La aplicación puede asistir antes de grabar mediante:
+
+- guía para cubrir correctamente el encuadre con la tela;
+- advertencia de sombras y arrugas;
+- medición de uniformidad del verde;
+- recomendaciones de iluminación;
+- detección de ropa u objetos con colores problemáticos;
+- vista previa del recorte;
+- regulación de tolerancia, suavizado de bordes y reducción del reflejo verde.
+
+El croma puede visualizarse de forma aproximada durante el ensayo, pero conviene conservar siempre el video original. El recorte de mayor calidad y la composición final se realizan después, de manera no destructiva.
+
+Los presets de escena pueden incluir también el fondo previsto y marcas espaciales coherentes con él. Así los actores saben dónde mirar, caminar o señalar aunque el objeto virtual todavía no exista físicamente.
+
 ## Fuera de la primera prueba
 
 - transferencia automática de videos entre teléfonos;

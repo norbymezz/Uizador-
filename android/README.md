@@ -39,6 +39,10 @@ Versión inicial:
 - público previsto: mayores de 18 años
 - formato de publicación: Android App Bundle (AAB)
 
+## Verificación automática
+
+Cada cambio dentro de `android/` dispara el workflow `Android`: ejecuta lint, pruebas unitarias, compila el APK de debug y lo guarda como artefacto `uizador-debug`. La firma de producción no se almacena en el repositorio.
+
 ## Próximas integraciones nativas
 
 1. CameraX para grabación local.

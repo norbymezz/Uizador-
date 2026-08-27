@@ -26,10 +26,71 @@ button{cursor:pointer;font-weight:650}.primary{background:#075d74;border-color:#
 .seg{border:0;border-right:1px solid #111;border-radius:0;padding:4px;font-size:.72rem;background:#283444}.seg.active{background:#087b99}
 textarea{min-height:120px;resize:vertical}.status{min-height:1.2em;margin-top:7px;color:#9ba9b8;font-size:.82rem}
 @media(max-width:560px){.grid{grid-template-columns:1fr}.actions{grid-template-columns:1fr 1fr}.actions button:last-child{grid-column:1/-1}}
+
+.wizard{min-height:72vh;display:grid;place-items:center;padding:12px 0}
+.wizard-card{width:min(560px,100%);padding:20px;border:1px solid rgba(130,160,190,.35);border-radius:18px;background:rgba(22,29,39,.88);backdrop-filter:blur(14px)}
+.progress{display:flex;gap:7px;margin-bottom:18px}.dot{height:6px;flex:1;border-radius:9px;background:#37404c}.dot.on{background:var(--accent)}
+.step{display:none}.step.on{display:block}.step h2{margin:0 0 7px;font-size:1.25rem}.step p{color:#b8c1cc;line-height:1.4;margin:0 0 18px}
+.nav{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:16px}.nav .next{background:#075d74;border-color:#168cac}.full{grid-column:1/-1}
+body:not(.shooting) .stage,body:not(.shooting) .controls-panel,body:not(.shooting) .script-panel{display:none}
+body.shooting .wizard,body.shooting .script-panel{display:none}
+body.shooting .controls-panel{display:block;background:transparent;border:0;padding:0}
+body.shooting .controls-panel .grid{display:none}
+body.shooting #cameraBtn{display:none}
+.camera-help{display:none;margin:8px 2px 0;color:#aeb7c3;font-size:.8rem;line-height:1.35}
+body.shooting .camera-help{display:block}
+body.shooting .stage{min-height:52vh;aspect-ratio:auto}
+body.shooting video{min-height:52vh}
+body.shooting .actions{grid-template-columns:1fr 1fr 44px}
+body.shooting #configBtn{display:block}
+#configBtn{display:none;padding:7px}
+.hint{color:#8fa0b2;font-size:.78rem;margin-top:6px}
+@media(max-width:560px){.wizard-card{padding:16px}.wizard{min-height:76vh}body.shooting .actions{grid-template-columns:1fr 1fr 44px}.actions button:last-child{grid-column:auto}}
 </style>
 </head>
 <body><main>
 <div class="top"><h1>Uizador · Ensayo guiado</h1><span id="clock">00:00.0</span></div>
+
+<section class="wizard" id="wizard">
+<div class="wizard-card">
+<div class="progress"><span class="dot on"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div>
+<div class="step on">
+<h2>1 · Elegí la escena</h2>
+<p>Esto define las líneas punteadas, el encuadre y el movimiento que vas a seguir.</p>
+<label>Tipo de escena
+<select id="wPreset"><option value="two">Plano de dos · acercamiento</option><option value="reverse">Plano / contraplano</option><option value="orbit">Rotación alrededor de protagonista</option></select></label>
+<div class="nav"><button class="next full" data-next>Continuar</button></div>
+</div>
+<div class="step">
+<h2>2 · Prepará la toma</h2>
+<p>Indicá cuánto dura la actuación, cuánto tiempo necesitás para acomodarte y cómo cambia el zoom.</p>
+<div class="grid">
+<label>Duración de la escena<input id="wDuration" type="number" min="6" max="60" value="15"></label>
+<label>Cuenta regresiva<input id="wCountdown" type="number" min="0" max="10" value="3"></label>
+<label>Zoom
+<select id="wZoom"><option value="1.0">Fijo 1.0×</option><option value="1.5" selected>1.0× → 1.5×</option><option value="2.0">1.0× → 2.0×</option></select></label>
+</div>
+<div class="nav"><button data-back>Volver</button><button class="next" data-next>Continuar</button></div>
+</div>
+<div class="step">
+<h2>3 · Escribí el diálogo</h2>
+<p>Cada línea indica personaje, segundo de entrada y texto. Podés reemplazarlo por tu propia parodia.</p>
+<textarea id="wScript">A|0|No llegamos tarde: llegamos exactamente cuando empieza.
+B|3|Eso lo decís cada vez que llegamos tarde.
+A|6|Entonces ya tenemos una tradición.
+B|10|Una tradición necesita testigos.
+A|13|Mirá a cámara.</textarea>
+<div class="hint">Formato: PERSONA | segundo | parlamento</div>
+<div class="nav"><button data-back>Volver</button><button class="next" data-next>Continuar</button></div>
+</div>
+<div class="step">
+<h2>4 · Prepará la cámara</h2>
+<p>Al continuar, el teléfono pedirá permiso para usar cámara y micrófono. Después verás solamente la imagen, las guías y los botones de ensayo y grabación.</p>
+<div class="nav"><button data-back>Volver</button><button id="startCamera" class="next">Abrir cámara</button></div>
+</div>
+</div>
+</section>
+
 <section class="stage">
 <video id="camera" autoplay muted playsinline></video>
 <div class="overlay">
@@ -39,8 +100,9 @@ textarea{min-height:120px;resize:vertical}.status{min-height:1.2em;margin-top:7p
 <div class="prompt" id="prompt"><small>PERSONA A · preparada</small>El texto aparecerá sincronizado acá.</div>
 </div>
 </section>
+<div class="camera-help"><strong>Ensayar:</strong> reproduce las guías y el teleprompter sin guardar. · <strong>Grabar:</strong> hace la cuenta regresiva y descarga la toma. · <strong>⚙</strong> vuelve a la configuración.</div>
 
-<section class="panel">
+<section class="panel controls-panel">
 <div class="grid">
 <label>Preset
 <select id="preset"><option value="two">Plano de dos · acercamiento</option><option value="reverse">Plano / contraplano</option><option value="orbit">Rotación alrededor de protagonista</option></select></label>
@@ -52,13 +114,13 @@ textarea{min-height:120px;resize:vertical}.status{min-height:1.2em;margin-top:7p
 <select id="zoomTarget"><option value="1.0">Fijo 1.0×</option><option value="1.5" selected>1.0× → 1.5×</option><option value="2.0">1.0× → 2.0×</option></select></label>
 </div>
 <div class="actions">
-<button id="cameraBtn">Activar cámara</button><button id="rehearse" class="primary">Ensayar</button><button id="record">Grabar toma</button>
+<button id="cameraBtn">Activar cámara</button><button id="rehearse" class="primary" title="Reproduce la escena sin guardar video">Ensayar</button><button id="record" title="Cuenta regresiva, graba y descarga la toma">Grabar</button><button id="configBtn" title="Volver a configurar la escena">⚙</button>
 </div>
 <div class="timeline" id="timeline"></div>
 <div class="status" id="status">Editá el texto, activá la cámara y ensayá.</div>
 </section>
 
-<section class="panel">
+<section class="panel script-panel">
 <label>Texto segmentado — una intervención por línea
 <textarea id="script">A|0|No llegamos tarde: llegamos exactamente cuando empieza.
 B|3|Eso lo decís cada vez que llegamos tarde.
@@ -84,5 +146,16 @@ async function start(recording=false){clearInterval(runTimer);renderTimeline();i
 function download(){const blob=new Blob(chunks,{type:recorder.mimeType}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`uizador-toma-${Date.now()}.webm`;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000)}
 $('#cameraBtn').onclick=enableCamera;$('#rehearse').onclick=()=>start(false);$('#record').onclick=()=>start(true);
 ['script','duration','preset'].forEach(id=>$('#'+id).addEventListener('input',renderTimeline));
+
+let wizardStep=0;
+const wizardSteps=[...document.querySelectorAll('.step')],dots=[...document.querySelectorAll('.dot')];
+function showWizardStep(index){wizardStep=Math.max(0,Math.min(wizardSteps.length-1,index));wizardSteps.forEach((x,i)=>x.classList.toggle('on',i===wizardStep));dots.forEach((x,i)=>x.classList.toggle('on',i<=wizardStep))}
+document.querySelectorAll('[data-next]').forEach(b=>b.onclick=()=>showWizardStep(wizardStep+1));
+document.querySelectorAll('[data-back]').forEach(b=>b.onclick=()=>showWizardStep(wizardStep-1));
+function syncWizard(){
+ $('#preset').value=$('#wPreset').value;$('#duration').value=$('#wDuration').value;$('#countdown').value=$('#wCountdown').value;$('#zoomTarget').value=$('#wZoom').value;$('#script').value=$('#wScript').value;renderTimeline();setAt(0)
+}
+$('#startCamera').onclick=async()=>{syncWizard();await enableCamera();if(stream){document.body.classList.add('shooting');statusBox.textContent='Cámara lista. Podés ensayar o grabar.'}};
+$('#configBtn').onclick=()=>{document.body.classList.remove('shooting');showWizardStep(0)};
 renderTimeline();setAt(0);
 </script></body></html>

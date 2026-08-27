@@ -5,14 +5,14 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Uizador · Ensayo de escena</title>
 <style>
-:root{color-scheme:dark;--accent:#59d8ff;--warn:#ffd166;--ok:#6dff9b}
-*{box-sizing:border-box}body{margin:0;background:#090b10;color:#f2f5f8;font-family:system-ui,sans-serif}
+:root{color-scheme:dark;--accent:#ff79bd;--accent2:#a98cff;--warn:#ffca7a;--ok:#7ff0c5}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at 85% 0%,#40245b 0,#1c132b 34%,#0e0b17 78%);color:#fff7fc;font-family:system-ui,sans-serif}
 main{width:min(900px,100%);margin:auto;padding:12px}.top{display:flex;gap:8px;align-items:center;justify-content:space-between}
-h1{font-size:1.05rem;margin:4px 0 10px}.stage{position:relative;overflow:hidden;border-radius:14px;background:#111;aspect-ratio:16/9;border:1px solid #303640}
+h1{font-size:1.05rem;margin:4px 0 10px}.stage{position:relative;overflow:hidden;border-radius:14px;background:#171020;aspect-ratio:16/9;border:1px solid #303640}
 video{width:100%;height:100%;object-fit:cover;transform:scaleX(-1)}
-.overlay{position:absolute;inset:0;pointer-events:none}.subject{position:absolute;border:3px dashed rgba(89,216,255,.85);border-radius:48% 48% 38% 38%;transition:.2s}
+.overlay{position:absolute;inset:0;pointer-events:none}.subject{position:absolute;border:3px dashed rgba(255,121,189,.9);border-radius:48% 48% 38% 38%;transition:.2s}
 .subject.a{left:10%;top:16%;width:31%;height:72%}.subject.b{right:10%;top:16%;width:31%;height:72%}
-.horizon{position:absolute;left:4%;right:4%;top:45%;border-top:2px dashed rgba(255,209,102,.7)}
+.horizon{position:absolute;left:4%;right:4%;top:45%;border-top:2px dashed rgba(191,157,255,.82)}
 .move{position:absolute;left:44%;top:16%;font-size:2.2rem;color:var(--warn);opacity:.9}
 .hud{position:absolute;left:10px;right:10px;top:8px;display:flex;justify-content:space-between;text-shadow:0 1px 4px #000}
 .count{position:absolute;inset:0;display:grid;place-items:center;font-size:min(25vw,150px);font-weight:800;text-shadow:0 4px 18px #000;background:rgba(0,0,0,.18)}
@@ -21,17 +21,17 @@ video{width:100%;height:100%;object-fit:cover;transform:scaleX(-1)}
 .panel{margin-top:10px;padding:10px;border:1px solid #303640;border-radius:12px;background:#121720}
 .grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}label{display:grid;gap:4px;color:#aeb7c3;font-size:.78rem}
 input,select,button,textarea{width:100%;border:1px solid #3a4350;background:#1a202a;color:#fff;border-radius:8px;padding:9px;font:inherit}
-button{cursor:pointer;font-weight:650}.primary{background:#075d74;border-color:#168cac}.recording{background:#8b1824}
+button{cursor:pointer;font-weight:650}.primary{background:linear-gradient(135deg,#e84f9a,#8b69e8);border-color:#ff8cc6}.recording{background:#8b1824}
 .actions{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:9px}.timeline{display:flex;height:38px;margin-top:10px;border-radius:8px;overflow:hidden}
 .seg{border:0;border-right:1px solid #111;border-radius:0;padding:4px;font-size:.72rem;background:#283444}.seg.active{background:#087b99}
 textarea{min-height:120px;resize:vertical}.status{min-height:1.2em;margin-top:7px;color:#9ba9b8;font-size:.82rem}
 @media(max-width:560px){.grid{grid-template-columns:1fr}.actions{grid-template-columns:1fr 1fr}.actions button:last-child{grid-column:1/-1}}
 
 .wizard{min-height:72vh;display:grid;place-items:center;padding:12px 0}
-.wizard-card{width:min(560px,100%);padding:20px;border:1px solid rgba(130,160,190,.35);border-radius:18px;background:rgba(22,29,39,.88);backdrop-filter:blur(14px)}
+.wizard-card{width:min(560px,100%);padding:20px;border:1px solid rgba(130,160,190,.35);border-radius:18px;background:linear-gradient(145deg,rgba(50,30,67,.94),rgba(24,20,40,.94));backdrop-filter:blur(14px)}
 .progress{display:flex;gap:7px;margin-bottom:18px}.dot{height:6px;flex:1;border-radius:9px;background:#37404c}.dot.on{background:var(--accent)}
 .step{display:none}.step.on{display:block}.step h2{margin:0 0 7px;font-size:1.25rem}.step p{color:#b8c1cc;line-height:1.4;margin:0 0 18px}
-.nav{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:16px}.nav .next{background:#075d74;border-color:#168cac}.full{grid-column:1/-1}
+.nav{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:16px}.nav .next{background:linear-gradient(135deg,#e84f9a,#8b69e8);border-color:#ff8cc6}.full{grid-column:1/-1}
 body:not(.shooting) .stage,body:not(.shooting) .controls-panel,body:not(.shooting) .script-panel{display:none}
 body.shooting .wizard,body.shooting .script-panel{display:none}
 body.shooting .controls-panel{display:block;background:transparent;border:0;padding:0}
@@ -49,13 +49,13 @@ body.shooting #configBtn{display:block}
 </style>
 </head>
 <body><main>
-<div class="top"><h1>Uizador · Ensayo guiado</h1><span id="clock">00:00.0</span></div>
+<div class="top"><h1>Uizador · Tu escena</h1><span id="clock">00:00.0</span></div>
 
 <section class="wizard" id="wizard">
 <div class="wizard-card">
 <div class="progress"><span class="dot on"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div>
 <div class="step on">
-<h2>1 · Elegí la escena</h2>
+<h2>1 · Elegí tu escena</h2>
 <p>Esto define las líneas punteadas, el encuadre y el movimiento que vas a seguir.</p>
 <label>Tipo de escena
 <select id="wPreset"><option value="two">Plano de dos · acercamiento</option><option value="reverse">Plano / contraplano</option><option value="orbit">Rotación alrededor de protagonista</option></select></label>
@@ -84,7 +84,7 @@ A|13|Mirá a cámara.</textarea>
 <div class="nav"><button data-back>Volver</button><button class="next" data-next>Continuar</button></div>
 </div>
 <div class="step">
-<h2>4 · Prepará la cámara</h2>
+<h2>4 · Lista para grabar</h2>
 <p>Al continuar, el teléfono pedirá permiso para usar cámara y micrófono. Después verás solamente la imagen, las guías y los botones de ensayo y grabación.</p>
 <div class="nav"><button data-back>Volver</button><button id="startCamera" class="next">Abrir cámara</button></div>
 </div>

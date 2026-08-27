@@ -5,14 +5,14 @@ Actualizado: 2026-08-27.
 ## Estrategia inicial recomendada
 
 - Aplicación Android nativa en Kotlin y Jetpack Compose.
-- Público inicial: adolescentes de 13 años en adelante y adultos.
+- Público inicial: exclusivamente personas mayores de 18 años.
 - Sin publicidad en el MVP.
 - Sin cuenta obligatoria.
 - Grabaciones y proyectos locales por defecto.
 - Sesiones P2P efímeras; no almacenar videos en un servidor central.
 - Permisos solicitados solamente al entrar en una función que realmente los necesita.
 
-La orientación visual juvenil no debe confundirse con una declaración de que la aplicación está dirigida a niños. Antes de publicar se debe definir con precisión la audiencia y completar las declaraciones correspondientes en Play Console.
+La orientación visual juvenil o femenina es una decisión estética y no una declaración de público infantil. La ficha, las declaraciones de audiencia, la política de privacidad y la comunicación del producto deben indicar coherentemente que la aplicación está destinada a mayores de 18 años.
 
 ## Arquitectura prevista
 
@@ -90,12 +90,12 @@ Cámara y micrófono son datos sensibles en el contexto de menores. Si la aplica
 
 Para el primer lanzamiento:
 
-- evitar posicionarla como aplicación infantil;
-- declarar honestamente el grupo etario;
-- usar contenido visual adolescente sin incentivar exposición pública automática;
+- establecer y declarar una audiencia exclusivamente mayor de 18 años;
+- evitar nombres, textos promocionales o categorías que presenten el producto como infantil;
+- mantener la estética juvenil como una opción visual, no como segmentación por edad;
 - no subir ni compartir material sin una acción clara del usuario;
-- permitir supervisión y control sobre exportaciones;
-- revisar nuevamente la política antes de cambiar el público objetivo.
+- mantener controles sobre exportaciones y eliminación;
+- revisar nuevamente políticas, consentimiento y diseño si alguna vez cambia el público objetivo.
 
 Fuente oficial:
 

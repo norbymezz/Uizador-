@@ -37,6 +37,35 @@ Cada participante ve solamente las instrucciones de su cámara. Sobre la imagen 
 
 El teléfono director conserva la vista global de la escena y el estado de todas las cámaras.
 
+## Ingreso rápido mediante QR
+
+El primer teléfono crea la sesión y asume inicialmente el rol de director. La aplicación genera un identificador breve y muestra un código QR.
+
+El QR contiene un enlace de sesión, no información audiovisual ni credenciales permanentes. Por ejemplo:
+
+```text
+uizador://join?session=K7M4Q2&token=...
+```
+
+Cuando otro participante lo escanea:
+
+1. se abre Uizador mediante un enlace profundo;
+2. si la aplicación no está instalada, se muestra una página de acceso o instalación;
+3. el teléfono solicita ingresar a la sesión;
+4. el director lo acepta automáticamente o mediante confirmación, según la configuración;
+5. el sistema le asigna un identificador de cámara;
+6. aparece en el panel del director con su estado de conexión, batería y disponibilidad.
+
+El director puede cambiar después el nombre y el rol: cámara A, cámara B, protagonista, audio, luz u otro rol previsto.
+
+Para una reunión rápida, el flujo esperado es:
+
+```text
+crear sesión → mostrar QR → escanear → entrar → asignar cámara → preparar toma
+```
+
+Así ningún participante necesita escribir direcciones de red, códigos largos ni configurar manualmente cada teléfono.
+
 ## Organización del material
 
 ```text

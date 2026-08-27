@@ -11,22 +11,22 @@ main{width:min(760px,100%);margin:auto;padding:18px}.brand{display:flex;align-it
 .tip{margin-top:22px;padding:14px;border-radius:14px;background:rgba(255,121,189,.1);border:1px solid rgba(255,121,189,.25);color:#e7dce9;font-size:.85rem;line-height:1.45}
 @media(max-width:520px){.primary{grid-template-columns:1fr}.choice{min-height:125px}}
 </style></head><body><main>
-<header class="brand"><div class="logo">UIZADOR</div><div class="avatar">U</div></header>
-<section class="hero"><h1>¿Qué querés grabar hoy?</h1><p>Elegí una escena, seguí las guías y convertí uno o varios teléfonos en tu equipo de cámara.</p></section>
+<header class="brand"><div class="logo">UIZADOR</div><a class="avatar" href="../settings/index.html" style="color:#fff;text-decoration:none" aria-label="Preferencias">⚙</a></header>
+<section class="hero"><h1 data-i18n="home_question">¿Qué querés grabar hoy?</h1><p data-i18n="home_intro">Elegí una escena, seguí las guías y convertí uno o varios teléfonos en tu equipo de cámara.</p></section>
 <section class="primary">
-<a class="choice main" href="../preset-library/index.html"><span class="icon">✦</span><strong>Crear una escena</strong><span>Empezá por una composición, diálogo o coreografía.</span></a>
-<a class="choice" href="../multicamera-session/index.html"><span class="icon">⌁</span><strong>Grabar con varios teléfonos</strong><span>Creá una sesión, mostrales el QR y graben juntas.</span></a>
+<a class="choice main" href="../preset-library/index.html"><span class="icon">✦</span><strong data-i18n="create_scene">Crear una escena</strong><span data-i18n="create_scene_help">Empezá por una composición, diálogo o coreografía.</span></a>
+<a class="choice" href="../multicamera-session/index.html"><span class="icon">⌁</span><strong data-i18n="multi_record">Grabar con varios teléfonos</strong><span data-i18n="multi_record_help">Creá una sesión, mostrales el QR y graben juntas.</span></a>
 </section>
 <div class="section-title">TU TRABAJO</div><nav class="list">
-<a class="row" href="../projects/index.html"><span class="ri">▣</span><div><strong>Mis proyectos</strong><small>Escenas, tomas y formatos guardados</small></div><span class="chev">›</span></a>
+<a class="row" href="../projects/index.html"><span class="ri">▣</span><div><strong data-i18n="my_projects">Mis proyectos</strong><small>Escenas, tomas y formatos guardados</small></div><span class="chev">›</span></a>
 </nav>
 <div class="section-title">ATAJOS</div><nav class="list">
-<a class="row" href="../scene-rehearsal/index.html"><span class="ri">◉</span><div><strong>Ensayo rápido</strong><small>Cámara, guías y teleprompter</small></div><span class="chev">›</span></a>
-<a class="row" href="../sync-preview/index.html"><span class="ri">≋</span><div><strong>Sincronizar tomas</strong><small>Cargá dos videos y elegí los cortes</small></div><span class="chev">›</span></a>
-<a class="row" href="../effects-lab/index.html"><span class="ri">✦</span><div><strong>Efectos y sonidos</strong><small>Sobreimpresiones, transiciones y audio</small></div><span class="chev">›</span></a>
+<a class="row" href="../scene-rehearsal/index.html"><span class="ri">◉</span><div><strong data-i18n="quick_rehearsal">Ensayo rápido</strong><small>Cámara, guías y teleprompter</small></div><span class="chev">›</span></a>
+<a class="row" href="../sync-preview/index.html"><span class="ri">≋</span><div><strong data-i18n="sync_takes">Sincronizar tomas</strong><small>Cargá dos videos y elegí los cortes</small></div><span class="chev">›</span></a>
+<a class="row" href="../effects-lab/index.html"><span class="ri">✦</span><div><strong data-i18n="effects">Efectos y sonidos</strong><small>Sobreimpresiones, transiciones y audio</small></div><span class="chev">›</span></a>
 </nav>
 <div class="section-title">ENTRAR A UNA SESIÓN</div><div class="join"><input id="code" placeholder="Código completo"><button id="join">Entrar</button></div>
-<div class="tip"><strong>Privado por defecto.</strong> Tus grabaciones permanecen en cada teléfono hasta que decidís compartirlas o exportarlas.</div>
+<div class="tip"><strong data-i18n="privacy_local">Privado por defecto.</strong> Tus grabaciones permanecen en cada teléfono hasta que decidís compartirlas o exportarlas.</div>
 </main><script>
 document.querySelector('#join').onclick=()=>{const id=document.querySelector('#code').value.trim();if(id)location.href='../multicamera-session/index.html?join='+encodeURIComponent(id)};
-</script></body></html>
+</script><script type="module">import{applyLanguage,applyTheme}from'../../core/i18n.js';applyLanguage();applyTheme();</script></body></html>

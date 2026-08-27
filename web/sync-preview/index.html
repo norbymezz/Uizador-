@@ -1,13 +1,13 @@
 <!doctype html>
 <html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Uizador · Sincronización multicámara</title>
+<title>Uizador · Elegí tus mejores tomas</title>
 <style>
-:root{color-scheme:dark;--a:#59d8ff;--b:#ff9e64;--panel:#141a23}*{box-sizing:border-box}
-body{margin:0;background:#090b10;color:#f3f6f8;font-family:system-ui,sans-serif}main{width:min(1050px,100%);margin:auto;padding:12px}
+:root{color-scheme:dark;--a:#ff79bd;--b:#a98cff;--panel:rgba(39,25,52,.92)}*{box-sizing:border-box}
+body{margin:0;background:radial-gradient(circle at 80% 0%,#43265d 0,#1b1228 38%,#0d0a15 80%);color:#fff7fc;font-family:system-ui,sans-serif}main{width:min(1050px,100%);margin:auto;padding:12px}
 h1{font-size:1.08rem;margin:5px 0 12px}.card{background:var(--panel);border:1px solid #303946;border-radius:14px;padding:12px;margin-bottom:10px}
 .grid{display:grid;grid-template-columns:1fr 1fr;gap:9px}label{display:grid;gap:5px;color:#b7c1cc;font-size:.82rem}
 input,button{width:100%;min-height:44px;border:1px solid #3a4654;border-radius:9px;background:#1c2430;color:#fff;padding:8px;font:inherit}
-button{cursor:pointer;font-weight:700}.primary{background:#08677f}.orange{background:#81451f}.status{font-size:.82rem;color:#a9b6c5;margin-top:8px;min-height:1.2em}
+button{cursor:pointer;font-weight:700}.primary{background:linear-gradient(135deg,#e84f9a,#8b69e8)}.orange{background:#744e9f}.status{font-size:.82rem;color:#a9b6c5;margin-top:8px;min-height:1.2em}
 .wave{width:100%;height:92px;background:#0b0e13;border:1px solid #303946;border-radius:8px;margin-top:7px}
 .videos{display:grid;grid-template-columns:1fr 1fr;gap:8px}.angle{position:relative;background:#000;border-radius:10px;overflow:hidden;border:3px solid transparent}
 .angle.live-a{border-color:var(--a)}.angle.live-b{border-color:var(--b)}video{display:block;width:100%;aspect-ratio:16/9;background:#000}
@@ -19,7 +19,7 @@ pre{max-height:230px;overflow:auto;background:#0a0d12;padding:9px;border-radius:
 .hint{font-size:.78rem;color:#99a8b9;line-height:1.4}.offset{display:grid;grid-template-columns:1fr 110px;gap:8px;align-items:end}
 @media(max-width:650px){.grid,.videos{grid-template-columns:1fr}.transport{grid-template-columns:1fr 1fr}.transport button:first-child{grid-column:1/-1}}
 </style></head>
-<body><main><h1>Uizador · Sincronización y corte previo</h1>
+<body><main><h1>Uizador · Elegí tus mejores tomas</h1>
 <section class="card"><div class="grid">
 <label>Cámara A<input id="fileA" type="file" accept="video/*"></label>
 <label>Cámara B<input id="fileB" type="file" accept="video/*"></label>

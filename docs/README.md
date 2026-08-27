@@ -1,42 +1,41 @@
-# Documentación de Uizador
+# Uizador documentation
 
-Este índice separa lo que define el producto actual, lo que sirve para probarlo y lo que está planificado para después.
+This index separates the current product contract, operational testing material, future capabilities, and store preparation.
 
-## Empezar aquí
+## Start here
 
-| Documento | Para qué sirve | Estado |
+| Document | Purpose | Status |
 |---|---|---|
-| [Concepto multicámara](multicamera-concept.md) | Fuente principal del flujo director/cámaras, clocks y tomas. | Esencial |
-| [Plan maestro de pruebas](test-plan.md) | Criterios, fases, evidencia y aprobación. | Esencial |
-| [Prueba con dos teléfonos](two-phone-test-checklist.md) | Guion operativo de la primera sesión física. | Listo para ejecutar |
-| [Formato `.uizador`](uizador-project-format.md) | Contrato del proyecto portable y no destructivo. | Implementado v1 |
-| [Ayuda de usuario](../web/help/index.html) | Explicaciones breves dentro del prototipo. | En evolución |
+| [Multicamera concept](multicamera-concept.md) | Director/camera flow, audible timing marks, repeated takes, and local recording. | Core |
+| [Master test plan](test-plan.md) | Test phases, evidence, acceptance criteria, and defect reporting. | Core |
+| [Two-phone test checklist](two-phone-test-checklist.md) | Exact procedure for the first physical session. | Ready |
+| [Portable `.uizador` format](uizador-project-format.md) | Non-destructive project contract. | Implemented v1 |
+| [In-app help](../web/help/index.html) | Short user-facing explanations. | Evolving |
 
-## Producto y realización
+## Production design
 
-| Documento | Alcance |
-|---|---|
-| [Biblioteca de planos y movimientos](shot-and-movement-library.md) | Presets originales de encuadre, recorrido y montaje. |
-| [Sesiones remotas](remote-session-concept.md) | Reloj común, grabación local, proxy y transferencia futura. |
-| [Localización](localization.md) | Idiomas y reglas para no mezclar textos. |
+- [Shot and movement library](shot-and-movement-library.md)
+- [Remote session concept](remote-session-concept.md)
+- [Localization](localization.md)
 
-## Publicación Android
+## Android and Play Store preparation
 
-| Documento | Alcance |
-|---|---|
-| [Preparación para Play Store](play-store-readiness.md) | Requisitos técnicos y proceso general. |
-| [Paquete de Play Console](play-console-submission-pack.md) | Lista concreta para la presentación. |
-| [Borrador de ficha](store-listing-draft.md) | Textos que deberán reflejar la versión real. |
-| [Brief visual de Play Store](play-store-creative-brief.md) | Capturas, mensajes, feature graphic, icono y video. |
-| [Data Safety](data-safety-working-draft.md) | Declaración de datos que debe verificarse contra el código final. |
-| [Datos para privacidad](privacy-policy-inputs.md) | Decisiones pendientes para la política definitiva. |
+- [Play Store readiness](play-store-readiness.md)
+- [Play Console submission pack](play-console-submission-pack.md)
+- [Store listing draft](store-listing-draft.md)
+- [Play Store creative brief](play-store-creative-brief.md)
+- [Data Safety working draft](data-safety-working-draft.md)
+- [Privacy policy inputs](privacy-policy-inputs.md)
 
-## Fuente de verdad
+## Source of truth
 
-- Los casos e identificadores de prueba se mantienen en `core/test-catalog.js`.
-- La ejecución y exportación de resultados se hace en `web/test-center/index.html`.
-- El formato portable se valida contra `schemas/uizador-project-v1.schema.json`.
-- La primera prueba no exige funciones futuras como croma, fondos o sesión remota.
-- La ficha de la tienda nunca debe prometer algo que la compilación publicada todavía no hace.
+- Test IDs and cases: `core/test-catalog.js`
+- Test execution and exported results: `web/test-center/index.html`
+- Portable project validation: `schemas/uizador-project-v1.schema.json`
+- Public prototype: [Uizador on GitHub Pages](https://norbymezz.github.io/Uizador-/web/app-home/)
+- The first validation cycle does not require chroma key, virtual backgrounds, remote sessions, or store publication.
+- Store copy must never promise a capability that the published build does not perform.
 
-Cuando dos documentos se contradigan, prevalece el contrato técnico o catálogo versionado correspondiente. La contradicción debe corregirse; no se resuelve durante una prueba improvisando.
+## Current known gap
+
+The synchronized player needs rewind, jump-back, jump-forward, and frame-step controls. Camera A/B selection should work during playback and while paused, with every decision remaining reversible.

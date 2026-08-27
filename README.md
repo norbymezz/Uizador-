@@ -1,73 +1,86 @@
 # Uizador
 
-Uizador reúne experimentos de reinterpretación audiovisual y una aplicación de realización guiada. El desarrollo activo de la rama `multicamera-concept` convierte uno o varios teléfonos Android en cámaras coordinadas para ensayar, repetir, sincronizar y editar una escena.
+**Uizador turns two or more phones into a coordinated multicamera recording setup.** A director phone creates a session, the other cameras join through a QR code, and every device records locally at full quality.
 
-## Aplicación multicámara
+> Current status: working web prototype under active physical testing. It is not a production release yet.
 
-El teléfono director crea una sesión y muestra un QR. Los demás teléfonos entran, reciben su rol, encuadre, movimiento, duración y cuenta regresiva. Cada dispositivo graba localmente para conservar la calidad y el material incluye una firma sonora común:
+## Try it now
 
-- tres pulsos antes de la acción;
-- audio e imagen grabados juntos en cada teléfono;
-- clac de cierre;
-- tres tomas consecutivas con pausa configurable;
-- identificación de proyecto, escena, toma y cámara.
+- [Open the multicamera session](https://norbymezz.github.io/Uizador-/web/multicamera-session/)
+- [Run the device preflight check](https://norbymezz.github.io/Uizador-/web/preflight/)
+- [Synchronize and select two recordings](https://norbymezz.github.io/Uizador-/web/sync-preview/)
+- [Open the test center](https://norbymezz.github.io/Uizador-/web/test-center/)
+- [Browse scene presets](https://norbymezz.github.io/Uizador-/web/preset-library/)
 
-Después de grabar, las pistas se alinean mediante el sonido registrado y se decide qué cámara usar en cada tramo. Los originales no se modifican.
+## Current workflow
 
-## Estado actual
+1. The director creates a session.
+2. Other phones scan the QR code or enter the session code.
+3. Every phone grants camera and microphone permission.
+4. The director configures duration, number of takes, pause time, and camera movement.
+5. All devices record locally.
+6. One audible start signature and an end clap are captured by every nearby phone.
+7. The original files are loaded into the synchronization view.
+8. Audio envelopes estimate the offset; the user can refine it manually and choose camera A or B.
 
-Ya existen prototipos web para:
+## Prototype screenshots
 
-- inicio y biblioteca de presets;
-- sesión multicámara con ingreso por QR;
-- diagnóstico de cámara, micrófono y grabación corta;
-- ensayo con guías de encuadre, movimiento y teleprompter;
-- sincronización y selección A/B;
-- proyectos portables `.uizador`;
-- efectos, textos y sonidos planificados como edición posterior;
-- ayuda, preferencias e idiomas;
-- centro de pruebas con 70 controles versionados.
+<p align="center">
+  <img src="docs/images/audio-sync-analysis.jpg" width="360" alt="Audio envelope analysis and automatic offset estimation">
+  <img src="docs/images/multicamera-cut-selection.jpg" width="360" alt="Synchronized camera A and B cut selection">
+</p>
 
-También existe un esqueleto Android y documentación de preparación para una futura distribución mediante Play Console. Que una función aparezca como concepto o prototipo no significa que esté aprobada para publicación.
+The screenshots show real files recorded during the first two-phone test: audio-envelope comparison, estimated offset, manual correction, synchronized preview, and reversible A/B cut decisions.
 
-## Próxima validación
+## What already works
 
-La prioridad es una prueba física completa con dos teléfonos, no agregar efectos nuevos. Debe producir seis archivos —A1, A2, A3, B1, B2 y B3— y demostrar:
+- QR/code session joining with PeerJS
+- Director and remote-camera readiness
+- Local camera and microphone capture
+- Configurable scene duration and repeated takes
+- Three-pulse start signature and end clap
+- Automatic local WebM downloads
+- Audio-envelope offset estimation
+- Manual synchronization adjustment
+- Synchronized A/B playback and reversible camera selection
+- Portable non-destructive `.uizador` project format
+- Device diagnostics and a versioned test catalog
 
-1. ingreso simple por QR;
-2. bloqueo hasta que ambos teléfonos estén listos;
-3. grabación local completa de tres tomas;
-4. presencia del clock y clac en los seis archivos;
-5. identidad inequívoca de cada archivo;
-6. sincronización reproducible sin separar audio e imagen;
-7. recuperación comprensible ante permisos, desconexión o falta de espacio.
+## Immediate testing priorities
 
-El [plan maestro](docs/test-plan.md), la [lista operativa de dos teléfonos](docs/two-phone-test-checklist.md) y el Centro de pruebas definen el criterio de aprobación.
+- Validate synchronization across different Android phones and browsers
+- Measure offset and drift over longer recordings
+- Preserve complete evidence for each test run
+- Improve file transfer from remote cameras to the director
+- Add rewind, frame-step, jump-back, and jump-forward controls to synchronized playback
+- Confirm that camera switching works both during playback and while paused
+- Improve download notifications and permission guidance
 
-## Documentación
+## Planned capabilities
 
-El [índice de documentación](docs/README.md) distingue fuentes de verdad, material operativo y funciones futuras. Los documentos principales son:
+Scene templates, teleprompter guidance, remote sessions, chroma key, virtual backgrounds, subtitles, titles, transitions, sound effects, news/interview layouts, and Android/Play Store packaging are planned in phases. They must not delay validation of recording, recovery, and synchronization.
 
-- [concepto multicámara](docs/multicamera-concept.md);
-- [plan maestro de pruebas](docs/test-plan.md);
-- [formato de proyecto `.uizador`](docs/uizador-project-format.md);
-- [biblioteca de planos y movimientos](docs/shot-and-movement-library.md);
-- [concepto de sesión remota](docs/remote-session-concept.md);
-- [preparación para Play Store](docs/play-store-readiness.md).
+## Documentation
 
-## Privacidad y archivos
+- [Documentation index](docs/README.md)
+- [Multicamera concept](docs/multicamera-concept.md)
+- [Master test plan](docs/test-plan.md)
+- [Two-phone test checklist](docs/two-phone-test-checklist.md)
+- [Shot and movement library](docs/shot-and-movement-library.md)
+- [Portable project format](docs/uizador-project-format.md)
+- [Remote session concept](docs/remote-session-concept.md)
+- [Play Store readiness](docs/play-store-readiness.md)
 
-La regla de diseño es local primero: las grabaciones permanecen en cada teléfono hasta que la persona decide compartirlas o exportarlas. Un proyecto `.uizador` guarda decisiones de montaje y referencias de medios; no debe incluir contactos, ubicación, dirección IP ni rutas privadas innecesarias.
+## Privacy and media ownership
 
-## Línea experimental original
+Recordings remain on each phone until the user explicitly shares or exports them. Uizador must not upload original media automatically. Project files store editing decisions and media references without modifying the originals.
 
-El repositorio comenzó como un prototipo para codificar y reinterpretar video mediante permutaciones de franjas verticales y análisis por ventanas temporales. Esa línea continúa siendo parte del proyecto, pero es independiente del mecanismo multicámara:
+## Legal direction
 
-```text
-Original -> permutación -> codificado
-Codificado -> inversa -> reinterpretado
+Uizador provides original camera, staging, and editing templates. It is not intended to redistribute copyrighted film clips, dialogue, music, or performances. Users are responsible for the media they record, import, and publish.
 
-Audio/video -> ventanas temporales -> métricas -> mapa de alternancia
-```
+## Development
 
-Separar ambas líneas permite conservar la investigación original sin confundirla con los criterios de calidad de la aplicación de grabación.
+The repository also preserves Uizador's earlier audiovisual-reinterpretation experiments. The multicamera prototype is the current product-validation track.
+
+Contributions, reproducible bug reports, device information, and test evidence are welcome.

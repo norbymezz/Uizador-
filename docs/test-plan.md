@@ -1,119 +1,80 @@
-# Plan maestro de pruebas
+# Master test plan
 
-Este documento define cómo probar Uizador sin mezclar una demostración prometedora con una función realmente confiable. El catálogo ejecutable vive en `core/test-catalog.js` y el seguimiento se realiza desde `web/test-center/index.html`.
+This document defines how Uizador is tested without confusing a promising demonstration with a reliable feature. The executable catalog lives in `core/test-catalog.js`; results are tracked in `web/test-center/index.html`.
 
-## Regla principal
+## First validation target
 
-La primera sesión física valida solamente el mecanismo esencial:
+The first physical session validates only the essential mechanism:
 
-1. dos teléfonos pueden preparar una misma sesión;
-2. el segundo entra por QR;
-3. ambos graban tres tomas sin intervención entre ellas;
-4. las seis grabaciones contienen clock inicial y clac final;
-5. los archivos se identifican sin ambigüedad;
-6. audio e imagen permanecen unidos;
-7. las parejas A/B pueden alinearse y reproducirse sincronizadas.
+1. two phones join the same session;
+2. the second phone joins through the QR code;
+3. both devices record locally;
+4. every recording contains the common start signature and end clap;
+5. files are identified unambiguously;
+6. audio and image remain together;
+7. A/B recordings can be aligned and played synchronously;
+8. camera A/B decisions remain reversible.
 
-Croma, fondos, filtros, sesión remota, títulos, subtítulos, transiciones y publicación son fases posteriores. Permanecen documentados, pero un fallo suyo no debe distraer de un fallo de grabación o sincronización.
+## Allowed results
 
-## Resultados permitidos
-
-| Estado | Significado |
+| Result | Meaning |
 |---|---|
-| Sin probar | Todavía no se ejecutó con esta versión y estos dispositivos. |
-| Pasa | Se obtuvo exactamente el resultado esperado y quedó evidencia. |
-| Falla | Se pudo ejecutar, pero el resultado fue incorrecto o incompleto. |
-| Bloqueada | No pudo ejecutarse por una dependencia, permiso, dispositivo o función ausente. |
+| Not tested | Not executed on this build and device pair. |
+| Pass | The expected result was obtained and evidence was preserved. |
+| Fail | The test ran, but the result was wrong or incomplete. |
+| Blocked | A dependency, permission, device, or missing feature prevented execution. |
 
-Una prueba no pasa por “parecer que anda”. En clock y sincronía deben conservarse los archivos y anotar el desplazamiento observado.
+A test does not pass because it “looks right.” Synchronization tests must preserve the original files and record the measured offset.
 
-## Prioridades
+## Execution order
 
-- **Bloqueante:** impide confiar en la grabación, recuperar el material, sincronizar o publicar de forma segura.
-- **Alta:** afecta una tarea importante o crea confusión considerable.
-- **Media:** conviene corregirla, pero permite continuar la evaluación principal.
+1. Individual device preflight.
+2. Local two-phone session and short recording.
+3. File verification and audio-mark inspection.
+4. Automatic synchronization and manual refinement.
+5. Playback, rewind controls, and live/paused A/B switching.
+6. Recovery from permissions, disconnection, locking, and low storage.
+7. Portable `.uizador` project and non-destructive editing.
+8. Remote sessions only after the local mechanism is reliable.
+9. Android release and Play Console validation before distribution.
 
-## Orden de ejecución
+## Minimum entry conditions
 
-1. Preparación individual de cada teléfono.
-2. Sesión local y tres tomas con dos teléfonos.
-3. Recuperación ante permisos, bloqueo, falta de espacio y desconexión.
-4. Sincronización y ajuste manual.
-5. Proyecto `.uizador` y postproducción no destructiva.
-6. Comprensión, idiomas y accesibilidad.
-7. Sesión remota cuando exista una implementación real.
-8. Android release y Play Console antes de distribuir.
+- Two charged Android phones
+- At least 1 GB free on each device
+- HTTPS access to the tested build
+- Camera and microphone verified individually
+- Director volume audible, without headphones
+- Both microphones able to capture the director's common timing marks
+- Tested commit/build recorded in the Test Center
 
-## Entrada para la primera prueba física
+## Minimum accepted output
 
-- dos teléfonos Android cargados y con al menos 1 GB libre;
-- acceso HTTPS a la versión que se está evaluando;
-- cámara y micrófono verificados individualmente;
-- volumen audible y sin auriculares;
-- espacio donde ambos capten el clock del director;
-- versión o commit anotado en el Centro de pruebas.
+The initial run succeeds only if:
 
-## Salida mínima aceptable
+- both phones connect and become ready;
+- each expected local file is complete and contains audio;
+- the common start signature and end clap are recognizable;
+- camera and take identity can be reconstructed;
+- an A/B offset is calculated and preserved;
+- a visible and audible common action aligns within the measured error;
+- playback remains aligned after pausing and resuming;
+- no recording disappears without explanation.
 
-La primera prueba se considera exitosa sólo si:
+## Evidence
 
-- pasan todos los controles principales bloqueantes ejecutables de preparación y sesión local;
-- se obtienen **seis archivos**: A1, A2, A3, B1, B2 y B3;
-- ninguno queda vacío, truncado o sin audio;
-- los tres pulsos iniciales y el clac final son reconocibles en los seis;
-- proyecto, escena, toma y cámara se pueden reconstruir desde el nombre o metadatos;
-- se calcula un offset A/B para cada toma y se conserva su valor;
-- una acción visible y audible común queda alineada dentro del error medido;
-- no existe pérdida inexplicada de material.
+Preserve together:
 
-Si falla un bloqueante, se detiene la ampliación de funciones y se abre un defecto reproducible.
+- device preflight reports;
+- Test Center JSON export;
+- untouched original videos;
+- screenshots or screen recording of director status;
+- offset and drift measurements;
+- tested commit/build;
+- reproducible defect reports.
 
-## Matriz de dispositivos
+Recommended folder: `YYYY-MM-DD_deviceA_deviceB_build`.
 
-En cada ejecución se anota:
+## Defect report
 
-| Dato | Teléfono A | Teléfono B |
-|---|---|---|
-| Marca y modelo | | |
-| Android | | |
-| Navegador / app | | |
-| Resolución elegida | | |
-| MIME / codec | | |
-| Batería inicial/final | | |
-| Espacio inicial | | |
-| Orientación | | |
-
-Las combinaciones posteriores deben incluir, como mínimo, un equipo modesto, uno reciente y una pareja con versiones Android diferentes.
-
-## Evidencia de una ejecución
-
-Conservar juntos:
-
-- JSON de diagnóstico de cada teléfono;
-- JSON exportado por el Centro de pruebas;
-- seis videos originales sin modificar;
-- captura o grabación del estado del director;
-- valores de offset y deriva;
-- versión o commit probado;
-- defectos encontrados.
-
-Nombre recomendado de carpeta: `AAAA-MM-DD_modeloA_modeloB_build`.
-
-## Cómo registrar un defecto
-
-Cada fallo debe incluir:
-
-1. ID del caso, por ejemplo `LOC-006`;
-2. versión, teléfonos y red;
-3. pasos exactos para repetirlo;
-4. resultado esperado;
-5. resultado real;
-6. frecuencia: siempre, intermitente o una vez;
-7. evidencia y nombre de los archivos afectados;
-8. si hubo riesgo de perder una grabación.
-
-Después de corregirlo se repite el caso fallido y los bloqueantes de su misma fase. No se cambia un “Falla” por “Pasa” sin ejecutar nuevamente.
-
-## Alcance del catálogo
-
-El catálogo actual contiene 70 controles en ocho fases. El interruptor **Mostrar primero la prueba principal** reduce la lista al camino crítico. Los controles futuros permanecen visibles para planificación, pero se marcan como bloqueados —no como fallidos— cuando aún no existe la función.
+Every failure includes: test ID, build, phones, network, exact steps, expected result, actual result, frequency, affected filenames, evidence, and whether media loss was possible. After a fix, rerun the failed case and the blocking cases in the same phase.

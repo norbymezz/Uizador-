@@ -222,6 +222,64 @@ Ejemplo conceptual:
 
 El preset no es solamente una imagen de referencia: es una secuencia temporal de objetivos visuales. En cada instante indica dónde debería estar el encuadre y cuánto debería haberse completado el movimiento.
 
+## Teleprompter, diálogo y aprendizaje inicial
+
+Los presets pueden incluir una pista de actuación además de la coreografía de cámara. Cada actor recibe en su teléfono un teleprompter sincronizado con la timeline de la escena.
+
+El teleprompter puede mostrar:
+
+- personaje que habla;
+- parlamento actual y siguiente;
+- texto desplazándose automáticamente;
+- cuenta regresiva hasta la entrada;
+- marcas de pausa, énfasis, movimiento y reacción;
+- velocidad regulable;
+- repetición automática en cada toma;
+- indicaciones por auricular cuando el teléfono se utiliza como cámara y no conviene leer la pantalla.
+
+El diálogo, las acciones y los movimientos de cámara comparten el mismo reloj. De ese modo, una línea puede activar simultáneamente una entrada actoral, un paneo, un zoom o un cambio de encuadre.
+
+### Escena demostrativa al iniciar
+
+La primera experiencia de la aplicación debe enseñar el sistema mediante una escena breve y ejecutable:
+
+1. elegir cantidad de teléfonos y participantes;
+2. seleccionar una escena o interacción;
+3. asignar personajes y roles de cámara;
+4. mostrar físicamente dónde colocar cada teléfono;
+5. superponer las guías de encuadre;
+6. ensayar con teleprompter;
+7. ejecutar cuenta regresiva y grabación;
+8. repetir las tomas configuradas;
+9. mostrar el resultado sincronizado.
+
+La aplicación puede ofrecer familias de puesta en escena como:
+
+- plano de dos;
+- plano/contraplano;
+- conversación sentada;
+- dos personajes caminando;
+- entrada y reacción;
+- acercamiento dramático;
+- rotación alrededor del protagonista;
+- plano general seguido de primeros planos.
+
+Una misma categoría, como **plano de dos**, debe admitir variantes de composición: frontal o lateral, personajes simétricos o dominancia de uno, cuerpo entero o primer plano, cámara fija o movimiento. El preset describe relaciones espaciales y temporales, no solamente una captura estática.
+
+### Escenas famosas y derechos
+
+La aplicación puede identificar y explicar patrones cinematográficos conocidos y permitir que el usuario cree una interpretación propia. Para distribuir diálogos completos de películas protegidas se necesitarían licencias.
+
+El catálogo inicial puede usar:
+
+- diálogos originales creados para Uizador;
+- textos aportados por el usuario;
+- obras de dominio público;
+- material expresamente licenciado;
+- plantillas abstractas inspiradas en técnicas generales, sin copiar el diálogo protegido.
+
+Los diálogos licenciados o aportados por el usuario pueden asociarse directamente al teleprompter y a las marcas de la escena.
+
 ## Pre-edición multicámara
 
 Al terminar una toma, la aplicación genera una pre-edición no destructiva. No modifica ni recodifica inmediatamente los archivos originales: guarda una lista de decisiones que indica qué cámara o rol debe verse en cada intervalo.

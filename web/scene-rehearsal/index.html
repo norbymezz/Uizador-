@@ -20,7 +20,7 @@ video{width:100%;height:100%;object-fit:cover;transform:scaleX(-1)}
 .hud{position:absolute;left:10px;right:10px;top:8px;display:flex;justify-content:space-between;text-shadow:0 1px 4px #000}
 .count{position:absolute;inset:0;display:grid;place-items:center;font-size:min(25vw,150px);font-weight:800;text-shadow:0 4px 18px #000;background:rgba(0,0,0,.18)}
 .prompt{position:absolute;left:5%;right:5%;bottom:5%;padding:9px 12px;border-radius:9px;background:rgba(0,0,0,.72);text-align:center;font-size:clamp(16px,3.8vw,26px);text-shadow:0 1px 2px #000}
-.prompt small{display:block;color:var(--accent);font-size:.65em;margin-bottom:3px}
+.prompt small{display:block;color:var(--accent);font-size:.65em;margin-bottom:3px}.direction{position:absolute;left:5%;right:5%;top:9%;text-align:center;color:#fff;background:rgba(20,12,28,.7);border:1px solid rgba(255,121,189,.45);border-radius:99px;padding:7px;font-weight:750}.path-guide{display:none;position:absolute;left:18%;right:18%;bottom:27%;align-items:center;color:var(--warn);font-weight:900}.path-guide i{flex:1;border-top:3px dotted var(--warn);margin:0 8px}.path-guide span{width:28px;height:28px;border:2px solid var(--warn);border-radius:50%;display:grid;place-items:center;background:#171020bb}
 .panel{margin-top:10px;padding:10px;border:1px solid #303640;border-radius:12px;background:#121720}
 .grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}label{display:grid;gap:4px;color:#aeb7c3;font-size:.78rem}
 input,select,button,textarea{width:100%;border:1px solid #3a4350;background:#1a202a;color:#fff;border-radius:8px;padding:9px;font:inherit}
@@ -61,7 +61,7 @@ body.shooting #configBtn{display:block}
 <h2>1 · Elegí tu escena</h2>
 <p>Esto define las líneas punteadas, el encuadre y el movimiento que vas a seguir.</p>
 <label>Tipo de escena
-<select id="wPreset"><option value="two">Plano de dos · acercamiento</option><option value="reverse">Plano / contraplano</option><option value="orbit">Rotación alrededor de protagonista</option><option value="sitcom">Sitcom multicámara</option><option value="sitcom">Sitcom multicámara</option></select></label>
+<select id="wPreset"><option value="two">Plano de dos · acercamiento</option><option value="reverse">Enfrentados · plano / contraplano</option><option value="moveab">Marca A → B</option><option value="followback">Seguimiento por espalda</option><option value="walkfront">Caminata frontal</option><option value="sidetrack">Seguimiento lateral</option><option value="walktalk">Dos caminando y hablando</option><option value="orbit">Rotación alrededor de protagonista</option><option value="montage">Montaje breve</option><option value="fantasy">Mundo dibujado</option><option value="sitcom">Sitcom multicámara</option></select></label>
 <label style="margin-top:10px">Imagen de referencia del plano
 <input id="wReference" type="file" accept="image/*"></label>
 <label style="margin-top:10px">Transparencia de la referencia
@@ -84,7 +84,7 @@ body.shooting #configBtn{display:block}
 <label>Uso de la pista
 <select id="wGuideMode"><option value="choreo">Sólo coreografía y ritmo</option><option value="dialogue">Diálogo de ensayo</option><option value="music">Música de referencia</option></select></label>
 </div>
-<div class="hint">La pista guía acompaña el ensayo y la toma. Después puede reemplazarse por el audio definitivo.</div>
+<div class="hint" id="movementHint">La pista guía acompaña el ensayo y la toma. Después puede reemplazarse por el audio definitivo.</div>
 <div class="nav"><button data-back>Volver</button><button class="next" data-next>Continuar</button></div>
 </div>
 <div class="step">
@@ -113,7 +113,7 @@ A|13|Mirá a cámara.</textarea>
 <div class="overlay">
 <img id="referenceOverlay" class="reference-frame" alt="">
 <div class="subject a"></div><div class="subject b"></div><div class="horizon"></div>
-<div class="move" id="move">↔</div><div class="hud"><span id="shot">Plano de dos</span><span id="zoom">1.0×</span></div>
+<div class="direction" id="direction">Mantené a las dos personas dentro de sus guías.</div><div class="path-guide" id="pathGuide"><span>A</span><i></i><span>B</span></div><div class="move" id="move">↔</div><div class="hud"><span id="shot">Plano de dos</span><span id="zoom">1.0×</span></div>
 <div class="count" id="count"></div>
 <div class="prompt" id="prompt"><small>PERSONA A · preparada</small>El texto aparecerá sincronizado acá.</div>
 </div>
@@ -123,7 +123,7 @@ A|13|Mirá a cámara.</textarea>
 <section class="panel controls-panel">
 <div class="grid">
 <label>Preset
-<select id="preset"><option value="two">Plano de dos · acercamiento</option><option value="reverse">Plano / contraplano</option><option value="orbit">Rotación alrededor de protagonista</option></select></label>
+<select id="preset"><option value="two">Plano de dos · acercamiento</option><option value="reverse">Enfrentados · plano / contraplano</option><option value="moveab">Marca A → B</option><option value="followback">Seguimiento por espalda</option><option value="walkfront">Caminata frontal</option><option value="sidetrack">Seguimiento lateral</option><option value="walktalk">Dos caminando y hablando</option><option value="orbit">Rotación alrededor de protagonista</option><option value="montage">Montaje breve</option><option value="fantasy">Mundo dibujado</option><option value="sitcom">Sitcom multicámara</option></select></label>
 <label>Duración
 <input id="duration" type="number" min="6" max="60" value="15"></label>
 <label>Cuenta regresiva
@@ -153,15 +153,24 @@ A|13|Mirá a cámara.</textarea></label>
 const $=s=>document.querySelector(s),video=$('#camera'),promptBox=$('#prompt'),countBox=$('#count'),statusBox=$('#status');
 let stream=null,runTimer=null,recorder=null,chunks=[],startedAt=0;
 const presets={
- two:{name:'Plano de dos',move:'↔',apply:p=>{document.querySelector('.a').style.transform=`scale(${1+p*.12})`;document.querySelector('.b').style.transform=`scale(${1+p*.12})`}},
- reverse:{name:'Plano / contraplano',move:'⇆',apply:p=>{document.querySelector('.a').style.opacity=p<.5?1:.25;document.querySelector('.b').style.opacity=p<.5?.25:1}},
- orbit:{name:'Rotación protagonista',move:'⟳',apply:p=>{document.querySelector('.a').style.left=`${10+p*18}%`;document.querySelector('.b').style.right=`${10+p*18}%`}},
- sitcom:{name:'Sitcom multicámara',move:'A · G · B',apply:p=>{document.querySelector('.a').style.left='12%';document.querySelector('.b').style.right='12%';document.querySelector('.a').style.opacity=1;document.querySelector('.b').style.opacity=1;document.querySelector('.a').style.transform='scale(1)';document.querySelector('.b').style.transform='scale(1)'}}
+ two:{name:'Plano de dos',move:'↔',help:'Mantené a ambas personas equilibradas y acercate suavemente.',cue:p=>p<.2?'Composición de dos · sostené':p<.85?'Acercate sin cortar cabezas':'Terminá el acercamiento',apply:p=>{document.querySelector('.a').style.transform=`scale(${1+p*.12})`;document.querySelector('.b').style.transform=`scale(${1+p*.12})`}},
+ reverse:{name:'Enfrentados · plano / contraplano',move:'⇆',help:'Las cámaras quedan del mismo lado de la línea entre las personas. Conservá miradas opuestas.',cue:p=>p<.48?'Plano A · aire hacia B':p<.52?'Prepará el corte':'Contraplano B · aire hacia A',apply:p=>{document.querySelector('.a').style.opacity=p<.5?1:.22;document.querySelector('.b').style.opacity=p<.5?.22:1}},
+ moveab:{name:'Marca A → B',move:'A → B',marks:true,help:'Marcá físicamente dos puntos. El actor va de A a B durante toda la duración.',cue:p=>p<.15?'Salí de la marca A':p<.85?'Desplazate hacia B':'Llegá y frená en B',apply:p=>{document.querySelector('.a').style.left=`${8+p*50}%`;document.querySelector('.b').style.opacity=0}},
+ followback:{name:'Seguimiento por espalda',move:'↑ detrás',help:'Caminá detrás del protagonista manteniendo distancia y altura constantes.',cue:p=>p<.15?'Ubicate detrás · misma distancia':p<.85?'Seguí el centro de la espalda':'Reducí velocidad y cerrá',apply:p=>{document.querySelector('.a').style.left='34%';document.querySelector('.a').style.transform=`scale(${1+p*.08})`;document.querySelector('.b').style.opacity=0}},
+ walkfront:{name:'Caminata frontal',move:'↓ cámara',help:'La cámara retrocede mientras el protagonista avanza de frente. Usar recorrido despejado y asistente.',cue:p=>p<.15?'Empezá a retroceder':p<.85?'Mantené rostro y distancia':'Frená con suavidad',apply:p=>{document.querySelector('.a').style.left='34%';document.querySelector('.a').style.transform=`scale(${.9+p*.18})`;document.querySelector('.b').style.opacity=0}},
+ sidetrack:{name:'Seguimiento lateral',move:'→ paralelo',marks:true,help:'Actor y cámara avanzan en paralelo conservando tamaño y dirección de marcha.',cue:p=>p<.15?'Salgan juntos desde A':p<.85?'Avancen paralelos':'Cierren juntos en B',apply:p=>{document.querySelector('.a').style.left=`${8+p*48}%`;document.querySelector('.b').style.opacity=0}},
+ walktalk:{name:'Dos caminando y hablando',move:'A+B →',marks:true,help:'Dos personas caminan juntas mientras la cámara acompaña de frente o de costado.',cue:p=>p<.15?'Entren juntas desde A':p<.85?'Mismo paso · diálogo continuo':'Lleguen a B y sostengan',apply:p=>{document.querySelector('.a').style.left=`${6+p*18}%`;document.querySelector('.b').style.right=`${42-p*18}%`}},
+ orbit:{name:'Rotación protagonista',move:'⟳',help:'Rodeá el centro sin cambiar bruscamente la distancia ni cruzar obstáculos.',cue:p=>p<.15?'Comenzá el arco':p<.85?'Misma distancia · seguí girando':'Completá y sostené',apply:p=>{document.querySelector('.a').style.left=`${10+p*18}%`;document.querySelector('.b').style.right=`${10+p*18}%`}},
+ montage:{name:'Montaje breve',move:'G · M · D · R',help:'Grabá una serie corta: plano general, acción media, detalle y reacción.',cue:p=>p<.25?'1 · Plano general':p<.5?'2 · Acción en plano medio':p<.75?'3 · Detalle de manos u objeto':'4 · Reacción final',apply:p=>{const scale=p<.25?.82:p<.5?1:p<.75?1.28:1.12;document.querySelector('.a').style.transform=`scale(${scale})`;document.querySelector('.b').style.opacity=p<.75?.7:1}},
+ fantasy:{name:'Mundo dibujado',move:'◇ fondo',help:'Grabá con separación clara del fondo. El escenario ilustrado se aplica después.',cue:p=>p<.2?'Separación del fondo · luz pareja':p<.8?'Actuá mirando las marcas imaginarias':'Sostené para el recorte final',apply:p=>{document.querySelector('.a').style.left='13%';document.querySelector('.b').style.right='13%'}},
+ sitcom:{name:'Sitcom multicámara',move:'A · G · B',help:'Actuación continua con plano general y coberturas de cada personaje.',cue:p=>p<.25?'Plano general':p<.62?'Cobertura de diálogo':'Reacciones y cierre',apply:p=>{document.querySelector('.a').style.left='12%';document.querySelector('.b').style.right='12%'}}
 };
+function resetGuides(){const a=document.querySelector('.a'),b=document.querySelector('.b');for(const x of[a,b]){x.style.left='';x.style.right='';x.style.opacity=1;x.style.transform='scale(1)'}$('#pathGuide').style.display='none'}
+function updatePresetHelp(){const p=presets[$('#wPreset').value]||presets.two;$('#movementHint').textContent=p.help}
 function lines(){return $('#script').value.split('\n').map(x=>{const [who,t,...rest]=x.split('|');return{who:(who||'').trim(),t:Number(t)||0,text:rest.join('|').trim()}}).filter(x=>x.text).sort((a,b)=>a.t-b.t)}
 function renderTimeline(){const d=+$('#duration').value||15,ls=lines(),box=$('#timeline');box.innerHTML='';ls.forEach((x,i)=>{const end=ls[i+1]?.t??d,b=document.createElement('button');b.className='seg';b.style.flex=Math.max(.2,end-x.t);b.textContent=`${x.who} · ${x.t}s`;box.appendChild(b)})}
 async function enableCamera(){try{stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:'environment'},audio:true});video.srcObject=stream;statusBox.textContent='Cámara preparada.'}catch(e){statusBox.textContent='No se pudo abrir la cámara: '+e.message}}
-function setAt(t){const d=+$('#duration').value||15,p=Math.min(1,t/d),ls=lines();let current=ls[0];ls.forEach(x=>{if(x.t<=t)current=x});promptBox.innerHTML=`<small>${current?.who||'—'} · ${Math.max(0,(ls.find(x=>x.t>t)?.t??d)-t).toFixed(1)} s</small>${current?.text||''}`;$('#clock').textContent=`00:${t.toFixed(1).padStart(4,'0')}`;const z=1+(Number($('#zoomTarget').value)-1)*p;$('#zoom').textContent=z.toFixed(2)+'×';const pr=presets[$('#preset').value];$('#shot').textContent=pr.name;$('#move').textContent=pr.move;pr.apply(p);document.querySelectorAll('.seg').forEach((e,i)=>e.classList.toggle('active',ls[i]===current))}
+function setAt(t){const d=+$('#duration').value||15,p=Math.min(1,t/d),ls=lines();let current=ls[0];ls.forEach(x=>{if(x.t<=t)current=x});promptBox.innerHTML=`<small>${current?.who||'—'} · ${Math.max(0,(ls.find(x=>x.t>t)?.t??d)-t).toFixed(1)} s</small>${current?.text||''}`;$('#clock').textContent=`00:${t.toFixed(1).padStart(4,'0')}`;const z=1+(Number($('#zoomTarget').value)-1)*p;$('#zoom').textContent=z.toFixed(2)+'×';const pr=presets[$('#preset').value]||presets.two;resetGuides();$('#shot').textContent=pr.name;$('#move').textContent=pr.move;$('#direction').textContent=pr.cue(p);$('#pathGuide').style.display=pr.marks?'flex':'none';pr.apply(p);document.querySelectorAll('.seg').forEach((e,i)=>e.classList.toggle('active',ls[i]===current))}
 async function start(recording=false){clearInterval(runTimer);renderTimeline();if(recording&&!stream){await enableCamera();if(!stream)return}const cd=Math.max(0,+$('#countdown').value||0);for(let i=cd;i>0;i--){countBox.textContent=i;await new Promise(r=>setTimeout(r,1000))}countBox.textContent='';if(recording){chunks=[];recorder=new MediaRecorder(stream);recorder.ondataavailable=e=>e.data.size&&chunks.push(e.data);recorder.onstop=download;recorder.start(500);$('#record').classList.add('recording');$('#record').textContent='Grabando…'}const guide=$('#guideAudio');if(guide.src){guide.currentTime=0;guide.play().catch(()=>{});}
 startedAt=performance.now();const d=+$('#duration').value||15;runTimer=setInterval(()=>{const t=(performance.now()-startedAt)/1000;setAt(Math.min(t,d));if(t>=d){clearInterval(runTimer);guide.pause();if(recorder?.state==='recording')recorder.stop();$('#record').classList.remove('recording');$('#record').textContent='Grabar toma';statusBox.textContent='Toma terminada.'}},50)}
 function download(){const blob=new Blob(chunks,{type:recorder.mimeType}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`uizador-toma-${Date.now()}.webm`;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000)}
@@ -180,11 +189,11 @@ function syncWizard(){
  const file=$('#wGuideFile').files?.[0];if(file){const old=$('#guideAudio').dataset.url;if(old)URL.revokeObjectURL(old);const url=URL.createObjectURL(file);$('#guideAudio').src=url;$('#guideAudio').dataset.url=url;}
  renderTimeline();setAt(0)
 }
-$('#wTheme').onchange=()=>document.body.dataset.theme=$('#wTheme').value;
+$('#wTheme').onchange=()=>document.body.dataset.theme=$('#wTheme').value;$('#wPreset').onchange=updatePresetHelp;
 function presetData(){return{schema:'uizador.scene-preset.v0.1',scene_type:$('#wPreset').value,duration_sec:Number($('#wDuration').value),countdown_sec:Number($('#wCountdown').value),zoom_target:Number($('#wZoom').value),guide_mode:$('#wGuideMode').value,theme:$('#wTheme').value,script:$('#wScript').value}}
 $('#savePreset').onclick=()=>{const blob=new Blob([JSON.stringify(presetData(),null,2)],{type:'application/json'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='uizador-preset-'+$('#wPreset').value+'.json';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000)}
 $('#loadPreset').onchange=async()=>{const file=$('#loadPreset').files?.[0];if(!file)return;try{const x=JSON.parse(await file.text());$('#wPreset').value=x.scene_type||'two';$('#wDuration').value=x.duration_sec||15;$('#wCountdown').value=x.countdown_sec??3;$('#wZoom').value=String(x.zoom_target||1.5);$('#wGuideMode').value=x.guide_mode||'choreo';$('#wTheme').value=x.theme||'pop';$('#wScript').value=x.script||'';document.body.dataset.theme=$('#wTheme').value;}catch(e){alert('El preset no parece válido.')}}
 $('#startCamera').onclick=async()=>{syncWizard();await enableCamera();if(stream){document.body.classList.add('shooting');statusBox.textContent='Cámara lista. Podés ensayar o grabar.'}};
 $('#configBtn').onclick=()=>{document.body.classList.remove('shooting');showWizardStep(0)};
-const launch=new URLSearchParams(location.search);if(launch.get('preset')&&[...$('#wPreset').options].some(o=>o.value===launch.get('preset')))$('#wPreset').value=launch.get('preset');if(launch.get('theme')&&[...$('#wTheme').options].some(o=>o.value===launch.get('theme')))$('#wTheme').value=launch.get('theme');document.body.dataset.theme=$('#wTheme').value;renderTimeline();setAt(0);
+const launch=new URLSearchParams(location.search);if(launch.get('preset')&&[...$('#wPreset').options].some(o=>o.value===launch.get('preset')))$('#wPreset').value=launch.get('preset');if(launch.get('theme')&&[...$('#wTheme').options].some(o=>o.value===launch.get('theme')))$('#wTheme').value=launch.get('theme');document.body.dataset.theme=$('#wTheme').value;updatePresetHelp();renderTimeline();setAt(0);
 </script></body></html>

@@ -41,6 +41,9 @@ No seleccionar Noticias y revistas solamente porque existe un preset visual de n
 
 ## Capturas previstas
 
+El guion visual, los formatos, textos candidatos y condiciones de producción se mantienen en [el brief creativo](play-store-creative-brief.md).
+
+
 1. Inicio: elegir una escena o grabar con varios teléfonos.
 2. Biblioteca: presets de diálogo, movimiento, música y noticias.
 3. Ensayo: guía semitransparente, encuadre y teleprompter.

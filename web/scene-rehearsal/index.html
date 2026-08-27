@@ -6,6 +6,9 @@
 <title>Uizador · Ensayo de escena</title>
 <style>
 :root{color-scheme:dark;--accent:#ff79bd;--accent2:#a98cff;--warn:#ffca7a;--ok:#7ff0c5}
+body[data-theme="pastel"]{--accent:#ff8fbd;--accent2:#c7a8ff;--warn:#ffd39a;background:radial-gradient(circle at 80% 0%,#6a456e 0,#30223e 40%,#17131f 82%)}
+body[data-theme="cinema"]{--accent:#e7b95f;--accent2:#8f98a8;--warn:#d96754;background:radial-gradient(circle at 80% 0%,#3b3427 0,#171718 45%,#080808 85%)}
+body[data-theme="neutral"]{--accent:#72d6e8;--accent2:#8495aa;--warn:#f0b96b;background:radial-gradient(circle at 80% 0%,#293747 0,#141b24 45%,#090c10 85%)}
 *{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at 85% 0%,#40245b 0,#1c132b 34%,#0e0b17 78%);color:#fff7fc;font-family:system-ui,sans-serif}
 main{width:min(900px,100%);margin:auto;padding:12px}.top{display:flex;gap:8px;align-items:center;justify-content:space-between}
 h1{font-size:1.05rem;margin:4px 0 10px}.stage{position:relative;overflow:hidden;border-radius:14px;background:#171020;aspect-ratio:16/9;border:1px solid #303640}
@@ -63,6 +66,8 @@ body.shooting #configBtn{display:block}
 <input id="wReference" type="file" accept="image/*"></label>
 <label style="margin-top:10px">Transparencia de la referencia
 <input id="wReferenceOpacity" type="range" min="5" max="70" value="28"></label>
+<label style="margin-top:10px">Estilo visual
+<select id="wTheme"><option value="pop">Pop violeta</option><option value="pastel">Pastel</option><option value="cinema">Cine</option><option value="neutral">Neutro</option></select></label>
 <div class="hint">La imagen se superpone a la cámara para hacer coincidir composición, posiciones y ángulo.</div>
 <div class="nav"><button class="next full" data-next>Continuar</button></div>
 </div>
@@ -96,6 +101,8 @@ A|13|Mirá a cámara.</textarea>
 <div class="step">
 <h2>4 · Lista para grabar</h2>
 <p>Al continuar, el teléfono pedirá permiso para usar cámara y micrófono. Después verás solamente la imagen, las guías y los botones de ensayo y grabación.</p>
+<div class="grid" style="margin-top:12px"><button id="savePreset">Guardar preset</button><label>Cargar preset<input id="loadPreset" type="file" accept=".json,application/json"></label></div>
+<div class="hint">El preset guarda escena, tiempos, zoom, diálogo y estilo. Los archivos multimedia se vuelven a elegir por seguridad.</div>
 <div class="nav"><button data-back>Volver</button><button id="startCamera" class="next">Abrir cámara</button></div>
 </div>
 </div>
@@ -168,11 +175,16 @@ document.querySelectorAll('[data-next]').forEach(b=>b.onclick=()=>showWizardStep
 document.querySelectorAll('[data-back]').forEach(b=>b.onclick=()=>showWizardStep(wizardStep-1));
 function syncWizard(){
  $('#preset').value=$('#wPreset').value;$('#duration').value=$('#wDuration').value;$('#countdown').value=$('#wCountdown').value;$('#zoomTarget').value=$('#wZoom').value;$('#script').value=$('#wScript').value;
+ document.body.dataset.theme=$('#wTheme').value;
  const ref=$('#wReference').files?.[0];if(ref){const oldRef=$('#referenceOverlay').dataset.url;if(oldRef)URL.revokeObjectURL(oldRef);const refUrl=URL.createObjectURL(ref);$('#referenceOverlay').src=refUrl;$('#referenceOverlay').dataset.url=refUrl;$('#referenceOverlay').style.display='block';}$('#referenceOverlay').style.opacity=(Number($('#wReferenceOpacity').value)||28)/100;
  const file=$('#wGuideFile').files?.[0];if(file){const old=$('#guideAudio').dataset.url;if(old)URL.revokeObjectURL(old);const url=URL.createObjectURL(file);$('#guideAudio').src=url;$('#guideAudio').dataset.url=url;}
  renderTimeline();setAt(0)
 }
+$('#wTheme').onchange=()=>document.body.dataset.theme=$('#wTheme').value;
+function presetData(){return{schema:'uizador.scene-preset.v0.1',scene_type:$('#wPreset').value,duration_sec:Number($('#wDuration').value),countdown_sec:Number($('#wCountdown').value),zoom_target:Number($('#wZoom').value),guide_mode:$('#wGuideMode').value,theme:$('#wTheme').value,script:$('#wScript').value}}
+$('#savePreset').onclick=()=>{const blob=new Blob([JSON.stringify(presetData(),null,2)],{type:'application/json'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='uizador-preset-'+$('#wPreset').value+'.json';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000)}
+$('#loadPreset').onchange=async()=>{const file=$('#loadPreset').files?.[0];if(!file)return;try{const x=JSON.parse(await file.text());$('#wPreset').value=x.scene_type||'two';$('#wDuration').value=x.duration_sec||15;$('#wCountdown').value=x.countdown_sec??3;$('#wZoom').value=String(x.zoom_target||1.5);$('#wGuideMode').value=x.guide_mode||'choreo';$('#wTheme').value=x.theme||'pop';$('#wScript').value=x.script||'';document.body.dataset.theme=$('#wTheme').value;}catch(e){alert('El preset no parece válido.')}}
 $('#startCamera').onclick=async()=>{syncWizard();await enableCamera();if(stream){document.body.classList.add('shooting');statusBox.textContent='Cámara lista. Podés ensayar o grabar.'}};
 $('#configBtn').onclick=()=>{document.body.classList.remove('shooting');showWizardStep(0)};
-renderTimeline();setAt(0);
+document.body.dataset.theme='pop';renderTimeline();setAt(0);
 </script></body></html>

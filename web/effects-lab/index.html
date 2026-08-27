@@ -17,7 +17,7 @@ input,button,select{width:100%;min-height:43px;border:1px solid #5a4666;border-r
 </main><script>
 const $=s=>document.querySelector(s);let cat='sound',items=[];const defs={
 sound:[['🚑','Sirena','siren'],['👏','Aplausos','applause'],['🐈','Gato','cat'],['✨','Brillo','sparkle']],
-overlay:[['T','Título','title'],['▂','Subtítulo','subtitle'],['▱','Nombre / lower third','lower-third'],['⇡','Créditos finales','rolling-credits'],['★','Sticker','sticker'],['▣','Imagen','image']],
+overlay:[['T','Título','title'],['▂','Subtítulo','subtitle'],['▱','Nombre / lower third','lower-third'],['!','Banda urgente','breaking'],['⌖','Ubicación','location'],['TV','Logo de canal','channel-logo'],['⇡','Créditos finales','rolling-credits'],['★','Sticker','sticker'],['▣','Imagen','image']],
 transition:[['↔','Deslizamiento','slide'],['◐','Fundido','fade'],['⚡','Flash','flash'],['◎','Zoom','zoom']]
 };
 function fmt(t){return'00:'+Number(t).toFixed(1).padStart(4,'0')}function renderPalette(){const p=$('#palette');p.innerHTML='';defs[cat].forEach(d=>{const b=document.createElement('button');b.className='effect';b.innerHTML='<span>'+d[0]+'</span><strong>'+d[1]+'</strong><small>'+(cat==='sound'?'Tocar para escuchar':'Agregar en '+fmt($('#scrub').value))+'</small>';b.onclick=()=>{if(cat==='sound')sound(d[2]);add(d[2],d[1])};p.appendChild(b)})}

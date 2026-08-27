@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Uizador · Centro de pruebas</title>
+  <style>
+    :root{color-scheme:dark;--bg:#0e0a15;--card:#1c1425;--line:#493854;--pink:#ff74b8;--violet:#a98cff;--cyan:#6dd8e8;--ink:#fff8fc;--muted:#c5b8ca;--ok:#66dda0;--bad:#ff7586;--wait:#ffd273}
+    *{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at 85% 0,#4a285f 0,#21132e 36%,var(--bg) 78%);color:var(--ink);font-family:system-ui,sans-serif}button,input,select,textarea{font:inherit}
+    main{width:min(980px,100%);margin:auto;padding:16px}.top{display:flex;gap:12px;align-items:center}.back{color:#fff;text-decoration:none;font-size:1.55rem}.top div{flex:1}.top h1{font-size:1.35rem;margin:0}.top p{color:var(--muted);margin:3px 0 0;font-size:.86rem}
+    .card{background:rgba(27,19,36,.94);border:1px solid var(--line);border-radius:18px;padding:15px;margin-top:14px}.card h2{font-size:1rem;margin:0 0 12px}.meta{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}.field label{display:block;color:var(--muted);font-size:.78rem;margin:0 0 5px}.field input,.field textarea,.filter select{width:100%;border:1px solid #584563;border-radius:11px;background:#15101d;color:#fff;padding:10px;min-height:44px}.wide{grid-column:1/-1}
+    .stats{display:grid;grid-template-columns:repeat(5,1fr);gap:7px}.stat{border-radius:12px;background:#17101f;padding:10px;text-align:center;border:1px solid #3d3047}.stat strong{display:block;font-size:1.25rem}.stat span{font-size:.72rem;color:var(--muted)}.bar{height:9px;background:#30243a;border-radius:9px;overflow:hidden;margin-top:12px}.bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--pink),var(--violet));transition:.2s}
+    .toolbar{display:flex;gap:9px;flex-wrap:wrap;align-items:center}.toolbar button,.action{border:1px solid #604b6e;border-radius:11px;background:#2a1e35;color:#fff;min-height:42px;padding:8px 13px;font-weight:750}.toolbar .primary{background:linear-gradient(135deg,#bd397d,#7555cc);border-color:#ef7db5}.toolbar .danger{color:#ffb5bf}.save-note{color:var(--muted);font-size:.76rem;margin-left:auto}
+    .filters{display:flex;gap:8px;flex-wrap:wrap}.chip{border:1px solid #594466;border-radius:999px;background:#22172c;color:#ddd0e1;padding:8px 11px}.chip.on{background:#7250a5;border-color:#bd8aff;color:#fff}.check{display:flex;gap:8px;align-items:center;color:#e7dce9}.filter{display:grid;grid-template-columns:1fr 180px;gap:10px;margin-top:10px}
+    details.phase{background:rgba(25,17,33,.92);border:1px solid #463650;border-radius:15px;margin:10px 0;overflow:hidden}details.phase>summary{cursor:pointer;padding:14px;display:flex;gap:8px;align-items:center;font-weight:850;list-style:none}details.phase>summary::-webkit-details-marker{display:none}.count{margin-left:auto;color:var(--muted);font-size:.76rem}.case{padding:13px 14px;border-top:1px solid #3c2e46}.case-head{display:flex;gap:8px;align-items:flex-start}.id{font-family:ui-monospace,monospace;color:var(--cyan);font-weight:900}.case-title{font-weight:800;flex:1}.badge{font-size:.67rem;border-radius:999px;padding:3px 7px;background:#352640;color:#dcd0e2}.badge.core{color:#fff;background:#9e3c75}.expected{color:var(--muted);line-height:1.4;font-size:.86rem;margin:7px 0 10px}.case-controls{display:grid;grid-template-columns:150px 1fr 1fr;gap:8px}.case select,.case input{width:100%;min-height:42px;border:1px solid #554260;border-radius:9px;background:#15101c;color:#fff;padding:8px}.case[data-status="pass"]{border-left:4px solid var(--ok)}.case[data-status="fail"]{border-left:4px solid var(--bad)}.case[data-status="blocked"]{border-left:4px solid var(--wait)}
+    .empty{padding:28px;text-align:center;color:var(--muted)}dialog{border:1px solid #604b6d;border-radius:16px;background:#1b1324;color:#fff;max-width:430px}dialog::backdrop{background:#050308cc}dialog button{margin-top:10px}.hidden{display:none}
+    @media(max-width:680px){.meta,.filter{grid-template-columns:1fr}.stats{grid-template-columns:repeat(3,1fr)}.case-controls{grid-template-columns:1fr}.wide{grid-column:auto}.save-note{width:100%;margin-left:0}.case-head{flex-wrap:wrap}}
+  </style>
+</head>
+<body><main>
+  <header class="top"><a class="back" href="../app-home/index.html" aria-label="Volver">‹</a><div><h1>Centro de pruebas</h1><p>Una lista común, resultados guardados y evidencia exportable.</p></div></header>
+
+  <section class="card"><h2>Esta ejecución</h2><div class="meta">
+    <div class="field"><label for="tester">Quién prueba</label><input id="tester" data-meta="tester" placeholder="Nombre o iniciales"></div>
+    <div class="field"><label for="build">Versión o commit</label><input id="build" data-meta="build" placeholder="Ej. multicamera-concept"></div>
+    <div class="field"><label for="phoneA">Teléfono A · director</label><input id="phoneA" data-meta="phoneA" placeholder="Modelo / Android / navegador"></div>
+    <div class="field"><label for="phoneB">Teléfono B · cámara</label><input id="phoneB" data-meta="phoneB" placeholder="Modelo / Android / navegador"></div>
+    <div class="field wide"><label for="environment">Lugar, red y condiciones</label><textarea id="environment" data-meta="environment" rows="2" placeholder="Wi-Fi, distancia, trípodes, ruido, orientación…"></textarea></div>
+  </div></section>
+
+  <section class="card" aria-live="polite"><div class="stats">
+    <div class="stat"><strong id="done">0</strong><span>evaluadas</span></div><div class="stat"><strong id="passed">0</strong><span>pasan</span></div><div class="stat"><strong id="failed">0</strong><span>fallan</span></div><div class="stat"><strong id="blocked">0</strong><span>bloqueadas</span></div><div class="stat"><strong id="pending">0</strong><span>pendientes</span></div>
+  </div><div class="bar"><i id="progress"></i></div></section>
+
+  <section class="card"><div class="toolbar">
+    <button class="primary" id="export">Exportar informe</button><button id="import">Importar</button><input class="hidden" type="file" id="file" accept="application/json"><button class="danger" id="reset">Nueva ejecución</button><span class="save-note" id="saved">Guardado automáticamente en este teléfono</span>
+  </div></section>
+
+  <section class="card"><h2>Qué vamos a verificar</h2><div class="filters" id="phases"></div><div class="filter"><label class="check"><input id="coreOnly" type="checkbox" checked> Mostrar primero la prueba principal</label><select id="statusFilter" aria-label="Filtrar por resultado"><option value="all">Todos los resultados</option><option value="not_run">Pendientes</option><option value="pass">Pasan</option><option value="fail">Fallan</option><option value="blocked">Bloqueadas</option></select></div></section>
+  <section id="cases"></section>
+</main>
+
+<dialog id="resetDialog"><strong>¿Empezar una ejecución nueva?</strong><p>Se borrarán de este teléfono los resultados y notas actuales. Exportalos antes si querés conservarlos.</p><button class="action danger" id="confirmReset">Sí, empezar de nuevo</button> <button class="action" id="cancelReset">Cancelar</button></dialog>
+
+<script type="module">
+import {TEST_PLAN_VERSION,PHASES,TEST_CASES,validateTestCatalog} from '../../core/test-catalog.js';
+validateTestCatalog();
+const KEY='uizador-test-run-v1';
+const statuses={not_run:'Sin probar',pass:'Pasa',fail:'Falla',blocked:'Bloqueada'};
+const priority={blocker:'bloqueante',high:'alta',medium:'media'};
+let phase='all';
+const fresh=()=>({schema:'uizador.test-run.v1',catalogVersion:TEST_PLAN_VERSION,runId:crypto.randomUUID?.()||String(Date.now()),createdAt:new Date().toISOString(),updatedAt:new Date().toISOString(),metadata:{tester:'',build:'',phoneA:'',phoneB:'',environment:''},results:{}});
+function load(){try{const value=JSON.parse(localStorage.getItem(KEY));return value?.schema==='uizador.test-run.v1'?Object.assign(fresh(),value):fresh()}catch{return fresh()}}
+let run=load();
+const esc=value=>String(value??'').replace(/[&<>'"]/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[ch]));
+function save(){run.updatedAt=new Date().toISOString();localStorage.setItem(KEY,JSON.stringify(run));document.querySelector('#saved').textContent='Guardado · '+new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});stats()}
+document.querySelectorAll('[data-meta]').forEach(el=>{el.value=run.metadata[el.dataset.meta]||'';el.addEventListener('input',()=>{run.metadata[el.dataset.meta]=el.value;save()})});
+function statusOf(id){return run.results[id]?.status||'not_run'}
+function stats(){const values=TEST_CASES.map(x=>statusOf(x.id));const count=s=>values.filter(x=>x===s).length;const done=values.length-count('not_run');document.querySelector('#done').textContent=done;document.querySelector('#passed').textContent=count('pass');document.querySelector('#failed').textContent=count('fail');document.querySelector('#blocked').textContent=count('blocked');document.querySelector('#pending').textContent=count('not_run');document.querySelector('#progress').style.width=(100*done/values.length)+'%'}
+function makePhases(){const root=document.querySelector('#phases');root.innerHTML=[{id:'all',label:'Todas'},...PHASES].map(x=>`<button class="chip ${phase===x.id?'on':''}" data-phase="${x.id}">${esc(x.label)}</button>`).join('');root.querySelectorAll('button').forEach(btn=>btn.onclick=()=>{phase=btn.dataset.phase;makePhases();render()})}
+function render(){const coreOnly=document.querySelector('#coreOnly').checked;const wanted=document.querySelector('#statusFilter').value;let items=TEST_CASES.filter(x=>(phase==='all'||x.phase===phase)&&(!coreOnly||x.core)&&(wanted==='all'||statusOf(x.id)===wanted));const root=document.querySelector('#cases');if(!items.length){root.innerHTML='<div class="empty">No hay controles con estos filtros.</div>';return}root.innerHTML=PHASES.map(group=>{const cases=items.filter(x=>x.phase===group.id);if(!cases.length)return'';const body=cases.map(item=>{const result=run.results[item.id]||{};return `<article class="case" data-id="${item.id}" data-status="${esc(result.status||'not_run')}"><div class="case-head"><span class="id">${item.id}</span><span class="case-title">${esc(item.title)}</span>${item.core?'<span class="badge core">PRINCIPAL</span>':''}<span class="badge">${priority[item.priority]}</span></div><p class="expected"><strong>Esperado:</strong> ${esc(item.expected)}</p><div class="case-controls"><select data-kind="status" aria-label="Resultado ${item.id}">${Object.entries(statuses).map(([value,label])=>`<option value="${value}" ${value===(result.status||'not_run')?'selected':''}>${label}</option>`).join('')}</select><input data-kind="notes" value="${esc(result.notes||'')}" placeholder="Qué pasó / error"><input data-kind="evidence" value="${esc(result.evidence||'')}" placeholder="Archivo, foto o evidencia"></div></article>`}).join('');return `<details class="phase" open><summary>${esc(group.label)}<span class="count">${cases.length} controles</span></summary>${body}</details>`}).join('');root.querySelectorAll('.case').forEach(row=>row.querySelectorAll('[data-kind]').forEach(input=>input.addEventListener(input,()=>{const id=row.dataset.id;run.results[id]={...(run.results[id]||{}),status:row.querySelector('[data-kind=status]').value,notes:row.querySelector('[data-kind=notes]').value,evidence:row.querySelector('[data-kind=evidence]').value,updatedAt:new Date().toISOString()};row.dataset.status=run.results[id].status;save()})))}
+document.querySelector('#coreOnly').onchange=render;document.querySelector('#statusFilter').onchange=render;
+document.querySelector('#export').onclick=()=>{save();const blob=new Blob([JSON.stringify(run,null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`uizador-pruebas-${run.runId}.json`;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000)};
+document.querySelector('#import').onclick=()=>document.querySelector('#file').click();document.querySelector('#file').onchange=async event=>{try{const value=JSON.parse(await event.target.files[0].text());if(value.schema!=='uizador.test-run.v1'||!value.results)throw Error();run=Object.assign(fresh(),value);localStorage.setItem(KEY,JSON.stringify(run));location.reload()}catch{alert('El archivo no es un informe de pruebas Uizador válido.')}finally{event.target.value=''}};
+const dialog=document.querySelector('#resetDialog');document.querySelector('#reset').onclick=()=>dialog.showModal();document.querySelector('#cancelReset').onclick=()=>dialog.close();document.querySelector('#confirmReset').onclick=()=>{run=fresh();localStorage.setItem(KEY,JSON.stringify(run));location.reload()};
+makePhases();render();stats();
+</script></body></html>

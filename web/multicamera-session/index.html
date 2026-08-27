@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Uizador · Sesión multicámara</title>
+<script src="https://unpkg.com/peerjs@1.5.5/dist/peerjs.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<style>
+:root{color-scheme:dark;--a:#54d8ff;--ok:#6dff9b;--bad:#ff6b78;--panel:rgba(18,24,33,.9)}
+*{box-sizing:border-box}body{margin:0;background:#080a0f;color:#f3f6f8;font-family:system-ui,sans-serif}
+main{width:min(780px,100%);margin:auto;padding:12px}h1{font-size:1.08rem;margin:4px 0 12px}
+.card{padding:16px;border:1px solid #323b48;border-radius:16px;background:var(--panel);margin-bottom:10px}
+h2{font-size:1.15rem;margin:0 0 7px}p{color:#b6c0cb;line-height:1.38;margin:5px 0 14px}
+button,input{width:100%;min-height:46px;border:1px solid #3b4654;border-radius:10px;background:#1b222c;color:#fff;padding:9px;font:inherit}
+button{font-weight:700;cursor:pointer}.primary{background:#08677f;border-color:#1597b9}.danger{background:#811a26}.grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.screen{display:none}.screen.on{display:block}.status{font-size:.84rem;color:#aeb9c6;margin-top:9px;min-height:1.2em}
+#qr{width:230px;height:230px;margin:14px auto;background:#fff;padding:10px;border-radius:10px}#qr img,#qr canvas{width:100%!important;height:100%!important}
+.code{text-align:center;font-size:1.25rem;letter-spacing:.12em;color:var(--a);word-break:break-all}
+.devices{display:grid;gap:6px;margin:10px 0}.device{display:flex;justify-content:space-between;padding:9px;border-radius:9px;background:#1b222c}.ready{color:var(--ok)}
+.stage{position:relative;overflow:hidden;border-radius:14px;background:#111;min-height:56vh;border:1px solid #303946}
+video{width:100%;height:56vh;object-fit:cover}.guide{position:absolute;inset:0;pointer-events:none}
+.face{position:absolute;top:17%;width:32%;height:65%;border:3px dashed rgba(84,216,255,.75);border-radius:48%}.face.a{left:10%}.face.b{right:10%}
+.horizon{position:absolute;left:5%;right:5%;top:45%;border-top:2px dashed rgba(255,209,102,.75)}
+.hud{position:absolute;top:10px;left:10px;right:10px;display:flex;justify-content:space-between;text-shadow:0 2px 4px #000}
+.big{position:absolute;inset:0;display:grid;place-items:center;font-size:min(30vw,160px);font-weight:900;text-shadow:0 3px 18px #000}
+.prompt{position:absolute;left:5%;right:5%;bottom:5%;background:rgba(0,0,0,.72);padding:10px;border-radius:10px;text-align:center}
+.controls{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:9px}.help{font-size:.8rem;color:#aab6c4;line-height:1.4;margin-top:8px}
+.pulse{animation:pulse .45s ease}@keyframes pulse{50%{box-shadow:inset 0 0 0 12px rgba(255,209,102,.7)}}
+@media(max-width:520px){.grid{grid-template-columns:1fr}.stage,video{height:61vh;min-height:61vh}}
+</style>
+</head>
+<body><main>
+<h1>Uizador · Multicámara</h1>
+
+<section id="home" class="screen on">
+<div class="card"><h2>¿Qué teléfono es este?</h2><p>El director crea la sesión y muestra el QR. Las demás cámaras lo escanean para entrar.</p>
+<div class="grid"><button id="create" class="primary">Crear sesión</button><button id="manual">Ingresar código</button></div>
+<div id="manualBox" hidden style="margin-top:8px"><input id="codeInput" placeholder="Código de sesión"><button id="joinCode" style="margin-top:6px">Unirme</button></div>
+<div class="status" id="homeStatus"></div></div>
+</section>
+
+<section id="lobby" class="screen">
+<div class="card"><h2 id="lobbyTitle">Sesión preparada</h2><p id="lobbyText">Los otros teléfonos deben escanear este QR.</p>
+<div id="qr"></div><div class="code" id="sessionCode"></div>
+<div class="devices" id="devices"></div>
+<div class="grid" id="directorSetup">
+<label>Duración de escena<input id="duration" type="number" min="5" max="120" value="12"></label>
+<label>Margen antes del clock<input id="preroll" type="number" min="1" max="8" value="2"></label>
+</div>
+<button id="prepare" class="primary" style="margin-top:10px">Preparar cámaras</button>
+<div class="status" id="lobbyStatus">Esperando conexiones…</div></div>
+</section>
+
+<section id="cameraScreen" class="screen">
+<div class="stage" id="stage"><video id="video" autoplay muted playsinline></video>
+<div class="guide"><div class="face a"></div><div class="face b"></div><div class="horizon"></div>
+<div class="hud"><span id="role">Cámara</span><span id="state">Preparada</span></div>
+<div class="big" id="big"></div><div class="prompt" id="prompt">Ubicá a las dos personas dentro de las guías.</div>
+</div></div>
+<div class="controls"><button id="startTake" class="primary">Iniciar toma</button><button id="backLobby">Sesión</button></div>
+<div class="help"><strong>Director:</strong> inicia la toma. Todos comienzan a grabar; después suenan tres beeps. Al terminar, suena el clac y se descargan los archivos locales.</div>
+<div class="status" id="cameraStatus"></div>
+</section>
+</main>
+<script>
+const $=s=>document.querySelector(s), screens=[...document.querySelectorAll('.screen')];
+let peer=null,connections=[],director=false,stream=null,recorder=null,chunks=[],take=0,currentCfg=null,audioCtx=null;
+const joinId=new URLSearchParams(location.search).get('join');
+function show(id){screens.forEach(x=>x.classList.toggle('on',x.id===id))}
+function short(id){return id?String(id).slice(-8).toUpperCase():'—'}
+function sendAll(msg){connections.filter(c=>c.open).forEach(c=>c.send(msg))}
+function addConnection(conn){
+ if(connections.some(x=>x.peer===conn.peer))return;
+ connections.push(conn);conn.on('data',handleMessage);conn.on('close',renderDevices);
+ conn.on('open',()=>{if(director)conn.send({type:'welcome',role:'Cámara '+String.fromCharCode(65+connections.indexOf(conn)+1)});renderDevices()});
+}
+function renderDevices(){
+ const box=$('#devices');box.innerHTML='<div class="device"><span>Este teléfono · '+(director?'Director':'Cámara')+'</span><span class="ready">conectado</span></div>';
+ connections.filter(c=>c.open).forEach((c,i)=>{const d=document.createElement('div');d.className='device';d.innerHTML='<span>Cámara '+String.fromCharCode(66+i)+' · '+short(c.peer)+'</span><span class="ready">conectada</span>';box.appendChild(d)})
+}
+function makePeer(id){
+ peer=new Peer(id||undefined);
+ peer.on('connection',addConnection);
+ peer.on('error',e=>{$('#homeStatus').textContent='Conexión: '+e.type;$('#lobbyStatus').textContent='Conexión: '+e.type});
+ return peer;
+}
+$('#create').onclick=()=>{
+ director=true;peer=makePeer();$('#homeStatus').textContent='Creando sesión…';
+ peer.on('open',id=>{show('lobby');$('#sessionCode').textContent=short(id);const url=location.origin+location.pathname+'?join='+encodeURIComponent(id);$('#qr').innerHTML='';new QRCode($('#qr'),{text:url,width:210,height:210});renderDevices()})
+};
+$('#manual').onclick=()=>$('#manualBox').hidden=false;
+$('#joinCode').onclick=()=>join($('#codeInput').value.trim());
+function join(id){
+ if(!id)return;director=false;peer=makePeer();$('#homeStatus').textContent='Entrando…';
+ peer.on('open',()=>{const c=peer.connect(id,{reliable:true});addConnection(c);c.on('open',()=>{show('lobby');$('#qr').style.display='none';$('#sessionCode').textContent='Sesión '+short(id);$('#lobbyTitle').textContent='Cámara conectada';$('#lobbyText').textContent='Esperá que el director prepare la toma.';$('#directorSetup').style.display='none';$('#prepare').style.display='none';renderDevices()})})
+}
+if(joinId)join(joinId);
+async function openCamera(){
+ if(stream)return true;
+ try{stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:'environment'},audio:{echoCancellation:false,noiseSuppression:false,autoGainControl:false}});$('#video').srcObject=stream;return true}
+ catch(e){$('#lobbyStatus').textContent='No se pudo abrir cámara/micrófono: '+e.message;return false}
+}
+$('#prepare').onclick=async()=>{
+ if(!director)return;const ok=await openCamera();if(!ok)return;
+ currentCfg={duration:Math.max(5,+$('#duration').value||12),preroll:Math.max(1,+$('#preroll').value||2)};
+ sendAll({type:'prepare',cfg:currentCfg});show('cameraScreen');$('#role').textContent='Director';$('#cameraStatus').textContent='Todas las cámaras deben quedar preparadas.'
+};
+async function handleMessage(m){
+ if(m.type==='welcome'){$('#role').textContent=m.role}
+ if(m.type==='prepare'){currentCfg=m.cfg;const ok=await openCamera();if(ok){show('cameraScreen');$('#startTake').style.display='none';$('#role').textContent='Cámara remota';connections[0]?.send({type:'ready'})}}
+ if(m.type==='ready'&&director){$('#cameraStatus').textContent='Una cámara confirmó que está preparada.'}
+ if(m.type==='record'){await beginRecording(m.take);$('#state').textContent='Grabando'}
+ if(m.type==='stop'){stopRecording();$('#state').textContent='Finalizada'}
+}
+function beginRecording(n){
+ return new Promise(resolve=>{
+  chunks=[];recorder=new MediaRecorder(stream);recorder.ondataavailable=e=>e.data.size&&chunks.push(e.data);
+  recorder.onstop=()=>download(n);recorder.start(400);$('#stage').classList.add('recording');resolve()
+ })
+}
+function stopRecording(){if(recorder?.state==='recording')recorder.stop();$('#stage').classList.remove('recording')}
+function download(n){const blob=new Blob(chunks,{type:recorder.mimeType}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='uizador-toma-'+String(n).padStart(2,'0')+'-'+(director?'director':'camera')+'.webm';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1500);$('#cameraStatus').textContent='Archivo de la toma '+n+' descargado en este teléfono.'}
+function ctx(){audioCtx=audioCtx||new (window.AudioContext||window.webkitAudioContext)();return audioCtx}
+function tone(freq,dur,vol=.85){
+ const ac=ctx(),o=ac.createOscillator(),g=ac.createGain();o.frequency.value=freq;o.type='sine';g.gain.setValueAtTime(.001,ac.currentTime);g.gain.exponentialRampToValueAtTime(vol,ac.currentTime+.015);g.gain.exponentialRampToValueAtTime(.001,ac.currentTime+dur);o.connect(g).connect(ac.destination);o.start();o.stop(ac.currentTime+dur+.02);$('#stage').classList.remove('pulse');void $('#stage').offsetWidth;$('#stage').classList.add('pulse')
+}
+const wait=ms=>new Promise(r=>setTimeout(r,ms));
+async function countdown(sec){for(let i=sec;i>0;i--){$('#big').textContent=i;await wait(1000)}$('#big').textContent=''}
+async function startSignature(){tone(740,.16);await wait(420);tone(740,.16);await wait(420);tone(1180,.34);await wait(520)}
+async function endSignature(){tone(190,.12,1);await wait(90);tone(95,.28,1);await wait(450)}
+$('#startTake').onclick=async()=>{
+ if(!director||!currentCfg)return;take++;$('#startTake').disabled=true;
+ sendAll({type:'record',take});await beginRecording(take);$('#state').textContent='Grabando';$('#cameraStatus').textContent='Pre-roll: todos ya están grabando.';
+ await countdown(currentCfg.preroll);await startSignature();$('#prompt').textContent='ACCIÓN · escena en curso';$('#state').textContent='ACCIÓN';
+ await countdown(currentCfg.duration);$('#prompt').textContent='FIN';await endSignature();
+ await wait(800);sendAll({type:'stop',take});stopRecording();$('#state').textContent='Finalizada';$('#startTake').disabled=false;$('#startTake').textContent='Grabar otra toma'
+};
+$('#backLobby').onclick=()=>show('lobby');
+renderDevices();
+</script></body></html>

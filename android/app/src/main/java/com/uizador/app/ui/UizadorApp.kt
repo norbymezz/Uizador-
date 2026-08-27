@@ -95,6 +95,7 @@ private fun HomeScreen(
         Action("🎬", "Crear una escena", "Elegí un preset, encuadre, texto y ritmo.", Destination.Record),
         Action("📱", "Grabar con varios teléfonos", "Creá una sala y sumá cámaras con QR.", Destination.Record),
         Action("🌐", "Grabar a distancia", "El director coordina teléfonos que están en lugares distintos.", Destination.Record),
+        Action("📰", "Noticiero o entrevista", "Pantalla partida, zócalos, titulares y participantes remotos.", Destination.Record),
         Action("✨", "Ensayar una coreografía", "Usá audio de referencia y guías de movimiento.", Destination.Record),
         Action("✂", "Editar lo grabado", "Sincronizá tomas, elegí cortes y agregá títulos.", Destination.Projects),
     )

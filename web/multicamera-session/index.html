@@ -23,7 +23,7 @@ video{width:100%;height:56vh;object-fit:cover}.guide{position:absolute;inset:0;p
 .horizon{position:absolute;left:5%;right:5%;top:45%;border-top:2px dashed rgba(191,157,255,.82)}
 .hud{position:absolute;top:10px;left:10px;right:10px;display:flex;justify-content:space-between;text-shadow:0 2px 4px #000}
 .big{position:absolute;inset:0;display:grid;place-items:center;font-size:min(30vw,160px);font-weight:900;text-shadow:0 3px 18px #000}
-.prompt{position:absolute;left:5%;right:5%;bottom:5%;background:rgba(0,0,0,.72);padding:10px;border-radius:10px;text-align:center}
+.prompt{position:absolute;left:5%;right:5%;bottom:5%;background:rgba(0,0,0,.72);padding:10px;border-radius:10px;text-align:center}.motion{position:absolute;left:8%;right:8%;top:49%;height:5px;border-radius:9px;background:rgba(255,255,255,.18);overflow:hidden}.motion i{display:block;width:0;height:100%;background:linear-gradient(90deg,var(--a),var(--b));}.motion-label{position:absolute;top:43%;left:0;right:0;text-align:center;font-size:1.6rem;text-shadow:0 2px 5px #000}
 .controls{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:9px}.help{font-size:.8rem;color:#aab6c4;line-height:1.4;margin-top:8px}
 .pulse{animation:pulse .45s ease}@keyframes pulse{50%{box-shadow:inset 0 0 0 12px rgba(255,209,102,.7)}}
 @media(max-width:520px){.grid{grid-template-columns:1fr}.stage,video{height:61vh;min-height:61vh}}
@@ -48,6 +48,7 @@ video{width:100%;height:56vh;object-fit:cover}.guide{position:absolute;inset:0;p
 <label>Margen antes del clock<input id="preroll" type="number" min="1" max="8" value="2"></label>
 <label>Cantidad de tomas<input id="repetitions" type="number" min="1" max="10" value="3"></label>
 <label>Pausa entre tomas<input id="pauseBetween" type="number" min="2" max="30" value="5"></label>
+<label>Movimiento guiado<select id="movement"><option value="fixed">Cámara fija</option><option value="pan-right">Paneo hacia la derecha</option><option value="approach">Acercamiento</option><option value="retreat">Alejamiento</option></select></label>
 </div>
 <button id="prepare" class="primary" style="margin-top:10px">Preparar cámaras</button>
 <div class="status" id="lobbyStatus">Esperando conexiones…</div></div>
@@ -56,7 +57,7 @@ video{width:100%;height:56vh;object-fit:cover}.guide{position:absolute;inset:0;p
 <section id="cameraScreen" class="screen">
 <div class="stage" id="stage"><video id="video" autoplay muted playsinline></video>
 <div class="guide"><div class="face a"></div><div class="face b"></div><div class="horizon"></div>
-<div class="hud"><span id="role">Cámara</span><span id="state">Preparada</span></div>
+<div class="hud"><span id="role">Cámara</span><span id="state">Preparada</span></div><div class="motion-label" id="motionLabel"></div><div class="motion"><i id="motionProgress"></i></div>
 <div class="big" id="big"></div><div class="prompt" id="prompt">Ubicá a las dos personas dentro de las guías.</div>
 </div></div>
 <div class="controls"><button id="startTake" class="primary">Iniciar toma</button><button id="backLobby">Sesión</button></div>
@@ -66,19 +67,19 @@ video{width:100%;height:56vh;object-fit:cover}.guide{position:absolute;inset:0;p
 </main>
 <script>
 const $=s=>document.querySelector(s), screens=[...document.querySelectorAll('.screen')];
-let peer=null,connections=[],director=false,stream=null,recorder=null,chunks=[],take=0,currentCfg=null,audioCtx=null;
+let peer=null,connections=[],director=false,stream=null,recorder=null,chunks=[],take=0,currentCfg=null,audioCtx=null;const readyPeers=new Set();let motionTimer=null;
 const joinId=new URLSearchParams(location.search).get('join');
 function show(id){screens.forEach(x=>x.classList.toggle('on',x.id===id))}
 function short(id){return id?String(id).slice(-8).toUpperCase():'—'}
 function sendAll(msg){connections.filter(c=>c.open).forEach(c=>c.send(msg))}
 function addConnection(conn){
  if(connections.some(x=>x.peer===conn.peer))return;
- connections.push(conn);conn.on('data',handleMessage);conn.on('close',renderDevices);
+ connections.push(conn);conn.on('data',m=>handleMessage(m,conn));conn.on('close',()=>{readyPeers.delete(conn.peer);renderDevices()});
  conn.on('open',()=>{if(director)conn.send({type:'welcome',role:'Cámara '+String.fromCharCode(65+connections.indexOf(conn)+1)});renderDevices()});
 }
 function renderDevices(){
  const box=$('#devices');box.innerHTML='<div class="device"><span>Este teléfono · '+(director?'Director':'Cámara')+'</span><span class="ready">conectado</span></div>';
- connections.filter(c=>c.open).forEach((c,i)=>{const d=document.createElement('div');d.className='device';d.innerHTML='<span>Cámara '+String.fromCharCode(66+i)+' · '+short(c.peer)+'</span><span class="ready">conectada</span>';box.appendChild(d)})
+ connections.filter(c=>c.open).forEach((c,i)=>{const d=document.createElement('div');d.className='device';const ok=readyPeers.has(c.peer);d.innerHTML='<span>Cámara '+String.fromCharCode(66+i)+' · '+short(c.peer)+'</span><span class="ready">'+(ok?'lista':'conectada')+'</span>';box.appendChild(d)})
 }
 function makePeer(id){
  peer=new Peer(id||undefined);
@@ -104,15 +105,16 @@ async function openCamera(){
 }
 $('#prepare').onclick=async()=>{
  if(!director)return;const ok=await openCamera();if(!ok)return;
- currentCfg={duration:Math.max(5,+$('#duration').value||12),preroll:Math.max(1,+$('#preroll').value||2),repetitions:Math.max(1,Math.min(10,+$('#repetitions').value||1)),pauseBetween:Math.max(2,+$('#pauseBetween').value||5)};
- sendAll({type:'prepare',cfg:currentCfg});show('cameraScreen');$('#role').textContent='Director';$('#cameraStatus').textContent='Todas las cámaras deben quedar preparadas.'
+ readyPeers.clear();currentCfg={duration:Math.max(5,+$('#duration').value||12),preroll:Math.max(1,+$('#preroll').value||2),repetitions:Math.max(1,Math.min(10,+$('#repetitions').value||1)),pauseBetween:Math.max(2,+$('#pauseBetween').value||5),movement:$('#movement').value};
+ sendAll({type:'prepare',cfg:currentCfg});show('cameraScreen');$('#role').textContent='Director';$('#startTake').disabled=connections.some(c=>c.open);$('#cameraStatus').textContent=connections.some(c=>c.open)?'Esperando confirmación de las cámaras…':'No hay cámaras remotas conectadas.'
 };
-async function handleMessage(m){
+async function handleMessage(m,conn){
  if(m.type==='welcome'){$('#role').textContent=m.role}
  if(m.type==='prepare'){currentCfg=m.cfg;const ok=await openCamera();if(ok){show('cameraScreen');$('#startTake').style.display='none';$('#role').textContent='Cámara remota';connections[0]?.send({type:'ready'})}}
- if(m.type==='ready'&&director){$('#cameraStatus').textContent='Una cámara confirmó que está preparada.'}
+ if(m.type==='ready'&&director){if(conn)readyPeers.add(conn.peer);renderDevices();const online=connections.filter(c=>c.open);const all=online.length>0&&online.every(c=>readyPeers.has(c.peer));$('#startTake').disabled=!all;$('#cameraStatus').textContent=all?'Todas las cámaras están listas.':'Preparadas '+readyPeers.size+' de '+online.length+'.'}
  if(m.type==='record'){await beginRecording(m.take);$('#state').textContent='Grabando'}
- if(m.type==='stop'){stopRecording();$('#state').textContent='Finalizada'}
+ if(m.type==='action'){startMotion(m.duration,m.movement);$('#prompt').textContent='ACCIÓN · seguí la guía';$('#state').textContent='ACCIÓN'}
+ if(m.type==='stop'){stopMotion();stopRecording();$('#state').textContent='Finalizada'}
 }
 function beginRecording(n){
  return new Promise(resolve=>{
@@ -130,11 +132,13 @@ const wait=ms=>new Promise(r=>setTimeout(r,ms));
 async function countdown(sec){for(let i=sec;i>0;i--){$('#big').textContent=i;await wait(1000)}$('#big').textContent=''}
 async function startSignature(){tone(740,.16);await wait(420);tone(740,.16);await wait(420);tone(1180,.34);await wait(520)}
 async function endSignature(){tone(190,.12,1);await wait(90);tone(95,.28,1);await wait(450)}
+function startMotion(seconds,movement){stopMotion();const label={fixed:'FIJA', 'pan-right':'→ PANEO',approach:'⇢ ACERCATE',retreat:'⇠ ALEJATE'}[movement]||'FIJA';$('#motionLabel').textContent=label;const started=performance.now();motionTimer=setInterval(()=>{const p=Math.min(1,(performance.now()-started)/(seconds*1000));$('#motionProgress').style.width=(p*100)+'%';if(p>=1)stopMotion()},40)}
+function stopMotion(){if(motionTimer)clearInterval(motionTimer);motionTimer=null;$('#motionProgress').style.width='0';$('#motionLabel').textContent=''}
 async function runOneTake(sequenceIndex,total){
  take++;$('#state').textContent='Toma '+sequenceIndex+' de '+total;$('#cameraStatus').textContent='Todos comienzan a grabar antes de la marca sonora.';
  sendAll({type:'record',take,sequenceIndex,total});await beginRecording(take);
- await countdown(currentCfg.preroll);await startSignature();$('#prompt').textContent='ACCIÓN · toma '+sequenceIndex;$('#state').textContent='ACCIÓN';
- await countdown(currentCfg.duration);$('#prompt').textContent='FIN';await endSignature();
+ await countdown(currentCfg.preroll);await startSignature();sendAll({type:'action',duration:currentCfg.duration,movement:currentCfg.movement});startMotion(currentCfg.duration,currentCfg.movement);$('#prompt').textContent='ACCIÓN · toma '+sequenceIndex;$('#state').textContent='ACCIÓN';
+ await countdown(currentCfg.duration);stopMotion();$('#prompt').textContent='FIN';await endSignature();
  await wait(800);sendAll({type:'stop',take});stopRecording();$('#state').textContent='Toma '+sequenceIndex+' terminada'
 }
 $('#startTake').onclick=async()=>{

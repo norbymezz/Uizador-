@@ -69,7 +69,12 @@ body.shooting #configBtn{display:block}
 <label>Cuenta regresiva<input id="wCountdown" type="number" min="0" max="10" value="3"></label>
 <label>Zoom
 <select id="wZoom"><option value="1.0">Fijo 1.0×</option><option value="1.5" selected>1.0× → 1.5×</option><option value="2.0">1.0× → 2.0×</option></select></label>
+<label>Pista de referencia
+<input id="wGuideFile" type="file" accept="audio/*,video/*"></label>
+<label>Uso de la pista
+<select id="wGuideMode"><option value="choreo">Sólo coreografía y ritmo</option><option value="dialogue">Diálogo de ensayo</option><option value="music">Música de referencia</option></select></label>
 </div>
+<div class="hint">La pista guía acompaña el ensayo y la toma. Después puede reemplazarse por el audio definitivo.</div>
 <div class="nav"><button data-back>Volver</button><button class="next" data-next>Continuar</button></div>
 </div>
 <div class="step">
@@ -129,6 +134,7 @@ B|10|Una tradición necesita testigos.
 A|13|Mirá a cámara.</textarea></label>
 <div class="status">Formato: PERSONA | segundo de entrada | texto. El diálogo es original y reemplazable.</div>
 </section>
+<audio id="guideAudio" playsinline></audio>
 </main>
 <script>
 const $=s=>document.querySelector(s),video=$('#camera'),promptBox=$('#prompt'),countBox=$('#count'),statusBox=$('#status');
@@ -142,7 +148,8 @@ function lines(){return $('#script').value.split('\n').map(x=>{const [who,t,...r
 function renderTimeline(){const d=+$('#duration').value||15,ls=lines(),box=$('#timeline');box.innerHTML='';ls.forEach((x,i)=>{const end=ls[i+1]?.t??d,b=document.createElement('button');b.className='seg';b.style.flex=Math.max(.2,end-x.t);b.textContent=`${x.who} · ${x.t}s`;box.appendChild(b)})}
 async function enableCamera(){try{stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:'environment'},audio:true});video.srcObject=stream;statusBox.textContent='Cámara preparada.'}catch(e){statusBox.textContent='No se pudo abrir la cámara: '+e.message}}
 function setAt(t){const d=+$('#duration').value||15,p=Math.min(1,t/d),ls=lines();let current=ls[0];ls.forEach(x=>{if(x.t<=t)current=x});promptBox.innerHTML=`<small>${current?.who||'—'} · ${Math.max(0,(ls.find(x=>x.t>t)?.t??d)-t).toFixed(1)} s</small>${current?.text||''}`;$('#clock').textContent=`00:${t.toFixed(1).padStart(4,'0')}`;const z=1+(Number($('#zoomTarget').value)-1)*p;$('#zoom').textContent=z.toFixed(2)+'×';const pr=presets[$('#preset').value];$('#shot').textContent=pr.name;$('#move').textContent=pr.move;pr.apply(p);document.querySelectorAll('.seg').forEach((e,i)=>e.classList.toggle('active',ls[i]===current))}
-async function start(recording=false){clearInterval(runTimer);renderTimeline();if(recording&&!stream){await enableCamera();if(!stream)return}const cd=Math.max(0,+$('#countdown').value||0);for(let i=cd;i>0;i--){countBox.textContent=i;await new Promise(r=>setTimeout(r,1000))}countBox.textContent='';if(recording){chunks=[];recorder=new MediaRecorder(stream);recorder.ondataavailable=e=>e.data.size&&chunks.push(e.data);recorder.onstop=download;recorder.start(500);$('#record').classList.add('recording');$('#record').textContent='Grabando…'}startedAt=performance.now();const d=+$('#duration').value||15;runTimer=setInterval(()=>{const t=(performance.now()-startedAt)/1000;setAt(Math.min(t,d));if(t>=d){clearInterval(runTimer);if(recorder?.state==='recording')recorder.stop();$('#record').classList.remove('recording');$('#record').textContent='Grabar toma';statusBox.textContent='Toma terminada.'}},50)}
+async function start(recording=false){clearInterval(runTimer);renderTimeline();if(recording&&!stream){await enableCamera();if(!stream)return}const cd=Math.max(0,+$('#countdown').value||0);for(let i=cd;i>0;i--){countBox.textContent=i;await new Promise(r=>setTimeout(r,1000))}countBox.textContent='';if(recording){chunks=[];recorder=new MediaRecorder(stream);recorder.ondataavailable=e=>e.data.size&&chunks.push(e.data);recorder.onstop=download;recorder.start(500);$('#record').classList.add('recording');$('#record').textContent='Grabando…'}const guide=$('#guideAudio');if(guide.src){guide.currentTime=0;guide.play().catch(()=>{});}
+startedAt=performance.now();const d=+$('#duration').value||15;runTimer=setInterval(()=>{const t=(performance.now()-startedAt)/1000;setAt(Math.min(t,d));if(t>=d){clearInterval(runTimer);guide.pause();if(recorder?.state==='recording')recorder.stop();$('#record').classList.remove('recording');$('#record').textContent='Grabar toma';statusBox.textContent='Toma terminada.'}},50)}
 function download(){const blob=new Blob(chunks,{type:recorder.mimeType}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`uizador-toma-${Date.now()}.webm`;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000)}
 $('#cameraBtn').onclick=enableCamera;$('#rehearse').onclick=()=>start(false);$('#record').onclick=()=>start(true);
 ['script','duration','preset'].forEach(id=>$('#'+id).addEventListener('input',renderTimeline));
@@ -153,7 +160,9 @@ function showWizardStep(index){wizardStep=Math.max(0,Math.min(wizardSteps.length
 document.querySelectorAll('[data-next]').forEach(b=>b.onclick=()=>showWizardStep(wizardStep+1));
 document.querySelectorAll('[data-back]').forEach(b=>b.onclick=()=>showWizardStep(wizardStep-1));
 function syncWizard(){
- $('#preset').value=$('#wPreset').value;$('#duration').value=$('#wDuration').value;$('#countdown').value=$('#wCountdown').value;$('#zoomTarget').value=$('#wZoom').value;$('#script').value=$('#wScript').value;renderTimeline();setAt(0)
+ $('#preset').value=$('#wPreset').value;$('#duration').value=$('#wDuration').value;$('#countdown').value=$('#wCountdown').value;$('#zoomTarget').value=$('#wZoom').value;$('#script').value=$('#wScript').value;
+ const file=$('#wGuideFile').files?.[0];if(file){const old=$('#guideAudio').dataset.url;if(old)URL.revokeObjectURL(old);const url=URL.createObjectURL(file);$('#guideAudio').src=url;$('#guideAudio').dataset.url=url;}
+ renderTimeline();setAt(0)
 }
 $('#startCamera').onclick=async()=>{syncWizard();await enableCamera();if(stream){document.body.classList.add('shooting');statusBox.textContent='Cámara lista. Podés ensayar o grabar.'}};
 $('#configBtn').onclick=()=>{document.body.classList.remove('shooting');showWizardStep(0)};

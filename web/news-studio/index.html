@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Uizador · Estudio de noticias</title>
+<style>
+:root{color-scheme:dark;--pink:#ff79bd;--violet:#9d83ff;--cyan:#58dce0;--ink:#fff8fc;--muted:#c9bfd0;--panel:#21162d}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at 85% 0,#4a2564 0,#1c1229 38%,#0b0911 82%);color:var(--ink);font-family:system-ui,sans-serif}
+main{width:min(1100px,100%);margin:auto;padding:16px}.top{display:flex;align-items:center;gap:12px}.top a{font-size:1.8rem;color:#fff;text-decoration:none}.top h1{font-size:1.35rem;margin:12px 0}
+.layout{display:grid;grid-template-columns:minmax(0,1.45fr) minmax(280px,.7fr);gap:14px}.card{border:1px solid #51405d;border-radius:18px;background:rgba(31,21,42,.94);padding:14px}
+.broadcast{position:relative;aspect-ratio:16/9;background:#08070c;border-radius:14px;overflow:hidden;border:1px solid #5a4964}.feeds{display:grid;grid-template-columns:1fr 1fr;height:100%}.feed{position:relative;overflow:hidden;background:linear-gradient(145deg,#3a2450,#16101f)}.feed:first-child{border-right:2px solid #fff3}.feed video{width:100%;height:100%;object-fit:cover}.person{position:absolute;inset:15% 22% 8%;border:3px dashed #ff79bd99;border-radius:45% 45% 30% 30%}.feed-name{position:absolute;top:12px;left:12px;background:#0a0710bb;padding:5px 9px;border-radius:99px;font-size:.75rem}
+.brand{position:absolute;top:12px;right:12px;background:linear-gradient(135deg,var(--pink),var(--violet));padding:7px 11px;border-radius:8px;font-weight:900;letter-spacing:.08em}.live{position:absolute;top:12px;left:50%;transform:translateX(-50%);background:#e7194c;padding:5px 9px;border-radius:5px;font-size:.72rem;font-weight:900}
+.lower{position:absolute;left:0;right:0;bottom:0}.breaking{display:none;background:#e7194c;color:#fff;padding:5px 15px;font-size:.75rem;font-weight:950;letter-spacing:.12em}.headline{background:#f7f4fa;color:#17101d;padding:9px 15px;font-size:clamp(.8rem,2vw,1.05rem);font-weight:900}.names{display:grid;grid-template-columns:1fr 1fr;background:#15101deF}.names span{padding:7px 14px;font-size:.75rem;border-right:1px solid #ffffff22}.names b{display:block;color:var(--cyan)}
+.controls{display:grid;gap:11px}.row{display:grid;grid-template-columns:1fr 1fr;gap:8px}label{display:grid;gap:5px;color:var(--muted);font-size:.82rem}
+input,select,button{width:100%;min-height:42px;border:1px solid #5a4865;border-radius:10px;background:#17101f;color:#fff;padding:8px;font:inherit}button{cursor:pointer;font-weight:800}.primary{background:linear-gradient(135deg,#e84f9a,#8064dc)}.uploads{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:11px}.note{color:var(--muted);font-size:.82rem;line-height:1.45;margin:10px 0 0}
+.timeline{margin-top:14px}.track{height:54px;background:#15101d;border-radius:10px;position:relative;overflow:hidden;margin-top:8px}.clip{position:absolute;top:8px;bottom:8px;border-radius:7px;padding:8px;font-size:.72rem;overflow:hidden;white-space:nowrap}.clip.a{left:2%;width:45%;background:#5a3972}.clip.b{left:49%;width:49%;background:#2c6670}
+.status{display:flex;align-items:center;gap:8px;margin:8px 0 0;color:var(--cyan);font-size:.82rem}.dot{width:8px;height:8px;border-radius:50%;background:var(--cyan)}
+@media(max-width:800px){.layout{grid-template-columns:1fr}.broadcast{aspect-ratio:9/12}.feeds{grid-template-columns:1fr;grid-template-rows:1fr 1fr}.feed:first-child{border-right:0;border-bottom:2px solid #fff3}.brand{top:46px}.names{grid-template-columns:1fr 1fr}.row{grid-template-columns:1fr}}
+</style>
+</head>
+<body><main>
+<header class="top"><a href="../preset-library/index.html">‹</a><h1>Noticiero, entrevista y conexión remota</h1></header>
+<div class="layout">
+<section>
+<div class="broadcast" id="broadcast">
+  <div class="feeds">
+    <div class="feed"><video id="videoA" playsinline muted loop></video><div class="person" id="guideA"></div><span class="feed-name">Cámara A</span></div>
+    <div class="feed"><video id="videoB" playsinline muted loop></video><div class="person" id="guideB"></div><span class="feed-name">Cámara B</span></div>
+  </div>
+  <div class="live" id="live">EN VIVO</div><div class="brand" id="brand">UIZADOR TV</div>
+  <div class="lower"><div class="breaking" id="breaking">ÚLTIMO MOMENTO</div><div class="headline" id="headline">Titular principal de la nota</div><div class="names"><span><b id="nameA">CONDUCTORA</b><i id="placeA">ESTUDIO</i></span><span><b id="nameB">MOVILERO</b><i id="placeB">BUENOS AIRES</i></span></div></div>
+</div>
+<div class="uploads"><label>Video A<input id="fileA" type="file" accept="video/*"></label><label>Video B<input id="fileB" type="file" accept="video/*"></label></div>
+<p class="note">Los videos pueden grabarse juntos o en momentos y lugares distintos. Las guías punteadas son sólo para preparar encuadres equivalentes.</p>
+<section class="card timeline"><strong>Plan de composición</strong><div class="track"><div class="clip a">A · presentación</div><div class="clip b">A + B · entrevista</div></div><div class="status"><span class="dot"></span><span id="status">Duración común: 30 segundos</span></div></section>
+</section>
+<aside class="card controls">
+<label>Formato<select id="template"><option value="breaking">Último momento</option><option value="interview">Entrevista</option><option value="correspondent">Móvil / corresponsal</option><option value="debate">Debate en pantalla partida</option></select></label>
+<label>Forma de grabación<select id="mode"><option value="separate">Por separado · montaje posterior</option><option value="remote">Remota · director coordina</option><option value="simultaneous">Simultánea · dos cámaras</option></select></label>
+<div class="row"><label>Duración<input id="duration" type="number" min="5" max="1800" value="30"></label><label>Relación<select id="ratio"><option value="16:9">16:9 horizontal</option><option value="9:16">9:16 vertical</option><option value="1:1">1:1 cuadrado</option></select></label></div>
+<label>Logo o canal<input id="logo" value="UIZADOR TV"></label>
+<label>Titular<input id="title" value="Titular principal de la nota"></label>
+<div class="row"><label>Nombre A<input id="personA" value="CONDUCTORA"></label><label>Ubicación A<input id="locationA" value="ESTUDIO"></label></div>
+<div class="row"><label>Nombre B<input id="personB" value="MOVILERO"></label><label>Ubicación B<input id="locationB" value="BUENOS AIRES"></label></div>
+<label><span><input id="urgent" type="checkbox" checked style="width:auto;min-height:auto"> Mostrar banda “Último momento”</span></label>
+<button class="primary" id="apply">Actualizar vista</button>
+<button id="export">Guardar preset JSON</button>
+<p class="note" id="modeHelp">Cada participante recibe la misma duración y su guía. Después se unen las tomas.</p>
+</aside>
+</div>
+</main>
+<script>
+const $=s=>document.querySelector(s),urls={};
+function loadVideo(input,video,key){const f=input.files?.[0];if(!f)return;if(urls[key])URL.revokeObjectURL(urls[key]);urls[key]=URL.createObjectURL(f);video.src=urls[key];video.controls=true;video.play().catch(()=>{})}
+$('#fileA').onchange=()=>loadVideo($('#fileA'),$('#videoA'),'a');$('#fileB').onchange=()=>loadVideo($('#fileB'),$('#videoB'),'b');
+const helps={separate:'No hace falta que coincidan en tiempo real: se conserva duración, guion y marcas para el montaje posterior.',remote:'El director envía la toma a ambos teléfonos, recibe estados y después recoge los archivos.',simultaneous:'Las dos cámaras graban la misma ejecución y usan el clock común.'};
+function apply(){
+ const ratio=$('#ratio').value;$('#broadcast').style.aspectRatio=ratio.replace(':','/');
+ $('#brand').textContent=$('#logo').value||'CANAL';$('#headline').textContent=$('#title').value||'Sin titular';
+ $('#nameA').textContent=$('#personA').value||'PERSONA A';$('#placeA').textContent=$('#locationA').value||'UBICACIÓN A';
+ $('#nameB').textContent=$('#personB').value||'PERSONA B';$('#placeB').textContent=$('#locationB').value||'UBICACIÓN B';
+ $('#breaking').style.display=$('#urgent').checked?'block':'none';$('#live').style.display=$('#mode').value==='simultaneous'?'block':'none';
+ $('#modeHelp').textContent=helps[$('#mode').value];$('#status').textContent='Duración común: '+$('#duration').value+' segundos';
+}
+$('#apply').onclick=apply;
+$('#template').onchange=()=>{const t=$('#template').value;$('#urgent').checked=t==='breaking';$('#title').value={breaking:'Último momento: información en desarrollo',interview:'Conversación especial',correspondent:'Informe desde el lugar',debate:'Dos miradas, un tema'}[t];apply()};
+$('#export').onclick=()=>{
+ const data={schema:'uizador.news-preset.v0.1',template:$('#template').value,recording_mode:$('#mode').value,duration_sec:+$('#duration').value,aspect_ratio:$('#ratio').value,graphics:{logo:$('#logo').value,headline:$('#title').value,breaking:$('#urgent').checked},roles:[{camera:'A',name:$('#personA').value,location:$('#locationA').value},{camera:'B',name:$('#personB').value,location:$('#locationB').value}],composition:{layout:'split-screen',sync:$('#mode').value==='separate'?'duration-and-cues':'common-clock'}};
+ const a=document.createElement('a'),blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});a.href=URL.createObjectURL(blob);a.download='uizador-noticiero.json';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);
+};apply();
+</script></body></html>

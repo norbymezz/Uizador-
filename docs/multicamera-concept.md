@@ -257,6 +257,29 @@ El teleprompter puede mostrar:
 
 El diálogo, las acciones y los movimientos de cámara comparten el mismo reloj. De ese modo, una línea puede activar simultáneamente una entrada actoral, un paneo, un zoom o un cambio de encuadre.
 
+### Pista audiovisual de referencia y fondeo posterior
+
+Un preset puede incluir o aceptar una pista de referencia aportada por el usuario. Puede ser audio, música, diálogo de ensayo o un fragmento audiovisual utilizado para seguir coreografía, ritmo y entradas.
+
+La pista de referencia puede marcar:
+
+- inicio y final de movimientos;
+- pasos o coreografía;
+- ritmo de actuación;
+- entradas de personajes;
+- pausas y reacciones;
+- paneos, zooms y cambios de encuadre.
+
+La grabación conserva el audio ambiente y la pista guía cuando resulte útil para sincronizar. Sin embargo, el proyecto distingue entre:
+
+- **audio guía:** utilizado durante ensayo y grabación;
+- **audio de cámara:** registrado localmente con la imagen;
+- **audio final:** música, diálogo, doblaje o fondeo incorporado posteriormente.
+
+En la edición, la pista guía puede silenciarse, sustituirse o conservarse parcialmente. Esto permite grabar primero la coreografía y realizar después voces, música o diseño sonoro con mayor control.
+
+Los presets distribuidos deben usar material original, licenciado o de dominio público. También pueden describir la estructura de una escena conocida y permitir que el usuario incorpore su propia referencia sin que el archivo protegido forme parte del catálogo de la aplicación.
+
 ### Escena demostrativa al iniciar
 
 La primera experiencia de la aplicación debe enseñar el sistema mediante una escena breve y ejecutable:

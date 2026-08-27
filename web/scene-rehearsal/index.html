@@ -58,7 +58,7 @@ body.shooting #configBtn{display:block}
 <h2>1 · Elegí tu escena</h2>
 <p>Esto define las líneas punteadas, el encuadre y el movimiento que vas a seguir.</p>
 <label>Tipo de escena
-<select id="wPreset"><option value="two">Plano de dos · acercamiento</option><option value="reverse">Plano / contraplano</option><option value="orbit">Rotación alrededor de protagonista</option></select></label>
+<select id="wPreset"><option value="two">Plano de dos · acercamiento</option><option value="reverse">Plano / contraplano</option><option value="orbit">Rotación alrededor de protagonista</option><option value="sitcom">Sitcom multicámara</option><option value="sitcom">Sitcom multicámara</option></select></label>
 <div class="nav"><button class="next full" data-next>Continuar</button></div>
 </div>
 <div class="step">
@@ -142,7 +142,8 @@ let stream=null,runTimer=null,recorder=null,chunks=[],startedAt=0;
 const presets={
  two:{name:'Plano de dos',move:'↔',apply:p=>{document.querySelector('.a').style.transform=`scale(${1+p*.12})`;document.querySelector('.b').style.transform=`scale(${1+p*.12})`}},
  reverse:{name:'Plano / contraplano',move:'⇆',apply:p=>{document.querySelector('.a').style.opacity=p<.5?1:.25;document.querySelector('.b').style.opacity=p<.5?.25:1}},
- orbit:{name:'Rotación protagonista',move:'⟳',apply:p=>{document.querySelector('.a').style.left=`${10+p*18}%`;document.querySelector('.b').style.right=`${10+p*18}%`}}
+ orbit:{name:'Rotación protagonista',move:'⟳',apply:p=>{document.querySelector('.a').style.left=`${10+p*18}%`;document.querySelector('.b').style.right=`${10+p*18}%`}},
+ sitcom:{name:'Sitcom multicámara',move:'A · G · B',apply:p=>{document.querySelector('.a').style.left='12%';document.querySelector('.b').style.right='12%';document.querySelector('.a').style.opacity=1;document.querySelector('.b').style.opacity=1;document.querySelector('.a').style.transform='scale(1)';document.querySelector('.b').style.transform='scale(1)'}}
 };
 function lines(){return $('#script').value.split('\n').map(x=>{const [who,t,...rest]=x.split('|');return{who:(who||'').trim(),t:Number(t)||0,text:rest.join('|').trim()}}).filter(x=>x.text).sort((a,b)=>a.t-b.t)}
 function renderTimeline(){const d=+$('#duration').value||15,ls=lines(),box=$('#timeline');box.innerHTML='';ls.forEach((x,i)=>{const end=ls[i+1]?.t??d,b=document.createElement('button');b.className='seg';b.style.flex=Math.max(.2,end-x.t);b.textContent=`${x.who} · ${x.t}s`;box.appendChild(b)})}

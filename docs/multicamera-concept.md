@@ -238,6 +238,21 @@ Ejemplo conceptual:
 }
 ```
 
+El preset puede derivarse del análisis de una escena de referencia sin conservar su contenido expresivo. Se abstraen:
+
+- composición y distribución relativa;
+- posiciones de cámara y actores;
+- altura, inclinación y ángulos;
+- tipo y duración de movimientos;
+- evolución del zoom;
+- duración aproximada de planos;
+- momentos de entrada, reacción y diálogo;
+- geometría general del fondo o decorado.
+
+El texto puede reemplazarse, traducirse o desaparecer por completo. Los actores, objetos, vestuario, fondo y sonido final también pueden ser distintos. La estructura temporal funciona independientemente del idioma.
+
+Durante la preparación puede mostrarse una imagen fija semitransparente de referencia para hacer coincidir el encuadre. Esa imagen es una ayuda de calibración y puede ser aportada por el usuario; no necesita incorporarse al video final.
+
 El preset no es solamente una imagen de referencia: es una secuencia temporal de objetivos visuales. En cada instante indica dónde debería estar el encuadre y cuánto debería haberse completado el movimiento.
 
 ## Teleprompter, diálogo y aprendizaje inicial

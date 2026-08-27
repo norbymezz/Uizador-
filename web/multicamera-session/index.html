@@ -46,6 +46,8 @@ video{width:100%;height:56vh;object-fit:cover}.guide{position:absolute;inset:0;p
 <div class="grid" id="directorSetup">
 <label>Duración de escena<input id="duration" type="number" min="5" max="120" value="12"></label>
 <label>Margen antes del clock<input id="preroll" type="number" min="1" max="8" value="2"></label>
+<label>Cantidad de tomas<input id="repetitions" type="number" min="1" max="10" value="3"></label>
+<label>Pausa entre tomas<input id="pauseBetween" type="number" min="2" max="30" value="5"></label>
 </div>
 <button id="prepare" class="primary" style="margin-top:10px">Preparar cámaras</button>
 <div class="status" id="lobbyStatus">Esperando conexiones…</div></div>
@@ -102,7 +104,7 @@ async function openCamera(){
 }
 $('#prepare').onclick=async()=>{
  if(!director)return;const ok=await openCamera();if(!ok)return;
- currentCfg={duration:Math.max(5,+$('#duration').value||12),preroll:Math.max(1,+$('#preroll').value||2)};
+ currentCfg={duration:Math.max(5,+$('#duration').value||12),preroll:Math.max(1,+$('#preroll').value||2),repetitions:Math.max(1,Math.min(10,+$('#repetitions').value||1)),pauseBetween:Math.max(2,+$('#pauseBetween').value||5)};
  sendAll({type:'prepare',cfg:currentCfg});show('cameraScreen');$('#role').textContent='Director';$('#cameraStatus').textContent='Todas las cámaras deben quedar preparadas.'
 };
 async function handleMessage(m){
@@ -128,12 +130,21 @@ const wait=ms=>new Promise(r=>setTimeout(r,ms));
 async function countdown(sec){for(let i=sec;i>0;i--){$('#big').textContent=i;await wait(1000)}$('#big').textContent=''}
 async function startSignature(){tone(740,.16);await wait(420);tone(740,.16);await wait(420);tone(1180,.34);await wait(520)}
 async function endSignature(){tone(190,.12,1);await wait(90);tone(95,.28,1);await wait(450)}
-$('#startTake').onclick=async()=>{
- if(!director||!currentCfg)return;take++;$('#startTake').disabled=true;
- sendAll({type:'record',take});await beginRecording(take);$('#state').textContent='Grabando';$('#cameraStatus').textContent='Pre-roll: todos ya están grabando.';
- await countdown(currentCfg.preroll);await startSignature();$('#prompt').textContent='ACCIÓN · escena en curso';$('#state').textContent='ACCIÓN';
+async function runOneTake(sequenceIndex,total){
+ take++;$('#state').textContent='Toma '+sequenceIndex+' de '+total;$('#cameraStatus').textContent='Todos comienzan a grabar antes de la marca sonora.';
+ sendAll({type:'record',take,sequenceIndex,total});await beginRecording(take);
+ await countdown(currentCfg.preroll);await startSignature();$('#prompt').textContent='ACCIÓN · toma '+sequenceIndex;$('#state').textContent='ACCIÓN';
  await countdown(currentCfg.duration);$('#prompt').textContent='FIN';await endSignature();
- await wait(800);sendAll({type:'stop',take});stopRecording();$('#state').textContent='Finalizada';$('#startTake').disabled=false;$('#startTake').textContent='Grabar otra toma'
+ await wait(800);sendAll({type:'stop',take});stopRecording();$('#state').textContent='Toma '+sequenceIndex+' terminada'
+}
+$('#startTake').onclick=async()=>{
+ if(!director||!currentCfg)return;$('#startTake').disabled=true;
+ const total=currentCfg.repetitions||1;
+ for(let i=1;i<=total;i++){
+  await runOneTake(i,total);
+  if(i<total){$('#prompt').textContent='Volvé a posición · próxima toma en '+currentCfg.pauseBetween+' s';$('#state').textContent='Pausa';await countdown(currentCfg.pauseBetween)}
+ }
+ $('#big').textContent='';$('#prompt').textContent='Secuencia completa';$('#state').textContent='Finalizada';$('#startTake').disabled=false;$('#startTake').textContent='Grabar otra secuencia'
 };
 $('#backLobby').onclick=()=>show('lobby');
 renderDevices();

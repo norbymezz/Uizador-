@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Uizador · Ensayo de escena</title>
+<style>
+:root{color-scheme:dark;--accent:#59d8ff;--warn:#ffd166;--ok:#6dff9b}
+*{box-sizing:border-box}body{margin:0;background:#090b10;color:#f2f5f8;font-family:system-ui,sans-serif}
+main{width:min(900px,100%);margin:auto;padding:12px}.top{display:flex;gap:8px;align-items:center;justify-content:space-between}
+h1{font-size:1.05rem;margin:4px 0 10px}.stage{position:relative;overflow:hidden;border-radius:14px;background:#111;aspect-ratio:16/9;border:1px solid #303640}
+video{width:100%;height:100%;object-fit:cover;transform:scaleX(-1)}
+.overlay{position:absolute;inset:0;pointer-events:none}.subject{position:absolute;border:3px dashed rgba(89,216,255,.85);border-radius:48% 48% 38% 38%;transition:.2s}
+.subject.a{left:10%;top:16%;width:31%;height:72%}.subject.b{right:10%;top:16%;width:31%;height:72%}
+.horizon{position:absolute;left:4%;right:4%;top:45%;border-top:2px dashed rgba(255,209,102,.7)}
+.move{position:absolute;left:44%;top:16%;font-size:2.2rem;color:var(--warn);opacity:.9}
+.hud{position:absolute;left:10px;right:10px;top:8px;display:flex;justify-content:space-between;text-shadow:0 1px 4px #000}
+.count{position:absolute;inset:0;display:grid;place-items:center;font-size:min(25vw,150px);font-weight:800;text-shadow:0 4px 18px #000;background:rgba(0,0,0,.18)}
+.prompt{position:absolute;left:5%;right:5%;bottom:5%;padding:9px 12px;border-radius:9px;background:rgba(0,0,0,.72);text-align:center;font-size:clamp(16px,3.8vw,26px);text-shadow:0 1px 2px #000}
+.prompt small{display:block;color:var(--accent);font-size:.65em;margin-bottom:3px}
+.panel{margin-top:10px;padding:10px;border:1px solid #303640;border-radius:12px;background:#121720}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}label{display:grid;gap:4px;color:#aeb7c3;font-size:.78rem}
+input,select,button,textarea{width:100%;border:1px solid #3a4350;background:#1a202a;color:#fff;border-radius:8px;padding:9px;font:inherit}
+button{cursor:pointer;font-weight:650}.primary{background:#075d74;border-color:#168cac}.recording{background:#8b1824}
+.actions{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:9px}.timeline{display:flex;height:38px;margin-top:10px;border-radius:8px;overflow:hidden}
+.seg{border:0;border-right:1px solid #111;border-radius:0;padding:4px;font-size:.72rem;background:#283444}.seg.active{background:#087b99}
+textarea{min-height:120px;resize:vertical}.status{min-height:1.2em;margin-top:7px;color:#9ba9b8;font-size:.82rem}
+@media(max-width:560px){.grid{grid-template-columns:1fr}.actions{grid-template-columns:1fr 1fr}.actions button:last-child{grid-column:1/-1}}
+</style>
+</head>
+<body><main>
+<div class="top"><h1>Uizador · Ensayo guiado</h1><span id="clock">00:00.0</span></div>
+<section class="stage">
+<video id="camera" autoplay muted playsinline></video>
+<div class="overlay">
+<div class="subject a"></div><div class="subject b"></div><div class="horizon"></div>
+<div class="move" id="move">↔</div><div class="hud"><span id="shot">Plano de dos</span><span id="zoom">1.0×</span></div>
+<div class="count" id="count"></div>
+<div class="prompt" id="prompt"><small>PERSONA A · preparada</small>El texto aparecerá sincronizado acá.</div>
+</div>
+</section>
+
+<section class="panel">
+<div class="grid">
+<label>Preset
+<select id="preset"><option value="two">Plano de dos · acercamiento</option><option value="reverse">Plano / contraplano</option><option value="orbit">Rotación alrededor de protagonista</option></select></label>
+<label>Duración
+<input id="duration" type="number" min="6" max="60" value="15"></label>
+<label>Cuenta regresiva
+<input id="countdown" type="number" min="0" max="10" value="3"></label>
+<label>Zoom previsto
+<select id="zoomTarget"><option value="1.0">Fijo 1.0×</option><option value="1.5" selected>1.0× → 1.5×</option><option value="2.0">1.0× → 2.0×</option></select></label>
+</div>
+<div class="actions">
+<button id="cameraBtn">Activar cámara</button><button id="rehearse" class="primary">Ensayar</button><button id="record">Grabar toma</button>
+</div>
+<div class="timeline" id="timeline"></div>
+<div class="status" id="status">Editá el texto, activá la cámara y ensayá.</div>
+</section>
+
+<section class="panel">
+<label>Texto segmentado — una intervención por línea
+<textarea id="script">A|0|No llegamos tarde: llegamos exactamente cuando empieza.
+B|3|Eso lo decís cada vez que llegamos tarde.
+A|6|Entonces ya tenemos una tradición.
+B|10|Una tradición necesita testigos.
+A|13|Mirá a cámara.</textarea></label>
+<div class="status">Formato: PERSONA | segundo de entrada | texto. El diálogo es original y reemplazable.</div>
+</section>
+</main>
+<script>
+const $=s=>document.querySelector(s),video=$('#camera'),promptBox=$('#prompt'),countBox=$('#count'),statusBox=$('#status');
+let stream=null,runTimer=null,recorder=null,chunks=[],startedAt=0;
+const presets={
+ two:{name:'Plano de dos',move:'↔',apply:p=>{document.querySelector('.a').style.transform=`scale(${1+p*.12})`;document.querySelector('.b').style.transform=`scale(${1+p*.12})`}},
+ reverse:{name:'Plano / contraplano',move:'⇆',apply:p=>{document.querySelector('.a').style.opacity=p<.5?1:.25;document.querySelector('.b').style.opacity=p<.5?.25:1}},
+ orbit:{name:'Rotación protagonista',move:'⟳',apply:p=>{document.querySelector('.a').style.left=`${10+p*18}%`;document.querySelector('.b').style.right=`${10+p*18}%`}}
+};
+function lines(){return $('#script').value.split('\n').map(x=>{const [who,t,...rest]=x.split('|');return{who:(who||'').trim(),t:Number(t)||0,text:rest.join('|').trim()}}).filter(x=>x.text).sort((a,b)=>a.t-b.t)}
+function renderTimeline(){const d=+$('#duration').value||15,ls=lines(),box=$('#timeline');box.innerHTML='';ls.forEach((x,i)=>{const end=ls[i+1]?.t??d,b=document.createElement('button');b.className='seg';b.style.flex=Math.max(.2,end-x.t);b.textContent=`${x.who} · ${x.t}s`;box.appendChild(b)})}
+async function enableCamera(){try{stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:'environment'},audio:true});video.srcObject=stream;statusBox.textContent='Cámara preparada.'}catch(e){statusBox.textContent='No se pudo abrir la cámara: '+e.message}}
+function setAt(t){const d=+$('#duration').value||15,p=Math.min(1,t/d),ls=lines();let current=ls[0];ls.forEach(x=>{if(x.t<=t)current=x});promptBox.innerHTML=`<small>${current?.who||'—'} · ${Math.max(0,(ls.find(x=>x.t>t)?.t??d)-t).toFixed(1)} s</small>${current?.text||''}`;$('#clock').textContent=`00:${t.toFixed(1).padStart(4,'0')}`;const z=1+(Number($('#zoomTarget').value)-1)*p;$('#zoom').textContent=z.toFixed(2)+'×';const pr=presets[$('#preset').value];$('#shot').textContent=pr.name;$('#move').textContent=pr.move;pr.apply(p);document.querySelectorAll('.seg').forEach((e,i)=>e.classList.toggle('active',ls[i]===current))}
+async function start(recording=false){clearInterval(runTimer);renderTimeline();if(recording&&!stream){await enableCamera();if(!stream)return}const cd=Math.max(0,+$('#countdown').value||0);for(let i=cd;i>0;i--){countBox.textContent=i;await new Promise(r=>setTimeout(r,1000))}countBox.textContent='';if(recording){chunks=[];recorder=new MediaRecorder(stream);recorder.ondataavailable=e=>e.data.size&&chunks.push(e.data);recorder.onstop=download;recorder.start(500);$('#record').classList.add('recording');$('#record').textContent='Grabando…'}startedAt=performance.now();const d=+$('#duration').value||15;runTimer=setInterval(()=>{const t=(performance.now()-startedAt)/1000;setAt(Math.min(t,d));if(t>=d){clearInterval(runTimer);if(recorder?.state==='recording')recorder.stop();$('#record').classList.remove('recording');$('#record').textContent='Grabar toma';statusBox.textContent='Toma terminada.'}},50)}
+function download(){const blob=new Blob(chunks,{type:recorder.mimeType}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`uizador-toma-${Date.now()}.webm`;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000)}
+$('#cameraBtn').onclick=enableCamera;$('#rehearse').onclick=()=>start(false);$('#record').onclick=()=>start(true);
+['script','duration','preset'].forEach(id=>$('#'+id).addEventListener('input',renderTimeline));
+renderTimeline();setAt(0);
+</script></body></html>

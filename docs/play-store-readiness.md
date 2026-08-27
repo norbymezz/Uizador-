@@ -14,6 +14,22 @@ Actualizado: 2026-08-27.
 
 La orientación visual juvenil o femenina es una decisión estética y no una declaración de público infantil. La ficha, las declaraciones de audiencia, la política de privacidad y la comunicación del producto deben indicar coherentemente que la aplicación está destinada a mayores de 18 años.
 
+## Avance implementado
+
+La rama `multicamera-concept` ya contiene un proyecto Android nativo en `android/` con:
+
+- identificador provisional `com.uizador.app`;
+- `versionCode 1` y `versionName 0.1.0`;
+- `compileSdk 36` y `targetSdk 36`;
+- aplicación mínima desde Android 8 / API 26;
+- Jetpack Compose, Material 3 y tema visual propio;
+- permisos de cámara y micrófono declarados pero no pedidos al iniciar;
+- reducción de código y recursos habilitada para release;
+- icono inicial;
+- workflow de GitHub que ejecuta lint, pruebas y compila un APK de debug.
+
+Decisión pendiente antes del primer alta en Play Console: confirmar el package name definitivo. La firma, la upload key y los secretos de publicación no deben guardarse en el repositorio.
+
 ## Arquitectura prevista
 
 Los prototipos web actuales sirven para validar experiencia, flujo y modelos de datos. La versión publicable debería trasladar las funciones principales a Android:

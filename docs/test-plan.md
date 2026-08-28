@@ -183,3 +183,15 @@ The following checks run after every media-library or project-format change:
 3. Confirm that full filenames—including extensions—appear in the library and both camera selectors.
 4. Confirm that Step 01 and Step 02 use editorial typography and an underline, have no button background, cannot receive focus, and do not suggest that they are tappable.
 5. Confirm that audio reanalysis appears in the editing step beside synchronization controls, not as a duplicate setup action.
+
+
+## Contextual clearing controls regression
+
+1. Confirm **Open a saved project** is the first control in the preparation card.
+2. Confirm its **Clear** button only clears the native project-file field and does not unload the project already in memory.
+3. Confirm **Add videos to library** has its own adjacent **Clear** button and that it does not remove linked library items.
+4. Confirm **Clear library** appears beside the media-library heading and still requires confirmation.
+5. Confirm **Clear A** and **Clear B** appear beside their respective selectors.
+6. Clear one camera assignment and verify that its media remains listed in the library, the other assignment remains intact, and the primary continue action becomes disabled.
+7. Reassign the cleared camera and verify that the saved pair profile can be restored.
+8. Confirm the former detached full-width clearing buttons no longer appear at the bottom of the preparation card.

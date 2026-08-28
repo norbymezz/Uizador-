@@ -60,7 +60,7 @@ The initial run succeeds only if:
 - a visible and audible common action aligns within the measured error;
 - playback remains aligned after pausing and resuming;
 - only the selected A/B button is illuminated;
-- either audio track can be muted independently;
+- the audio source can be selected explicitly as A, B, Mix, or None;
 - a project can retain more than two media references and restore its active pair;
 - saved offsets, cuts, mute state, and playback position survive reopening;
 - no recording disappears without explanation.
@@ -207,3 +207,15 @@ The following checks run after every media-library or project-format change:
 6. Confirm the original videos and cut timestamps remain unchanged.
 7. Press **Full length**, save, reopen, and verify that a null saved end still means the complete remaining duration rather than time zero.
 8. Attempt to set the start after the end and the end before the start; confirm both invalid ranges are rejected.
+
+
+## Explicit audio-source regression
+
+1. Open an edited A/B pair and select **Audio A**.
+2. Play across several camera cuts and confirm the picture changes while only A remains audible.
+3. Repeat with **Audio B**, **Mix A + B**, and **No audio**.
+4. Confirm exactly one audio-source button is highlighted at a time.
+5. Save project v0.7, reopen it, relink the media, and confirm the selected source is restored for that pair.
+6. Assign another pair, choose a different audio source, and verify both pair profiles remain independent.
+7. Export each mode and confirm the downloaded file matches the preview selection without changing audio at visual cuts.
+8. Open a v0.6 project containing only legacy camera mute flags and confirm it maps correctly: A enabled → Audio A, B enabled → Audio B, both enabled → Mix, both muted → No audio.

@@ -15,6 +15,22 @@ A `.uizador` project preserves editable state rather than a rendered movie. It c
 - guides, presets, titles, effects, transitions, and captions;
 - enough media identity to relink moved originals safely.
 
+## Project and export metadata
+
+Project v0.8 stores human-readable naming and output layout without embedding or modifying media:
+
+```json
+{
+  "project": {"name": "Birthday scene 02"},
+  "export_settings": {
+    "file_name": "birthday-scene-final",
+    "layout": "portrait"
+  }
+}
+```
+
+Supported checkpoint layouts are `landscape` (1280×720), `portrait` (720×1280), and `square` (720×720).
+
 ## Media library and active pair
 
 A project is not limited to two files. The media library is an array. The synchronized editor selects two library entries as the current A/B pair.
@@ -59,8 +75,9 @@ Each ordered pair has an independent profile:
       "camera_b_media_id": "media-b1",
       "sync": {"camera_b_offset_ms": 10, "confidence": 0.85},
       "cuts": [{"t": 0, "camera": "A"}],
-      "audio": {"camera_a_muted": false, "camera_b_muted": true},
-      "playback": {"position_sec": 4.2, "selected_camera": "A"}
+      "audio": {"mode": "A", "camera_a_muted": false, "camera_b_muted": true},
+      "playback": {"position_sec": 4.2, "selected_camera": "A"},
+      "export_range": {"start_sec": 1.25, "end_sec": 12.8}
     }
   }
 }
@@ -107,7 +124,7 @@ The current checkpoint preserves:
 - all reversible cut decisions;
 - common playback position;
 - selected camera;
-- independent A/B mute state;
+- explicit audio source mode (A, B, Mix, or None);
 - media names, sizes, MIME types, timestamps, durations, and SHA-256 hashes.
 
 Canonical project time will use integer microseconds to avoid floating-point accumulation in long projects.
@@ -139,6 +156,8 @@ The importer must:
 - Existing `uizador.multicam.edl.v0.2`, project v0.3, and v0.4 JSON checkpoints remain accepted by the synchronization prototype.
 - Project v0.5 introduces `media_items` and `active_pair`.
 - Project v0.6 introduces `pair_states`, keyed by the ordered A/B media IDs. Each pair preserves its own offset, confidence, cuts, mute state, playback position, selected camera, and duration.
+- Project v0.7 replaces ambiguous independent mute controls with an explicit audio source mode while retaining legacy mute fields for migration.
+- Project v0.8 adds project naming, configurable download names, landscape/portrait/square output layouts, and the non-destructive export range.
 
 ## Current validation target
 

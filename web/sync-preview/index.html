@@ -17,7 +17,7 @@ button{cursor:pointer;font-weight:700}.danger{background:#5f2032;border-color:#b
 .cut{position:absolute;top:0;bottom:0;border-right:1px solid #111;display:grid;place-items:center;font-size:.72rem;font-weight:800}.cut.a{background:#126477}.cut.b{background:#854a25}
 pre{max-height:230px;overflow:auto;background:#0a0d12;padding:9px;border-radius:8px;font-size:.75rem}
 .workspace-screen{display:none}.workspace-screen.on{display:block}.steps{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px}.step{padding:9px;border-radius:999px;background:#171d27;color:#8794a4;text-align:center;font-size:.78rem;font-weight:800}.step.on{background:linear-gradient(135deg,#e84f9a,#8b69e8);color:#fff}.editor-head{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center}.editor-head h2{font-size:1rem;margin:0}.editor-head button{width:auto;min-height:38px}.media-list{display:grid;gap:6px;margin:8px 0}.media-item{padding:8px;border-radius:8px;background:#171d27;color:#bac6d4;font-size:.78rem}.media-item.linked{border-left:4px solid #7ff0c5}.media-item.missing{border-left:4px solid #ffb65c}.audio-controls{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}.audio-controls button.muted{background:#6d273c;border-color:#ff7da6;color:#fff}.seek-controls{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-top:8px}.seek-controls button{min-height:40px;padding:6px}.scrub{margin-top:8px}.scrub input{padding:0}.actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:9px}
-.hint{font-size:.78rem;color:#99a8b9;line-height:1.4}.offset{display:grid;grid-template-columns:1fr 110px;gap:8px;align-items:end}
+.hint{font-size:.78rem;color:#99a8b9;line-height:1.4}.offset{display:grid;grid-template-columns:1fr 110px;gap:8px;align-items:end}.export-box{border-color:#704e8e;background:linear-gradient(160deg,rgba(65,31,75,.96),rgba(32,25,49,.96))}.export-box h2{font-size:1rem;margin:0 0 7px}.export-actions{display:grid;grid-template-columns:2fr 1fr;gap:8px;margin-top:9px}.export-progress{width:100%;height:16px;margin-top:10px;accent-color:#e84f9a}.export-progress[hidden]{display:none}
 @media(max-width:650px){.grid,.videos{grid-template-columns:1fr}.transport{grid-template-columns:1fr 1fr}.transport button:first-child{grid-column:1/-1}.seek-controls{grid-template-columns:repeat(5,1fr)}.seek-controls button{font-size:.78rem}.actions{grid-template-columns:1fr}}
 </style></head>
 <body><main><h1>Uizador · Elegí tus mejores tomas</h1>
@@ -58,6 +58,12 @@ pre{max-height:230px;overflow:auto;background:#0a0d12;padding:9px;border-radius:
 <div class="time" id="time">00:00.000</div><div class="timeline" id="timeline"></div>
 <div class="actions"><button id="exportReport">Guardar proyecto .uizador</button><button id="clearCuts">Reiniciar cortes</button></div>
 <div class="status" id="previewStatus">A/B funciona reproduciendo o en pausa. Los controles no modifican los videos originales.</div>
+</section>
+<section class="card export-box"><h2>Exportar video terminado</h2>
+<div class="hint">Genera el montaje completo en este teléfono respetando el offset, los cortes A/B y los muteos. Los originales no se modifican ni se suben a Internet.</div>
+<div class="export-actions"><button id="exportVideo" class="primary">Crear video editado</button><button id="cancelExport" disabled>Cancelar</button></div>
+<progress id="exportProgress" class="export-progress" max="100" value="0" hidden></progress>
+<div class="status" id="exportStatus">Formato inicial: WebM, compatible con Android y con la carga manual a YouTube.</div>
 </section>
 <section class="card"><details><summary>Lista de decisiones de montaje</summary><pre id="json"></pre></details></section>
 </section>
@@ -122,6 +128,39 @@ $('#clearCuts').onclick=()=>{cuts=[{t:0,camera:'A'}];setActiveCamera('A');render
 async function sha256(file){if(!file||!crypto.subtle)return null;const hash=await crypto.subtle.digest('SHA-256',await file.arrayBuffer());return[...new Uint8Array(hash)].map(x=>x.toString(16).padStart(2,'0')).join('')}
 async function mediaDescriptor(file,video,previous,id){if(!file)return previous?{...previous,id:id||previous.id||fallbackMediaId(previous)}:null;return{id:id||mediaKey(file),name:file.name,size:file.size,type:file.type||null,last_modified:file.lastModified||null,duration_sec:Number.isFinite(video?.duration)?Number(video.duration.toFixed(3)):(previous?.duration_sec??null),sha256:await sha256(file)}}
 $('#exportReport').onclick=async()=>{const report=projectData(),fa=selectedMedia.A?.file,fb=selectedMedia.B?.file;$('#previewStatus').textContent='Verificando los videos y guardando el proyecto…';capturePairState();report.schema='uizador.multicam.project.v0.6';report.pair_states=pairStates;report.media_items=(await Promise.all(mediaLibrary.map(item=>mediaDescriptor(item.file,(item===selectedMedia.A?videos.A:item===selectedMedia.B?videos.B:null),item.ref,item.id)))).filter(Boolean);report.active_pair={camera_a_media_id:selectedMedia.A?.id||null,camera_b_media_id:selectedMedia.B?.id||null};report.media={camera_a:report.media_items.find(x=>x.id===report.active_pair.camera_a_media_id)||null,camera_b:report.media_items.find(x=>x.id===report.active_pair.camera_b_media_id)||null};report.files={camera_a:report.media.camera_a?.name||null,camera_b:report.media.camera_b?.name||null};report.analysis={confidence:analysisScore===null?null:Number(analysisScore.toFixed(4)),automatic_offset_ms:openedProject?.analysis?.automatic_offset_ms??offsetMs,manual_offset_ms:offsetMs,frame_step_assumption_fps:30};report.playback={position_sec:Number(commonTime().toFixed(3)),selected_camera:activeCamera};report.audio={camera_a_muted:videos.A.muted,camera_b_muted:videos.B.muted};report.capture=openedProject?.capture||null;report.saved_at=new Date().toISOString();const blob=new Blob([JSON.stringify(report,null,2)],{type:'application/vnd.uizador.project+json'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='uizador-multicam-project.uizador';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1500);openedProject=report;$('#previewStatus').textContent='Proyecto guardado con referencias, huellas, offset, cortes y posición. Los videos originales siguen separados.'};
+let exportJob=null;
+function cameraAt(t){let camera=cuts[0]?.camera||'A';for(const cut of cuts){if(cut.t<=t)camera=cut.camera;else break}return camera}
+function waitMetadata(v){return new Promise((resolve,reject)=>{if(v.readyState>=1)return resolve();v.onloadedmetadata=resolve;v.onerror=()=>reject(new Error('No se pudo abrir uno de los videos para exportar.'))})}
+function drawContained(ctx,v,w,h){ctx.fillStyle='#000';ctx.fillRect(0,0,w,h);if(!v.videoWidth||!v.videoHeight)return;const scale=Math.min(w/v.videoWidth,h/v.videoHeight),dw=v.videoWidth*scale,dh=v.videoHeight*scale;ctx.drawImage(v,(w-dw)/2,(h-dh)/2,dw,dh)}
+function exportMime(){for(const type of ['video/webm;codecs=vp9,opus','video/webm;codecs=vp8,opus','video/webm'])if(MediaRecorder.isTypeSupported(type))return type;return''}
+async function exportEditedVideo(){
+ if(exportJob)return;
+ const fa=selectedMedia.A?.file,fb=selectedMedia.B?.file;if(!fa||!fb){$('#exportStatus').textContent='Faltan los archivos originales del par A/B.';return}
+ if(!window.MediaRecorder||!HTMLCanvasElement.prototype.captureStream){$('#exportStatus').textContent='Este navegador no permite exportar video. Probá con Chrome actualizado en Android.';return}
+ if(playing)$('#play').click();
+ const va=document.createElement('video'),vb=document.createElement('video'),urlA=URL.createObjectURL(fa),urlB=URL.createObjectURL(fb);va.src=urlA;vb.src=urlB;va.preload=vb.preload='auto';va.playsInline=vb.playsInline=true;
+ const canvas=document.createElement('canvas');canvas.width=1280;canvas.height=720;const ctx=canvas.getContext('2d'),fps=30,total=Math.max(.1,duration||videos.A.duration||1);
+ let ac=null,rec=null,raf=0,cancelled=false,chunks=[],bStarted=false,start=0;
+ exportJob={cancel(){cancelled=true;try{rec?.stop()}catch{}},cleanup(){cancelAnimationFrame(raf);va.pause();vb.pause();ac?.close();URL.revokeObjectURL(urlA);URL.revokeObjectURL(urlB);exportJob=null;$('#cancelExport').disabled=true;$('#exportVideo').disabled=false}};
+ $('#exportVideo').disabled=true;$('#cancelExport').disabled=false;$('#exportProgress').hidden=false;$('#exportProgress').value=0;$('#exportStatus').textContent='Preparando el render… No cierres esta pantalla.';
+ try{
+  va.load();vb.load();await Promise.all([waitMetadata(va),waitMetadata(vb)]);
+  const off=offsetMs/1000;va.currentTime=0;vb.currentTime=Math.max(0,-off);
+  ac=new AudioContext();const dest=ac.createMediaStreamDestination(),srcA=ac.createMediaElementSource(va),srcB=ac.createMediaElementSource(vb),gainA=ac.createGain(),gainB=ac.createGain();gainA.gain.value=videos.A.muted?0:1;gainB.gain.value=videos.B.muted?0:1;srcA.connect(gainA).connect(dest);srcB.connect(gainB).connect(dest);await ac.resume();
+  const canvasStream=canvas.captureStream(fps),stream=new MediaStream([...canvasStream.getVideoTracks(),...dest.stream.getAudioTracks()]),mime=exportMime();rec=new MediaRecorder(stream,mime?{mimeType:mime,videoBitsPerSecond:6000000}:undefined);
+  rec.ondataavailable=e=>{if(e.data.size)chunks.push(e.data)};
+  rec.onstop=()=>{if(!cancelled&&chunks.length){const blob=new Blob(chunks,{type:rec.mimeType||'video/webm'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='uizador-video-editado.webm';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),3000);$('#exportProgress').value=100;$('#exportStatus').textContent='Video terminado y enviado a Descargas.'}else $('#exportStatus').textContent='Exportación cancelada.';exportJob?.cleanup()};
+  rec.start(1000);await va.play();if(off<=0){await vb.play();bStarted=true}start=performance.now();
+  const frame=()=>{
+   if(cancelled)return;const t=(performance.now()-start)/1000;
+   if(!bStarted&&t>=off){vb.currentTime=Math.max(0,t-off);vb.play().catch(()=>{});bStarted=true}
+   const expectedA=t,expectedB=Math.max(0,t-off);if(Math.abs(va.currentTime-expectedA)>.15&&expectedA<va.duration)va.currentTime=expectedA;if(bStarted&&Math.abs(vb.currentTime-expectedB)>.15&&expectedB<vb.duration)vb.currentTime=expectedB;
+   const camera=cameraAt(t),source=camera==='B'&&t>=off?vb:va;drawContained(ctx,source,canvas.width,canvas.height);$('#exportProgress').value=Math.min(100,t/total*100);$('#exportStatus').textContent='Creando video… '+Math.min(100,Math.round(t/total*100))+' %';
+   if(t>=total){va.pause();vb.pause();rec.stop();return}raf=requestAnimationFrame(frame)
+  };frame()
+ }catch(e){$('#exportStatus').textContent='No se pudo exportar: '+e.message;exportJob?.cleanup()}
+}
+$('#exportVideo').onclick=exportEditedVideo;$('#cancelExport').onclick=()=>exportJob?.cancel();
 function projectData(){const d=duration||Math.max(videos.A.duration||0,videos.B.duration||0,1);return{schema:'uizador.multicam.edl.v0.2',sync:{reference:'A',camera_b_offset_ms:offsetMs},duration_sec:Number(d.toFixed(3)),cuts:cuts.map((x,i)=>({...x,end_sec:Number((cuts[i+1]?.t??d).toFixed(3))}))}}
 function render(){const d=duration||Math.max(videos.A.duration||0,videos.B.duration||0,1),box=$('#timeline');box.innerHTML='';cuts.forEach((x,i)=>{const end=cuts[i+1]?.t??d,el=document.createElement('div');el.className='cut '+x.camera.toLowerCase();el.style.left=(x.t/d*100)+'%';el.style.width=(Math.max(0,end-x.t)/d*100)+'%';el.textContent=x.camera;box.appendChild(el)});$('#json').textContent=JSON.stringify(projectData(),null,2);$('#positionRange').max=Math.max(.001,d)}
 function format(t){const m=Math.floor(t/60),s=t-m*60;return String(m).padStart(2,'0')+':'+s.toFixed(3).padStart(6,'0')}

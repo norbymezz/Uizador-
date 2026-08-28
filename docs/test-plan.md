@@ -232,3 +232,15 @@ The following checks run after every media-library or project-format change:
 7. Confirm undo history resets when switching to another A/B pair and never alters original media.
 8. Confirm the export summary updates after changes to trim range, audio source, output name, layout, or cut count.
 9. Run `node --test tests/*.test.mjs` and require all automated tests to pass before the physical batch.
+
+
+## Post-export preview recovery regression
+
+1. Load and synchronize an A/B pair, play it, pause, and record the common position.
+2. Export a named video in each output layout while observing that preview controls are temporarily disabled.
+3. Confirm the final file downloads and the temporary export decoders and stream tracks are released.
+4. Confirm A/B preview sources return at the pre-export common position and **Play together** works immediately.
+5. Rewind, replay, pause, seek, step one frame, and navigate to previous/next cuts without reloading the page.
+6. Change to another A/B pair and confirm metadata, duration, offset, and playback still initialize correctly.
+7. Cancel an export and repeat steps 4–6.
+8. Repeat two exports consecutively on Android to detect decoder exhaustion or controls left disabled.

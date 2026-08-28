@@ -39,11 +39,11 @@ The screenshots show real files recorded during the first two-phone test: audio-
 - Local camera and microphone capture
 - Configurable scene duration and repeated takes
 - Three-pulse start signature and end clap
-- Automatic local WebM downloads
-- Audio-envelope offset estimation
-- Manual synchronization adjustment
-- Synchronized A/B playback and reversible camera selection
-- Portable non-destructive `.uizador` project format
+- Local take retention without download prompts between repetitions
+- Audio-envelope offset estimation and manual adjustment on a shared time grid
+- Synchronized A/B playback, reversible cuts, precise seeking, and independent track mute
+- Multi-file media library with selectable active A/B pairs
+- Portable non-destructive `.uizador` projects with media identity, hashes, offsets, cuts, mute state, and playback state
 - Device diagnostics and a versioned test catalog
 
 ## Immediate testing priorities
@@ -52,9 +52,9 @@ The screenshots show real files recorded during the first two-phone test: audio-
 - Measure offset and drift over longer recordings
 - Preserve complete evidence for each test run
 - Improve file transfer from remote cameras to the director
-- Add rewind, frame-step, jump-back, and jump-forward controls to synchronized playback
-- Confirm that camera switching works both during playback and while paused
-- Improve download notifications and permission guidance
+- Validate multi-file project reopen and automatic media relinking
+- Confirm that camera switching and mute state survive save/reopen
+- Improve remote-camera transfer to the director and final batch-download verification
 
 ## Planned capabilities
 

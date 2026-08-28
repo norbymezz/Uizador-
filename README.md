@@ -56,6 +56,10 @@ The screenshots show real files recorded during the first two-phone test: audio-
 - Confirm that camera switching and mute state survive save/reopen
 - Improve remote-camera transfer to the director and final batch-download verification
 
+## Test evidence
+
+- [2026-08-28: four-file media library and active-pair validation](docs/test-results/2026-08-28-media-library.md)
+
 ## Planned capabilities
 
 Scene templates, teleprompter guidance, remote sessions, chroma key, virtual backgrounds, subtitles, titles, transitions, sound effects, news/interview layouts, and Android/Play Store packaging are planned in phases. They must not delay validation of recording, recovery, and synchronization.

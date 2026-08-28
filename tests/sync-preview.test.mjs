@@ -39,3 +39,13 @@ test('visible editor copy remains English',()=>{
   assert.doesNotMatch(html,/[áéíóúñ¿¡]/i);
   assert.doesNotMatch(html,/id="mute[AB]"/);
 });
+
+
+test('export explicitly releases and restores preview resources',()=>{
+  for(const marker of [
+    'releasePreviewForExport','restorePreviewAfterExport','renderStream?.getTracks()',
+    "removeAttribute('src')",'setExportLock(true)','setExportLock(false)'
+  ]) assert.ok(script.includes(marker),`missing export recovery marker: ${marker}`);
+  assert.ok(script.includes("$('#play').textContent='Pause'"));
+  assert.ok(script.includes("v.addEventListener('loadedmetadata'"));
+});

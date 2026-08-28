@@ -22,6 +22,7 @@
 6. One audible start signature and an end clap are captured by every nearby phone.
 7. The original files are loaded into the synchronization view.
 8. Audio envelopes estimate the offset; the user can refine it manually and choose camera A or B.
+9. The user trims the export range, selects a stable audio source, and downloads one locally rendered WebM.
 
 ## Prototype screenshots
 
@@ -41,12 +42,13 @@ The screenshots show real files recorded during the first two-phone test: audio-
 - Three-pulse start signature and end clap
 - Local take retention without download prompts between repetitions
 - Audio-envelope offset estimation and manual adjustment on a shared time grid
-- Synchronized A/B playback, reversible cuts, precise seeking, and independent track mute
+- Synchronized A/B playback, reversible cuts, precise seeking, cut navigation, and cut undo
 - Two-step mobile workflow: project/media preparation followed by focused montage editing
 - Multi-file media library with selectable active A/B pairs
 - Independent synchronization and montage profiles for every ordered A/B pair
-- Portable non-destructive `.uizador` projects with media identity, hashes, offsets, cuts, mute state, and playback state
-- Device diagnostics and a versioned test catalog
+- Portable non-destructive `.uizador` projects with media identity, hashes, offsets, cuts, explicit audio source, trim range, naming, output layout, and playback state
+- Local WebM rendering and download with landscape, portrait, or square output
+- Device diagnostics, a versioned test catalog, and automated sync-preview structure tests
 
 ## Immediate testing priorities
 
@@ -55,7 +57,7 @@ The screenshots show real files recorded during the first two-phone test: audio-
 - Preserve complete evidence for each test run
 - Improve file transfer from remote cameras to the director
 - Validate multi-file project reopen and automatic media relinking
-- Confirm that camera switching and mute state survive save/reopen
+- Confirm that camera switching, audio source, trim, naming, and output layout survive save/reopen
 - Improve remote-camera transfer to the director and final batch-download verification
 
 ## Test evidence

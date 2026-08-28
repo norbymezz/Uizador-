@@ -63,6 +63,7 @@ The screenshots show real files recorded during the first two-phone test: audio-
 ## Test evidence
 
 - [2026-08-28: four-file media library and active-pair validation](docs/test-results/2026-08-28-media-library.md)
+- [2026-08-28: end-to-end edited-video export validation](docs/test-results/2026-08-28-mvp-export.md)
 
 ## Planned capabilities
 

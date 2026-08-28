@@ -132,3 +132,17 @@ The following checks run after every media-library or project-format change:
 6. Verify that offset and cut decisions remain available for intentional relinking.
 7. Verify that **Continue to editing** is disabled until a new A/B pair is linked and analyzed.
 8. Confirm that **Reset cuts** remains the separate action for discarding edit decisions.
+
+
+## Independent pair-state regression
+
+1. Add four videos and create pair A1/B1.
+2. Analyze A1/B1; set a recognizable offset, mute combination, playback position, and several cuts.
+3. Return to preparation and choose A2/B2.
+4. Confirm that A2/B2 starts with a new profile rather than inheriting A1/B1 decisions.
+5. Analyze and edit A2/B2 with different values.
+6. Switch back to A1/B1 and verify restoration of its original offset, confidence, cuts, mute state, position, duration, and selected camera.
+7. Switch again to A2/B2 and verify its independent profile.
+8. Save project v0.6, reload, relink all four media files, and repeat both restorations.
+9. Open a v0.5 project and confirm migration of its single global state into the legacy active pair.
+10. Clear the library, relink files, and confirm that preserved pair profiles are not overwritten with null media IDs.

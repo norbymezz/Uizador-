@@ -49,6 +49,25 @@ A project is not limited to two files. The media library is an array. The synchr
 
 Further takes and cameras remain in `media_items` while another pair is edited. Scene, take, and camera-role metadata will be attached to each item as capture metadata becomes available.
 
+Each ordered pair has an independent profile:
+
+```json
+{
+  "pair_states": {
+    "media-a1::media-b1": {
+      "camera_a_media_id": "media-a1",
+      "camera_b_media_id": "media-b1",
+      "sync": {"camera_b_offset_ms": 10, "confidence": 0.85},
+      "cuts": [{"t": 0, "camera": "A"}],
+      "audio": {"camera_a_muted": false, "camera_b_muted": true},
+      "playback": {"position_sec": 4.2, "selected_camera": "A"}
+    }
+  }
+}
+```
+
+Changing the active pair saves the previous profile before restoring or creating the next one.
+
 ## Lightweight and portable modes
 
 ### Lightweight project
@@ -119,6 +138,7 @@ The importer must:
 - Migrations create a copy and never overwrite the only project.
 - Existing `uizador.multicam.edl.v0.2`, project v0.3, and v0.4 JSON checkpoints remain accepted by the synchronization prototype.
 - Project v0.5 introduces `media_items` and `active_pair`.
+- Project v0.6 introduces `pair_states`, keyed by the ordered A/B media IDs. Each pair preserves its own offset, confidence, cuts, mute state, playback position, selected camera, and duration.
 
 ## Current validation target
 

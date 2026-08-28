@@ -1,194 +1,133 @@
-# Formato de proyecto .uizador
+# Uizador project format
 
-Estado: versión 1 experimental.
+Status: experimental version 1.
 
-## Objetivo
+## Purpose
 
-Un archivo `.uizador` conserva la parte editable de un proyecto:
+A `.uizador` project preserves editable state rather than a rendered movie. It can describe:
 
-- escenas, tomas y roles de cámara;
-- referencias a video y audio;
-- offsets y deriva de sincronización;
-- guías y presets;
-- decisiones de montaje;
-- títulos, efectos y transiciones;
-- subtítulos;
-- información mínima para recuperar o trasladar el proyecto.
+- multiple scenes and takes;
+- any number of video and audio media items;
+- camera roles and active comparison pairs;
+- synchronization offsets, drift, confidence, and detected timing marks;
+- reversible A/B cut decisions;
+- mute and playback state;
+- guides, presets, titles, effects, transitions, and captions;
+- enough media identity to relink moved originals safely.
 
-No es el video final. Es el equivalente al archivo de proyecto de un editor.
+## Media library and active pair
 
-## Contenedor
+A project is not limited to two files. The media library is an array. The synchronized editor selects two library entries as the current A/B pair.
 
-`.uizador` es un ZIP estándar sin contraseña con MIME:
-
-`application/vnd.uizador.project+zip`
-
-Contenido mínimo:
-
-```text
-mimetype
-manifest.json
+```json
+{
+  "media_items": [
+    {
+      "id": "media-a1",
+      "name": "take-01-director.webm",
+      "size": 1234567,
+      "type": "video/webm",
+      "last_modified": 1787860000000,
+      "duration_sec": 14.83,
+      "sha256": "..."
+    },
+    {
+      "id": "media-b1",
+      "name": "take-01-camera.webm",
+      "size": 1200000,
+      "type": "video/webm",
+      "duration_sec": 14.81,
+      "sha256": "..."
+    }
+  ],
+  "active_pair": {
+    "camera_a_media_id": "media-a1",
+    "camera_b_media_id": "media-b1"
+  }
+}
 ```
 
-Estructura ampliada:
+Further takes and cameras remain in `media_items` while another pair is edited. Scene, take, and camera-role metadata will be attached to each item as capture metadata becomes available.
+
+## Lightweight and portable modes
+
+### Lightweight project
+
+Stores metadata, captions, edit decisions, and external media references identified by SHA-256, size, duration, and name. It does not copy the original videos.
+
+Advantages: small files, fast saves, and frequent checkpoints.
+
+Limitation: if originals move or permissions expire, the user must authorize them again. Uizador matches selected files against stored identity.
+
+### Portable package
+
+The canonical container is a standard ZIP with MIME `application/vnd.uizador.project+zip`. It may contain:
 
 ```text
 mimetype
 manifest.json
 captions/
-  es.vtt
 effects/
-  timeline.json
 presets/
-  scene-01.json
 thumbnails/
 proxies/
 media/
 ```
 
-La versión web inicial escribe entradas ZIP sin compresión para mantener el lector pequeño y verificable. Android podrá usar `ZipInputStream` y `ZipOutputStream`. Una versión futura puede admitir DEFLATE sin modificar el manifest.
+Originals are optional. Before embedding them, Uizador must show the estimated package size and available-space implications.
 
-## Dos formas de guardado
+The current synchronization prototype writes a readable JSON-based `.uizador` checkpoint for rapid testing. It is migration input for the canonical ZIP container; it is not yet the final packaged representation.
 
-### Proyecto liviano
+## Synchronization and editing state
 
-Guarda metadata, subtítulos y referencias identificadas por nombre, tamaño y SHA-256. No copia los videos originales.
+The current checkpoint preserves:
 
-Ventajas:
+- automatic and manually refined camera-B offset;
+- analysis confidence;
+- active A/B media IDs;
+- all reversible cut decisions;
+- common playback position;
+- selected camera;
+- independent A/B mute state;
+- media names, sizes, MIME types, timestamps, durations, and SHA-256 hashes.
 
-- archivo pequeño;
-- guardado rápido;
-- ideal para copias frecuentes.
+Canonical project time will use integer microseconds to avoid floating-point accumulation in long projects.
 
-Límite:
+## Relinking and paths
 
-- si los videos se mueven o borran, habrá que volver a localizarlos.
+Absolute phone or computer paths are private, platform-specific, and not portable. They must not be written into a shared project.
 
-### Proyecto portátil
+On Android, the application may retain a user-authorized content URI locally. That URI belongs to local application state, not to the portable manifest. On the web, the user may need to select the original files again. Uizador then verifies hash, size, duration, and name.
 
-Puede incluir:
+## Integrity and security
 
-- proxies;
-- miniaturas;
-- audios auxiliares;
-- opcionalmente originales.
+The importer must:
 
-Antes de exportar originales se debe mostrar el tamaño estimado. Los paquetes grandes necesitan escritura por streaming y espacio temporal controlado.
+- reject absolute paths and `..` traversal;
+- limit file count and total extraction size;
+- verify CRC for package entries and SHA-256 for linked media;
+- never execute package content;
+- not trust extensions or declared MIME types alone;
+- ignore compatible unknown fields;
+- never store session tokens, credentials, or live signed URLs.
 
-## manifest.json
+## Versioning and compatibility
 
-Identidad obligatoria:
+- Format versions change only for incompatible interpretation rules.
+- New optional fields do not require a major version.
+- Readers should preserve unknown compatible fields when saving.
+- Migrations create a copy and never overwrite the only project.
+- Existing `uizador.multicam.edl.v0.2`, project v0.3, and v0.4 JSON checkpoints remain accepted by the synchronization prototype.
+- Project v0.5 introduces `media_items` and `active_pair`.
 
-```json
-{
-  "schema": "com.uizador.project",
-  "format_version": 1,
-  "project": {
-    "id": "uuid",
-    "title": "Entrevista",
-    "created_at": "2026-08-27T00:00:00.000Z",
-    "updated_at": "2026-08-27T00:00:00.000Z",
-    "locale": "es",
-    "aspect_ratio": "16:9",
-    "duration_us": 30000000
-  },
-  "scenes": [],
-  "media": [],
-  "tracks": {}
-}
-```
+## Current validation target
 
-El esquema verificable está en `schemas/uizador-project-v1.schema.json`.
+1. Open an older two-file synchronization report.
+2. Relink both originals.
+3. Add additional videos to the media library.
+4. choose a different active A/B pair;
+5. preserve offsets, cuts, mute state, and playback position;
+6. save v0.5;
+7. reload it and relink all media without losing editing decisions.
 
-## Tiempo y sincronización
-
-Los instantes y duraciones se guardan como enteros en microsegundos:
-
-- `duration_us`;
-- `common_offset_us`;
-- puntos de entrada y salida;
-- posiciones de subtítulos y efectos.
-
-No se usan flotantes en segundos como representación canónica porque acumulan errores en proyectos largos.
-
-Cada medio puede conservar:
-
-- SHA-256;
-- duración;
-- rol de cámara;
-- offset al timeline común;
-- deriva en ppm;
-- confianza estimada;
-- marcas de clock detectadas.
-
-## Subtítulos
-
-Formato interno preferido: WebVTT UTF-8.
-
-Razones:
-
-- tiempos claros;
-- soporte de estilos y regiones;
-- buena interoperabilidad web;
-- conversión sencilla desde y hacia SRT.
-
-Un proyecto puede incluir varios idiomas:
-
-```json
-{
-  "tracks": {
-    "captions": [
-      {
-        "id": "captions-es",
-        "language": "es",
-        "format": "webvtt",
-        "path": "captions/es.vtt"
-      }
-    ]
-  }
-}
-```
-
-## Integridad y relocalización
-
-Los originales externos se reconocen por:
-
-1. SHA-256;
-2. tamaño;
-3. duración;
-4. nombre informativo.
-
-Las rutas absolutas del teléfono o computadora no son portátiles y no deben escribirse en el paquete. Al abrir un proyecto incompleto, Uizador solicita localizar la carpeta o archivo y vuelve a verificar el hash.
-
-## Seguridad
-
-El importador debe:
-
-- rechazar rutas absolutas y componentes `..`;
-- limitar cantidad y tamaño total antes de extraer;
-- verificar CRC y, para medios, SHA-256;
-- no ejecutar contenido del paquete;
-- no confiar en MIME ni extensión aportados;
-- ignorar campos desconocidos de versiones compatibles;
-- nunca incluir tokens de sesión, contraseñas, claves o URLs firmadas vigentes.
-
-El ZIP no cifra. Un paquete con originales sensibles debe almacenarse y compartirse con las mismas precauciones que los videos.
-
-## Versionado
-
-- `format_version` cambia cuando una versión no puede interpretarse con las reglas anteriores.
-- Los campos nuevos opcionales no obligan a cambiar la versión.
-- El lector conserva campos desconocidos al volver a guardar cuando sea posible.
-- Las migraciones deben crear una copia y nunca sobrescribir el único original.
-
-## Implementación actual
-
-`core/uizador-package.js` puede:
-
-- crear un ZIP `.uizador`;
-- descargarlo desde el navegador;
-- abrir paquetes creados por Uizador;
-- validar tipo, versión, rutas y CRC;
-- devolver manifest y archivos internos.
-
-La primera prueba automática de ida y vuelta crea el paquete, agrega subtítulos, lo vuelve a abrir y verifica el manifest.
+The verifiable canonical schema remains in `schemas/uizador-project-v1.schema.json`; it will be updated when the JSON checkpoint is promoted into the packaged manifest.

@@ -109,3 +109,14 @@ The following checks run after every media-library or project-format change:
 6. Use **Change videos** and confirm that the library, permissions, current pair, offset, and cuts remain in memory.
 7. Choose another pair, analyze it, and return to editing.
 8. Save and reopen the project without losing media references or edit state.
+
+
+## File-input clearing regression
+
+1. Add multiple files to the media library and select an active A/B pair.
+2. Analyze the pair and create at least one cut.
+3. Use **Clear file fields**.
+4. Confirm that the visible native file inputs become empty.
+5. Confirm that the media library, active A/B selectors, object URLs, offset, mute state, cuts, and enabled editing step remain unchanged.
+6. Confirm that editing still works while the optional quick-load A/B inputs are empty.
+7. Reload the page separately and confirm that a full reload—unlike clearing fields—does require relinking browser-protected files.

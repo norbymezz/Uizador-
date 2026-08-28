@@ -195,3 +195,15 @@ The following checks run after every media-library or project-format change:
 6. Clear one camera assignment and verify that its media remains listed in the library, the other assignment remains intact, and the primary continue action becomes disabled.
 7. Reassign the cleared camera and verify that the saved pair profile can be restored.
 8. Confirm the former detached full-width clearing buttons no longer appear at the bottom of the preparation card.
+
+
+## Non-destructive export-range regression
+
+1. Open a synchronized edit and move the common playhead past unwanted material at the beginning.
+2. Press **Set start**, move near the desired finish, and press **Set end**.
+3. Confirm the timeline shades everything outside the selected range and displays exact start/end timestamps.
+4. Save the `.uizador` project, reopen it, relink the media, and verify that the export range is restored with the pair profile.
+5. Export and verify that the downloaded video begins and ends at the selected common-timeline positions while preserving A/B cuts, offset, and enabled audio.
+6. Confirm the original videos and cut timestamps remain unchanged.
+7. Press **Full length**, save, reopen, and verify that a null saved end still means the complete remaining duration rather than time zero.
+8. Attempt to set the start after the end and the end before the start; confirm both invalid ranges are rejected.

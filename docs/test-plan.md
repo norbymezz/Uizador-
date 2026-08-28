@@ -146,3 +146,15 @@ The following checks run after every media-library or project-format change:
 8. Save project v0.6, reload, relink all four media files, and repeat both restorations.
 9. Open a v0.5 project and confirm migration of its single global state into the legacy active pair.
 10. Clear the library, relink files, and confirm that preserved pair profiles are not overwritten with null media IDs.
+
+
+## Saved synchronization preservation regression
+
+1. Save a project with a distinctive manual offset for an A/B pair.
+2. Reload the project and relink its original media.
+3. Confirm that the preparation step shows **Continue with saved synchronization**.
+4. Continue without pressing reanalyze.
+5. Verify that audio envelopes are decoded for display while the stored offset, confidence, cuts, mute state, position, and selected camera remain unchanged.
+6. Return to preparation and press **Reanalyze audio**.
+7. Cancel the replacement warning and verify that the saved offset remains unchanged.
+8. Reanalyze only after confirming, and verify that the new estimate intentionally replaces the pair profile.

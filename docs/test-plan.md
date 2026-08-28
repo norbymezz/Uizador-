@@ -34,7 +34,7 @@ A test does not pass because it “looks right.” Synchronization tests must pr
 4. Automatic synchronization and manual refinement.
 5. Playback, rewind controls, and live/paused A/B switching.
 6. Recovery from permissions, disconnection, locking, and low storage.
-7. Portable `.uizador` project and non-destructive editing.
+7. Portable `.uizador` project, multi-file media library, relinking, mute persistence, and non-destructive editing.
 8. Remote sessions only after the local mechanism is reliable.
 9. Android release and Play Console validation before distribution.
 
@@ -59,6 +59,10 @@ The initial run succeeds only if:
 - an A/B offset is calculated and preserved;
 - a visible and audible common action aligns within the measured error;
 - playback remains aligned after pausing and resuming;
+- only the selected A/B button is illuminated;
+- either audio track can be muted independently;
+- a project can retain more than two media references and restore its active pair;
+- saved offsets, cuts, mute state, and playback position survive reopening;
 - no recording disappears without explanation.
 
 ## Evidence
@@ -78,3 +82,18 @@ Recommended folder: `YYYY-MM-DD_deviceA_deviceB_build`.
 ## Defect report
 
 Every failure includes: test ID, build, phones, network, exact steps, expected result, actual result, frequency, affected filenames, evidence, and whether media loss was possible. After a fix, rerun the failed case and the blocking cases in the same phase.
+
+
+## Multi-file project regression
+
+The following checks run after every media-library or project-format change:
+
+1. Load an older two-file synchronization report.
+2. Relink its original A/B videos.
+3. Add at least two additional videos in one selection.
+4. Switch the active A/B pair without losing the first pair from the library.
+5. Mute A, save, reopen, and confirm that A remains muted while B remains audible.
+6. Confirm that offsets and cuts remain attached to the intended active pair.
+7. Save a v0.5 `.uizador` checkpoint and reopen it.
+8. Verify media identity by name, size, duration, and SHA-256.
+9. Confirm that missing originals are reported as needing relink rather than silently replaced.

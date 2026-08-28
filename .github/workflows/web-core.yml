@@ -3,11 +3,13 @@ name: Web core
 on:
   push:
     branches:
+      - main
       - multicamera-concept
     paths:
       - "core/**"
       - "schemas/**"
       - "tests/**"
+      - "web/sync-preview/**"
       - ".github/workflows/web-core.yml"
   pull_request:
     paths:

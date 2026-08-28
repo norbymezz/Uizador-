@@ -120,3 +120,15 @@ The following checks run after every media-library or project-format change:
 5. Confirm that the media library, active A/B selectors, object URLs, offset, mute state, cuts, and enabled editing step remain unchanged.
 6. Confirm that editing still works while the optional quick-load A/B inputs are empty.
 7. Reload the page separately and confirm that a full reload—unlike clearing fields—does require relinking browser-protected files.
+
+
+## Media-library clearing regression
+
+1. Add several files, select A/B, analyze, and create cuts.
+2. Confirm that **Clear fields** only resets native file-input labels.
+3. Choose **Clear library**, cancel the confirmation, and verify that nothing changes.
+4. Choose it again and confirm.
+5. Verify that the library and active A/B media are removed, playback stops, and the preparation step is shown.
+6. Verify that offset and cut decisions remain available for intentional relinking.
+7. Verify that **Continue to editing** is disabled until a new A/B pair is linked and analyzed.
+8. Confirm that **Reset cuts** remains the separate action for discarding edit decisions.

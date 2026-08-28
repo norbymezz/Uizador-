@@ -219,3 +219,16 @@ The following checks run after every media-library or project-format change:
 6. Assign another pair, choose a different audio source, and verify both pair profiles remain independent.
 7. Export each mode and confirm the downloaded file matches the preview selection without changing audio at visual cuts.
 8. Open a v0.6 project containing only legacy camera mute flags and confirm it maps correctly: A enabled → Audio A, B enabled → Audio B, both enabled → Mix, both muted → No audio.
+
+
+## Batch v0.8 naming and edit-navigation regression
+
+1. Enter a project name containing spaces and punctuation; save and confirm the downloaded `.uizador` filename is sanitized but recognizable.
+2. Enter a separate video download name and confirm the WebM uses it without changing the project name.
+3. Select landscape, portrait, and square layouts; confirm the export summary reports 1280×720, 720×1280, and 720×720 respectively.
+4. Reopen the project and confirm project name, export filename, and selected layout persist.
+5. Create several cuts, use **Previous cut** and **Next cut**, and verify exact navigation on the common timeline.
+6. Add or reset cuts and press **Undo cut**; confirm the immediately preceding cut state is restored.
+7. Confirm undo history resets when switching to another A/B pair and never alters original media.
+8. Confirm the export summary updates after changes to trim range, audio source, output name, layout, or cut count.
+9. Run `node --test tests/*.test.mjs` and require all automated tests to pass before the physical batch.

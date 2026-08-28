@@ -97,3 +97,15 @@ The following checks run after every media-library or project-format change:
 7. Save a v0.5 `.uizador` checkpoint and reopen it.
 8. Verify media identity by name, size, duration, and SHA-256.
 9. Confirm that missing originals are reported as needing relink rather than silently replaced.
+
+
+## Two-step mobile editor regression
+
+1. Open the preparation step and add or relink multiple media files.
+2. Select the active A/B pair.
+3. Confirm that **Continue to editing** remains disabled until both files are analyzed.
+4. Continue to the editing step and verify that file inputs and the long media list are no longer visible.
+5. Edit offset, mute state, playback position, and A/B cuts.
+6. Use **Change videos** and confirm that the library, permissions, current pair, offset, and cuts remain in memory.
+7. Choose another pair, analyze it, and return to editing.
+8. Save and reopen the project without losing media references or edit state.

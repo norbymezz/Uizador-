@@ -158,3 +158,18 @@ The following checks run after every media-library or project-format change:
 6. Return to preparation and press **Reanalyze audio**.
 7. Cancel the replacement warning and verify that the saved offset remains unchanged.
 8. Reanalyze only after confirming, and verify that the new estimate intentionally replaces the pair profile.
+
+
+## Local edited-video export regression
+
+1. Relink a synchronized A/B pair and open the editing step.
+2. Create at least three alternating A/B segments and choose a recognizable non-zero offset.
+3. Mute one source track and leave the other audible.
+4. Press **Create edited video** and keep the page visible until progress reaches 100%.
+5. Confirm that Android downloads a single `.webm` file and that neither original changes.
+6. Play the downloaded file outside Uizador from beginning to end.
+7. Verify every camera change occurs at its saved cut time and no black frame appears where the selected source is available.
+8. Verify picture and the enabled audio remain synchronized at the start, middle, and end.
+9. Repeat with the opposite audio mute selection.
+10. Start another export, cancel it, and confirm no incomplete result is presented as finished.
+11. Upload the downloaded file manually only as a separate compatibility check; YouTube integration is not an MVP requirement.

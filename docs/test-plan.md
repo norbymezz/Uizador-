@@ -103,12 +103,13 @@ The following checks run after every media-library or project-format change:
 
 1. Open the preparation step and add or relink multiple media files.
 2. Select the active A/B pair.
-3. Confirm that **Continue to editing** remains disabled until both files are analyzed.
-4. Continue to the editing step and verify that file inputs and the long media list are no longer visible.
-5. Edit offset, mute state, playback position, and A/B cuts.
-6. Use **Change videos** and confirm that the library, permissions, current pair, offset, and cuts remain in memory.
-7. Choose another pair, analyze it, and return to editing.
-8. Save and reopen the project without losing media references or edit state.
+3. Confirm that the primary action remains disabled until both Camera A and Camera B are assigned.
+4. For a new pair, confirm the action reads **Analyze and continue**; for a saved pair, confirm it reads **Continue with saved sync**.
+5. Continue to the editing step and verify that file inputs and the long media list are no longer visible.
+6. Edit offset, mute state, playback position, and A/B cuts.
+7. Use **Change videos** and confirm that the library, permissions, current pair, offset, and cuts remain in memory.
+8. Choose another pair, analyze it, and return to editing.
+9. Save and reopen the project without losing media references or edit state.
 
 
 ## File-input clearing regression
@@ -173,3 +174,12 @@ The following checks run after every media-library or project-format change:
 9. Repeat with the opposite audio mute selection.
 10. Start another export, cancel it, and confirm no incomplete result is presented as finished.
 11. Upload the downloaded file manually only as a separate compatibility check; YouTube integration is not an MVP requirement.
+
+
+## English UI and progress-indicator regression
+
+1. Confirm that every visible heading, label, button, status, warning, and downloaded filename is in English.
+2. Confirm that the preparation screen has one multi-file library input and no separate quick-load Camera A/B inputs.
+3. Confirm that full filenames—including extensions—appear in the library and both camera selectors.
+4. Confirm that Step 01 and Step 02 use editorial typography and an underline, have no button background, cannot receive focus, and do not suggest that they are tappable.
+5. Confirm that audio reanalysis appears in the editing step beside synchronization controls, not as a duplicate setup action.

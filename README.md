@@ -44,6 +44,7 @@ The screenshots show real files recorded during the first two-phone test: audio-
 - Synchronized A/B playback, reversible cuts, precise seeking, and independent track mute
 - Two-step mobile workflow: project/media preparation followed by focused montage editing
 - Multi-file media library with selectable active A/B pairs
+- Independent synchronization and montage profiles for every ordered A/B pair
 - Portable non-destructive `.uizador` projects with media identity, hashes, offsets, cuts, mute state, and playback state
 - Device diagnostics and a versioned test catalog
 

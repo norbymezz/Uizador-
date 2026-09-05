@@ -129,6 +129,10 @@ The current checkpoint preserves:
 
 Canonical project time will use integer microseconds to avoid floating-point accumulation in long projects.
 
+## Capture identity when filenames change
+
+Browsers and Android download managers may ignore an HTML download name and replace it with a numeric filename. Capture manifests use schema `uizador.capture.manifest.v0.1` and map each recording's SHA-256, byte size, expected filename, device role, session, and take number. The editor matches the original bytes by SHA-256; filename is only a human hint. Manual preview and internal labels remain available when an older capture has no manifest.
+
 ## Relinking and paths
 
 Absolute phone or computer paths are private, platform-specific, and not portable. They must not be written into a shared project.

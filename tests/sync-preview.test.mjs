@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
 
 const html=await readFile(new URL('../web/sync-preview/index.html',import.meta.url),'utf8');
+const captureHtml=await readFile(new URL('../web/multicamera-session/index.html',import.meta.url),'utf8');
 const script=html.match(/<script>([\s\S]*)<\/script>/)?.[1]??'';
 
 test('sync preview contains valid JavaScript',()=>{
@@ -48,4 +49,27 @@ test('export explicitly releases and restores preview resources',()=>{
   ]) assert.ok(script.includes(marker),`missing export recovery marker: ${marker}`);
   assert.ok(script.includes("$('#play').textContent='Pause'"));
   assert.ok(script.includes("v.addEventListener('loadedmetadata'"));
+});
+
+
+test('common transport clock replaces camera-A-only timing',()=>{
+  for(const marker of [
+    'transportAnchor','transportStartedAt','mediaLocalTime','syncPreviewMedia',
+    'stopPreviewPlayback','local>=0&&local<d-.01'
+  ]) assert.ok(script.includes(marker),`missing transport marker: ${marker}`);
+  assert.ok(!script.includes("function commonTime(){return videos.A.currentTime"));
+});
+
+test('renamed capture identity and manual inspection remain available',()=>{
+  for(const id of ['captureManifestFiles','mediaPreviewPanel','setupPreview'])
+    assert.match(html,new RegExp(`id="${id}"`));
+  for(const marker of ['applyCaptureIdentities','previewMedia','labelMedia','uizador.capture.manifest.v0.1'])
+    assert.ok(script.includes(marker),`missing identity marker: ${marker}`);
+});
+
+test('capture page produces shareable named files and SHA manifests',()=>{
+  const captureScript=captureHtml.match(/<script>([\s\S]*)<\/script>/)?.[1]??'';
+  assert.doesNotThrow(()=>new Function(captureScript));
+  for(const marker of ['shareTake','captureManifest','blobSha256','uizador.capture.manifest.v0.1'])
+    assert.ok(captureScript.includes(marker),`missing capture marker: ${marker}`);
 });

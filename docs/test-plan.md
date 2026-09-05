@@ -244,3 +244,17 @@ The following checks run after every media-library or project-format change:
 6. Change to another A/B pair and confirm metadata, duration, offset, and playback still initialize correctly.
 7. Cancel an export and repeat steps 4–6.
 8. Repeat two exports consecutively on Android to detect decoder exhaustion or controls left disabled.
+
+
+## Common-clock playback and renamed-file regression
+
+1. Record three consecutive takes on two different devices and download all six originals.
+2. Confirm the capture page offers named file sharing and one SHA-256 identification manifest per device.
+3. Transfer files through an Android route known to replace filenames with numeric names.
+4. Load both manifests and all six videos; verify role and take are restored by SHA-256 rather than filename.
+5. Without manifests, preview numeric files in the preparation step and assign persistent internal labels.
+6. Select a pair with a positive B offset, rewind to zero, and play. Confirm B remains parked once before its start instead of repeatedly bouncing to zero.
+7. Pause and resume before and after B starts; confirm both valid sources resume.
+8. Seek, step frames, navigate cuts, change the offset, and replay without stale intervals or a paused source.
+9. Continue through the end when one source duration is shorter; confirm the common clock does not stop merely because camera A ended.
+10. Export, restore preview, rewind, and replay twice without reloading the page.

@@ -42,10 +42,13 @@ test('visible editor copy remains English',()=>{
 });
 
 
-test('export explicitly releases and restores preview resources',()=>{
+test('export releases and restores every preview decoder',()=>{
   for(const marker of [
     'releasePreviewForExport','restorePreviewAfterExport','renderStream?.getTracks()',
-    "removeAttribute('src')",'setExportLock(true)','setExportLock(false)'
+    '[videos.A,videos.B,audioPlayers.A,audioPlayers.B]',
+    "media.removeAttribute('src')",'a.src=url',
+    "audioPlayers[key].addEventListener('loadedmetadata'",
+    'setExportLock(true)','setExportLock(false)'
   ]) assert.ok(script.includes(marker),`missing export recovery marker: ${marker}`);
   assert.ok(script.includes("$('#play').textContent='Pause'"));
   assert.ok(script.includes("v.addEventListener('loadedmetadata'"));

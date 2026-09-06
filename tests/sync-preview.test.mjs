@@ -52,12 +52,13 @@ test('export explicitly releases and restores preview resources',()=>{
 });
 
 
-test('common transport clock replaces camera-A-only timing',()=>{
+test('common transport clock is independent from sampled video frames',()=>{
   for(const marker of [
-    'transportAnchor','transportStartedAt','mediaLocalTime','syncPreviewMedia',
-    'stopPreviewPlayback','local>=0&&local<d-.01'
+    'transportAnchor','transportStartedAt','mediaLocalTime','syncAudioPlayer',
+    'samplePreviewFrame','stopPreviewPlayback','local>=0&&local<d-.01'
   ]) assert.ok(script.includes(marker),`missing transport marker: ${marker}`);
   assert.ok(!script.includes("function commonTime(){return videos.A.currentTime"));
+  assert.ok(!script.includes('syncPreviewMedia'));
 });
 
 test('renamed capture identity and manual inspection remain available',()=>{
@@ -75,9 +76,15 @@ test('capture page produces shareable named files and SHA manifests',()=>{
 });
 
 
-test('selected audio is the preview clock and drift correction is not seek-happy',()=>{
-  for(const marker of ['mediaClock','audioSignalLabel','audioSignalStatus','Math.abs(v.currentTime-local)>.3'])
-    assert.ok(script.includes(marker),`missing audio-clock marker: ${marker}`);
-  assert.ok(!script.includes('Math.abs(v.currentTime-local)>.09'));
-  assert.ok(script.includes('videos.A.volume=videos.B.volume=1'));
+test('continuous audio is decoupled from low-rate phone preview',()=>{
+  for(const marker of [
+    'mediaClock','audioSignalLabel','audioSignalStatus',
+    'audioPlayers={A:new Audio(),B:new Audio()}','PREVIEW_SAMPLE_HZ=3',
+    'PREVIEW_SAMPLE_MS=1000/PREVIEW_SAMPLE_HZ','setInterval(syncLoop,100)',
+    'videos.A.muted=videos.B.muted=true'
+  ]) assert.ok(script.includes(marker),`missing lightweight-preview marker: ${marker}`);
+  assert.ok(script.includes("const key=previewTurn++%2===0?'A':'B'"));
+  assert.ok(script.includes('a.volume=1'));
+  assert.ok(!script.includes('requestMediaPlay'));
+  assert.match(html,/Audio stays continuous; final export uses every original frame/);
 });

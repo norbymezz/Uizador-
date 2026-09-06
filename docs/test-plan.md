@@ -260,12 +260,15 @@ The following checks run after every media-library or project-format change:
 10. Export, restore preview, rewind, and replay twice without reloading the page.
 
 
-## Continuous preview-audio regression
+## Lightweight preview and continuous-audio regression
 
 1. Analyze a pair and confirm the UI reports **signal detected** or **near silent** independently for A and B.
-2. Select Audio A and play from zero across B's positive offset; confirm A audio is continuous and B remains parked until its common start.
-3. Select Audio B while playing and confirm the common position does not jump and B becomes the master clock.
-4. Repeat with Mix and No audio.
-5. Confirm ordinary decoder delay below 300 ms does not trigger repeated seeks; only material drift receives a hard correction.
-6. Pause, rewind, frame-step, resume, and repeat after an export without losing audible playback.
-7. If a track is reported near silent, play the original outside Uizador before filing a playback defect.
+2. Select **Audio A**, play from zero across B's positive offset, and confirm A audio remains continuous.
+3. Watch both camera panels for at least ten seconds. Confirm they update as a deliberately sampled orientation preview: three image updates per second in total, alternating A/B, with neither full video playing continuously.
+4. Select **Audio B** while playing and confirm the common position does not jump, B becomes the audio clock, and the sampled images continue.
+5. Repeat with **Mix A + B** and **No audio**. Confirm the audio choice changes without changing the sampled-image rate or the A/B edit decisions.
+6. Pause, rewind, scrub, frame-step, and navigate cuts. Confirm both panels jump to the requested exact common position while paused, then return to sampled updates after resuming.
+7. Change a positive and negative B offset while playing. Confirm continuous audio follows the common timeline and the B image reflects the offset without repeatedly bouncing to zero.
+8. Export the edit and inspect motion in the downloaded file. Confirm it uses the original full frame rate rather than the three-updates-per-second phone preview.
+9. After export, rewind and play again without reloading; confirm audible playback and sampled A/B preview recover.
+10. If a track is reported near silent, play the original outside Uizador before filing a playback defect.

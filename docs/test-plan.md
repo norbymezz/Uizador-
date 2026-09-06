@@ -99,17 +99,17 @@ The following checks run after every media-library or project-format change:
 9. Confirm that missing originals are reported as needing relink rather than silently replaced.
 
 
-## Two-step mobile editor regression
+## Single-page collapsible editor regression
 
-1. Open the preparation step and add or relink multiple media files.
-2. Select the active A/B pair.
-3. Confirm that the primary action remains disabled until both Camera A and Camera B are assigned.
-4. For a new pair, confirm the action reads **Analyze and continue**; for a saved pair, confirm it reads **Continue with saved sync**.
-5. Continue to the editing step and verify that file inputs and the long media list are no longer visible.
-6. Edit offset, mute state, playback position, and A/B cuts.
-7. Use **Change videos** and confirm that the library, permissions, current pair, offset, and cuts remain in memory.
-8. Choose another pair, analyze it, and return to editing.
-9. Save and reopen the project without losing media references or edit state.
+1. Open the editor and confirm the sections appear once in this order: **Project and media**, **Synchronization**, **Preview and edit**, **Export finished video**.
+2. Collapse and reopen each section; confirm media assignments, offset, cuts, audio source, and playback position remain unchanged.
+3. Add or relink multiple files and select the active A/B pair.
+4. Confirm the only analysis action remains disabled until both Camera A and Camera B are assigned.
+5. For a new pair, confirm it reads **Analyze audio and synchronize**; for a saved pair, confirm it reads **Reanalyze audio and replace offset**.
+6. Analyze a new pair and confirm the project section collapses while the shared preview/edit container opens.
+7. Preview a numeric library file and confirm it temporarily uses the same main Camera A video element, with no separate setup player left loaded.
+8. Close the library preview and confirm Camera A returns to the active pair at the stored common position.
+9. Select another pair, analyze it, then save and reopen the project without losing media references or edit state.
 
 
 ## File-input clearing regression
@@ -118,7 +118,7 @@ The following checks run after every media-library or project-format change:
 2. Analyze the pair and create at least one cut.
 3. Use **Clear file fields**.
 4. Confirm that the visible native file inputs become empty.
-5. Confirm that the media library, active A/B selectors, object URLs, offset, mute state, cuts, and enabled editing step remain unchanged.
+5. Confirm that the media library, active A/B selectors, object URLs, offset, mute state, cuts, and current edit state remain unchanged.
 6. Confirm that editing still works while the optional quick-load A/B inputs are empty.
 7. Reload the page separately and confirm that a full reload—unlike clearing fields—does require relinking browser-protected files.
 
@@ -129,9 +129,9 @@ The following checks run after every media-library or project-format change:
 2. Confirm that **Clear fields** only resets native file-input labels.
 3. Choose **Clear library**, cancel the confirmation, and verify that nothing changes.
 4. Choose it again and confirm.
-5. Verify that the library and active A/B media are removed, playback stops, and the preparation step is shown.
+5. Verify that the library and active A/B media are removed, playback stops, and the **Project and media** section is expanded.
 6. Verify that offset and cut decisions remain available for intentional relinking.
-7. Verify that **Continue to editing** is disabled until a new A/B pair is linked and analyzed.
+7. Verify that the synchronization action is disabled until a new A/B pair is linked.
 8. Confirm that **Reset cuts** remains the separate action for discarding edit decisions.
 
 
@@ -153,17 +153,17 @@ The following checks run after every media-library or project-format change:
 
 1. Save a project with a distinctive manual offset for an A/B pair.
 2. Reload the project and relink its original media.
-3. Confirm that the preparation step shows **Continue with saved synchronization**.
-4. Continue without pressing reanalyze.
+3. Confirm that the synchronization section shows **Reanalyze audio and replace offset**.
+4. Let the saved pair load without pressing reanalyze.
 5. Verify that audio envelopes are decoded for display while the stored offset, confidence, cuts, mute state, position, and selected camera remain unchanged.
-6. Return to preparation and press **Reanalyze audio**.
+6. Expand **Project and media** if needed, then press **Reanalyze audio and replace offset** in **Synchronization**.
 7. Cancel the replacement warning and verify that the saved offset remains unchanged.
 8. Reanalyze only after confirming, and verify that the new estimate intentionally replaces the pair profile.
 
 
 ## Local edited-video export regression
 
-1. Relink a synchronized A/B pair and open the editing step.
+1. Relink a synchronized A/B pair and scroll to **Preview and edit**.
 2. Create at least three alternating A/B segments and choose a recognizable non-zero offset.
 3. Mute one source track and leave the other audible.
 4. Press **Create edited video** and keep the page visible until progress reaches 100%.
@@ -179,22 +179,22 @@ The following checks run after every media-library or project-format change:
 ## English UI and progress-indicator regression
 
 1. Confirm that every visible heading, label, button, status, warning, and downloaded filename is in English.
-2. Confirm that the preparation screen has one multi-file library input and no separate quick-load Camera A/B inputs.
+2. Confirm that the **Project and media** section has one multi-file library input and no separate quick-load Camera A/B inputs.
 3. Confirm that full filenames—including extensions—appear in the library and both camera selectors.
-4. Confirm that Step 01 and Step 02 use editorial typography and an underline, have no button background, cannot receive focus, and do not suggest that they are tappable.
-5. Confirm that audio reanalysis appears in the editing step beside synchronization controls, not as a duplicate setup action.
+4. Confirm that there are no Step 01/Step 02 indicators; the four ordered section summaries are collapsible and clearly distinct from action buttons.
+5. Confirm that one audio-analysis action appears in **Synchronization**, with no duplicated continue/analyze control.
 
 
 ## Contextual clearing controls regression
 
-1. Confirm **Open a saved project** is the first control in the preparation card.
+1. Confirm **Open a saved project** is the first control in the **Project and media** section.
 2. Confirm its **Clear** button only clears the native project-file field and does not unload the project already in memory.
 3. Confirm **Add videos to library** has its own adjacent **Clear** button and that it does not remove linked library items.
 4. Confirm **Clear library** appears beside the media-library heading and still requires confirmation.
 5. Confirm **Clear A** and **Clear B** appear beside their respective selectors.
 6. Clear one camera assignment and verify that its media remains listed in the library, the other assignment remains intact, and the primary continue action becomes disabled.
 7. Reassign the cleared camera and verify that the saved pair profile can be restored.
-8. Confirm the former detached full-width clearing buttons no longer appear at the bottom of the preparation card.
+8. Confirm the former detached full-width clearing buttons no longer appear at the bottom of the **Project and media** section.
 
 
 ## Non-destructive export-range regression
@@ -252,7 +252,7 @@ The following checks run after every media-library or project-format change:
 2. Confirm the capture page offers named file sharing and one SHA-256 identification manifest per device.
 3. Transfer files through an Android route known to replace filenames with numeric names.
 4. Load both manifests and all six videos; verify role and take are restored by SHA-256 rather than filename.
-5. Without manifests, preview numeric files in the preparation step and assign persistent internal labels.
+5. Without manifests, preview numeric files from **Project and media** in the shared main preview container and assign persistent internal labels.
 6. Select a pair with a positive B offset, rewind to zero, and play. Confirm B remains parked once before its start instead of repeatedly bouncing to zero.
 7. Pause and resume before and after B starts; confirm both valid sources resume.
 8. Seek, step frames, navigate cuts, change the offset, and replay without stale intervals or a paused source.

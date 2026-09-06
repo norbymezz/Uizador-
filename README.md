@@ -42,7 +42,7 @@ The screenshots show real files recorded during the first two-phone test: audio-
 - Three-pulse start signature and end clap
 - Local take retention without download prompts between repetitions
 - Audio-envelope offset estimation and manual adjustment on a shared time grid
-- Synchronized A/B playback, reversible cuts, precise seeking, cut navigation, and cut undo
+- Continuous selectable audio with a lightweight 3-updates-per-second A/B orientation preview, reversible cuts, precise paused seeking, cut navigation, and cut undo
 - Two-step mobile workflow: project/media preparation followed by focused montage editing
 - Multi-file media library with selectable active A/B pairs
 - Independent synchronization and montage profiles for every ordered A/B pair
@@ -52,7 +52,7 @@ The screenshots show real files recorded during the first two-phone test: audio-
 
 ## Immediate testing priorities
 
-- Validate synchronization across different Android phones and browsers
+- Validate continuous A/B/Mix audio and the lightweight sampled preview across different Android phones and browsers
 - Measure offset and drift over longer recordings
 - Preserve complete evidence for each test run
 - Improve file transfer from remote cameras to the director

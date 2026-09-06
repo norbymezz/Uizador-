@@ -64,11 +64,27 @@ test('common transport clock is independent from sampled video frames',()=>{
   assert.ok(!script.includes('syncPreviewMedia'));
 });
 
-test('renamed capture identity and manual inspection remain available',()=>{
-  for(const id of ['captureManifestFiles','mediaPreviewPanel','setupPreview'])
+test('renamed capture identity reuses the main preview container',()=>{
+  for(const id of ['captureManifestFiles','mediaPreviewPanel','previewVideos','videoA'])
     assert.match(html,new RegExp(`id="${id}"`));
-  for(const marker of ['applyCaptureIdentities','previewMedia','labelMedia','uizador.capture.manifest.v0.1'])
+  for(const marker of ['applyCaptureIdentities','previewMedia','closeMediaPreview','labelMedia','uizador.capture.manifest.v0.1'])
     assert.ok(script.includes(marker),`missing identity marker: ${marker}`);
+  assert.doesNotMatch(html,/id="setupPreview"/);
+});
+
+test('workflow is one ordered collapsible page without duplicated step controls',()=>{
+  const ordered=['id="setupPanel"','id="syncPanel"','id="previewCard"','id="exportPanel"'];
+  let cursor=-1;
+  for(const marker of ordered){
+    const next=html.indexOf(marker);
+    assert.ok(next>cursor,`out-of-order section: ${marker}`);
+    cursor=next;
+  }
+  for(const removed of ['stepSetup','stepEdit','setupScreen','editorScreen','continueEditor','backSetup'])
+    assert.ok(!html.includes(`id="${removed}"`),`obsolete split-screen control remains: ${removed}`);
+  assert.ok(!script.includes('showWorkspace('));
+  assert.ok(!script.includes('openEditorPreservingSync'));
+  assert.match(html,/class="card collapsible" id="previewCard" open/);
 });
 
 test('capture page produces shareable named files and SHA manifests',()=>{

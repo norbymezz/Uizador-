@@ -258,3 +258,14 @@ The following checks run after every media-library or project-format change:
 8. Seek, step frames, navigate cuts, change the offset, and replay without stale intervals or a paused source.
 9. Continue through the end when one source duration is shorter; confirm the common clock does not stop merely because camera A ended.
 10. Export, restore preview, rewind, and replay twice without reloading the page.
+
+
+## Continuous preview-audio regression
+
+1. Analyze a pair and confirm the UI reports **signal detected** or **near silent** independently for A and B.
+2. Select Audio A and play from zero across B's positive offset; confirm A audio is continuous and B remains parked until its common start.
+3. Select Audio B while playing and confirm the common position does not jump and B becomes the master clock.
+4. Repeat with Mix and No audio.
+5. Confirm ordinary decoder delay below 300 ms does not trigger repeated seeks; only material drift receives a hard correction.
+6. Pause, rewind, frame-step, resume, and repeat after an export without losing audible playback.
+7. If a track is reported near silent, play the original outside Uizador before filing a playback defect.

@@ -73,3 +73,11 @@ test('capture page produces shareable named files and SHA manifests',()=>{
   for(const marker of ['shareTake','captureManifest','blobSha256','uizador.capture.manifest.v0.1'])
     assert.ok(captureScript.includes(marker),`missing capture marker: ${marker}`);
 });
+
+
+test('selected audio is the preview clock and drift correction is not seek-happy',()=>{
+  for(const marker of ['mediaClock','audioSignalLabel','audioSignalStatus','Math.abs(v.currentTime-local)>.3'])
+    assert.ok(script.includes(marker),`missing audio-clock marker: ${marker}`);
+  assert.ok(!script.includes('Math.abs(v.currentTime-local)>.09'));
+  assert.ok(script.includes('videos.A.volume=videos.B.volume=1'));
+});

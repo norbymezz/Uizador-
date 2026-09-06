@@ -43,7 +43,7 @@ The screenshots show real files recorded during the first two-phone test: audio-
 - Local take retention without download prompts between repetitions
 - Audio-envelope offset estimation and manual adjustment on a shared time grid
 - Continuous selectable audio with a lightweight 3-updates-per-second A/B orientation preview, reversible cuts, precise paused seeking, cut navigation, and cut undo
-- Two-step mobile workflow: project/media preparation followed by focused montage editing
+- One ordered, collapsible mobile page: project/media, synchronization, shared preview/editing, then export
 - Multi-file media library with selectable active A/B pairs
 - Independent synchronization and montage profiles for every ordered A/B pair
 - Portable non-destructive `.uizador` projects with media identity, hashes, offsets, cuts, explicit audio source, trim range, naming, output layout, and playback state

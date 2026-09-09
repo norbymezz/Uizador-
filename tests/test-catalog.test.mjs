@@ -5,9 +5,9 @@ import {readFile} from 'node:fs/promises';
 const source=await readFile(new URL('../core/test-catalog.js',import.meta.url),'utf8');
 const api=await import(`data:text/javascript;base64,${Buffer.from(source).toString('base64')}`);
 
-test('el catálogo es válido y tiene 70 casos',()=>{
+test('el catálogo es válido y tiene 73 casos',()=>{
   assert.equal(api.validateTestCatalog(),true);
-  assert.equal(api.TEST_CASES.length,70);
+  assert.equal(api.TEST_CASES.length,73);
 });
 
 test('todos los ID son únicos y todas las fases tienen casos',()=>{

@@ -35,8 +35,9 @@ A test does not pass because it “looks right.” Synchronization tests must pr
 5. Playback, rewind controls, and live/paused A/B switching.
 6. Recovery from permissions, disconnection, locking, and low storage.
 7. Portable `.uizador` project, multi-file media library, relinking, mute persistence, and non-destructive editing.
-8. Remote sessions only after the local mechanism is reliable.
-9. Android release and Play Console validation before distribution.
+8. Breaking News and Video Podcast preset rendering after the core A/B editor is stable.
+9. Remote sessions only after the local mechanism is reliable.
+10. Android release and Play Console validation before distribution.
 
 ## Minimum entry conditions
 
@@ -176,6 +177,20 @@ The following checks run after every media-library or project-format change:
 11. Upload the downloaded file manually only as a separate compatibility check; YouTube integration is not an MVP requirement.
 
 
+## Production preset regression
+
+1. Open the preset library and confirm **Breaking News** and **Video Podcast** open the synchronized editor with the matching preset selected.
+2. Assign a short synchronized A/B pair and apply **Breaking News**.
+3. Confirm the timeline loads A, split, B, split, and A segments in that order; both angle borders and **Split A + B** must be selected during an `S` segment.
+4. Change the channel, headline, Camera A name, and Camera B name; toggle the urgent banner and confirm the preview updates.
+5. Export landscape and portrait samples. Confirm both videos appear during `S`, all graphics are burned into the result, and text remains inside the frame.
+6. Apply **Video Podcast** and confirm its two-shot, host close-up, guest close-up, two-shot, and host-close plan.
+7. Confirm **Undo cut** restores the plan that existed immediately before the preset was applied.
+8. Choose **Free multicamera edit** and apply it; confirm preset graphics disappear without deleting the current cuts.
+9. Save project v0.9, reopen it, relink the originals, and verify preset, text, urgent state, audio mode, and every A/B/S decision.
+10. Export, wait for preview restoration, then rewind and play again to detect a decoder or control left open.
+
+
 ## English UI and progress-indicator regression
 
 1. Confirm that every visible heading, label, button, status, warning, and downloaded filename is in English.
@@ -221,7 +236,7 @@ The following checks run after every media-library or project-format change:
 8. Open a v0.6 project containing only legacy camera mute flags and confirm it maps correctly: A enabled → Audio A, B enabled → Audio B, both enabled → Mix, both muted → No audio.
 
 
-## Batch v0.8 naming and edit-navigation regression
+## Batch v0.9 naming, presets, and edit-navigation regression
 
 1. Enter a project name containing spaces and punctuation; save and confirm the downloaded `.uizador` filename is sanitized but recognizable.
 2. Enter a separate video download name and confirm the WebM uses it without changing the project name.
@@ -230,7 +245,7 @@ The following checks run after every media-library or project-format change:
 5. Create several cuts, use **Previous cut** and **Next cut**, and verify exact navigation on the common timeline.
 6. Add or reset cuts and press **Undo cut**; confirm the immediately preceding cut state is restored.
 7. Confirm undo history resets when switching to another A/B pair and never alters original media.
-8. Confirm the export summary updates after changes to trim range, audio source, output name, layout, or cut count.
+8. Confirm the export summary updates after changes to trim range, audio source, output name, layout, preset, or cut count.
 9. Run `node --test tests/*.test.mjs` and require all automated tests to pass before the physical batch.
 
 

@@ -11,6 +11,8 @@
 - [Synchronize and select two recordings](https://norbymezz.github.io/Uizador-/web/sync-preview/)
 - [Open the test center](https://norbymezz.github.io/Uizador-/web/test-center/)
 - [Browse scene presets](https://norbymezz.github.io/Uizador-/web/preset-library/)
+- [Try the Breaking News preset](https://norbymezz.github.io/Uizador-/web/sync-preview/?preset=breaking-news)
+- [Try the Video Podcast preset](https://norbymezz.github.io/Uizador-/web/sync-preview/?preset=video-podcast)
 
 ## Current workflow
 
@@ -21,8 +23,9 @@
 5. All devices record locally.
 6. One audible start signature and an end clap are captured by every nearby phone.
 7. The original files are loaded into the synchronization view.
-8. Audio envelopes estimate the offset; the user can refine it manually and choose camera A or B.
-9. The user trims the export range, selects a stable audio source, and downloads one locally rendered WebM.
+8. Audio envelopes estimate the offset; the user can refine it manually and choose camera A, camera B, or a split A+B composition.
+9. The user can edit freely or apply a ready-made news or podcast production preset with an initial cut plan and editable graphics.
+10. The user trims the export range, selects a stable audio source, and downloads one locally rendered WebM.
 
 ## Prototype screenshots
 
@@ -43,6 +46,7 @@ The screenshots show real files recorded during the first two-phone test: audio-
 - Local take retention without download prompts between repetitions
 - Audio-envelope offset estimation and manual adjustment on a shared time grid
 - Continuous selectable audio with a lightweight 3-updates-per-second A/B orientation preview, reversible cuts, precise paused seeking, cut navigation, and cut undo
+- Breaking News and Video Podcast presets with normalized shot plans, split-screen segments, editable titles/lower thirds, and graphics rendered into the final video
 - One ordered, collapsible mobile page: project/media, synchronization, shared preview/editing, then export
 - Multi-file media library with selectable active A/B pairs
 - Independent synchronization and montage profiles for every ordered A/B pair
@@ -58,6 +62,7 @@ The screenshots show real files recorded during the first two-phone test: audio-
 - Improve file transfer from remote cameras to the director
 - Validate multi-file project reopen and automatic media relinking
 - Confirm that camera switching, audio source, trim, naming, and output layout survive save/reopen
+- Validate both production presets in landscape and portrait exports, including split-screen framing and text safe areas
 - Improve remote-camera transfer to the director and final batch-download verification
 
 ## Test evidence
@@ -67,7 +72,7 @@ The screenshots show real files recorded during the first two-phone test: audio-
 
 ## Planned capabilities
 
-Scene templates, teleprompter guidance, remote sessions, chroma key, virtual backgrounds, subtitles, titles, transitions, sound effects, news/interview layouts, and Android/Play Store packaging are planned in phases. They must not delay validation of recording, recovery, and synchronization.
+Additional scene templates, teleprompter guidance, remote sessions, chroma key, virtual backgrounds, subtitles, animated transitions, sound effects, and Android/Play Store packaging are planned in phases. They must not delay validation of recording, recovery, and synchronization.
 
 ## Documentation
 
@@ -76,6 +81,7 @@ Scene templates, teleprompter guidance, remote sessions, chroma key, virtual bac
 - [Master test plan](docs/test-plan.md)
 - [Two-phone test checklist](docs/two-phone-test-checklist.md)
 - [Shot and movement library](docs/shot-and-movement-library.md)
+- [Production presets](docs/production-presets.md)
 - [Portable project format](docs/uizador-project-format.md)
 - [Remote session concept](docs/remote-session-concept.md)
 - [Play Store readiness](docs/play-store-readiness.md)

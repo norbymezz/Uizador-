@@ -17,7 +17,7 @@ A `.uizador` project preserves editable state rather than a rendered movie. It c
 
 ## Project and export metadata
 
-Project v0.8 stores human-readable naming and output layout without embedding or modifying media:
+Project v0.9 stores human-readable naming, output layout, and an optional production preset without embedding or modifying media:
 
 ```json
 {
@@ -76,6 +76,16 @@ Each ordered pair has an independent profile:
       "sync": {"camera_b_offset_ms": 10, "confidence": 0.85},
       "cuts": [{"t": 0, "camera": "A"}],
       "audio": {"mode": "A", "camera_a_muted": false, "camera_b_muted": true},
+      "production": {
+        "preset_id": "breaking-news",
+        "graphics": {
+          "brand": "UIZADOR NEWS",
+          "headline": "BREAKING NEWS · DEVELOPING STORY",
+          "name_a": "ANCHOR · STUDIO",
+          "name_b": "REPORTER · LIVE",
+          "urgent": true
+        }
+      },
       "playback": {"position_sec": 4.2, "selected_camera": "A"},
       "export_range": {"start_sec": 1.25, "end_sec": 12.8}
     }
@@ -121,7 +131,7 @@ The current checkpoint preserves:
 - automatic and manually refined camera-B offset;
 - analysis confidence;
 - active A/B media IDs;
-- all reversible cut decisions;
+- all reversible A, B, and split-screen (`S`) visual decisions;
 - common playback position;
 - selected camera;
 - explicit audio source mode (A, B, Mix, or None);
@@ -162,15 +172,17 @@ The importer must:
 - Project v0.6 introduces `pair_states`, keyed by the ordered A/B media IDs. Each pair preserves its own offset, confidence, cuts, mute state, playback position, selected camera, and duration.
 - Project v0.7 replaces ambiguous independent mute controls with an explicit audio source mode while retaining legacy mute fields for migration.
 - Project v0.8 adds project naming, configurable download names, landscape/portrait/square output layouts, and the non-destructive export range.
+- Project v0.9 adds production preset identity, editable graphics, and split A+B visual segments. Older A/B-only projects remain valid.
 
 ## Current validation target
 
 1. Open an older two-file synchronization report.
 2. Relink both originals.
 3. Add additional videos to the media library.
-4. choose a different active A/B pair;
-5. preserve offsets, cuts, mute state, and playback position;
-6. save v0.5;
-7. reload it and relink all media without losing editing decisions.
+4. Choose a different active A/B pair.
+5. Apply a production preset and customize its graphics.
+6. Preserve offsets, A/B/S cuts, audio mode, trim, preset data, and playback position.
+7. Save project v0.9.
+8. Reload it and relink all media without losing editing decisions.
 
 The verifiable canonical schema remains in `schemas/uizador-project-v1.schema.json`; it will be updated when the JSON checkpoint is promoted into the packaged manifest.

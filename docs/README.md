@@ -15,6 +15,7 @@ This index separates the current product contract, operational testing material,
 ## Production design
 
 - [Shot and movement library](shot-and-movement-library.md)
+- [Breaking News and Video Podcast presets](production-presets.md)
 - [Remote session concept](remote-session-concept.md)
 - [Localization](localization.md)
 
@@ -36,6 +37,8 @@ This index separates the current product contract, operational testing material,
 - The first validation cycle does not require chroma key, virtual backgrounds, remote sessions, or store publication.
 - Store copy must never promise a capability that the published build does not perform.
 
-## Current known gap
+## Current known gaps
 
-The synchronized player needs rewind, jump-back, jump-forward, and frame-step controls. Camera A/B selection should work during playback and while paused, with every decision remaining reversible.
+- Production graphics are static and use one global audio mode per edit.
+- Chroma key, animated transitions, and background replacement are later phases.
+- Physical Android tests must verify split-screen framing and safe text areas in every export orientation.

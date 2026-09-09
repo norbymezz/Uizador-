@@ -1,4 +1,4 @@
-export const TEST_PLAN_VERSION = 1;
+export const TEST_PLAN_VERSION = 2;
 
 export const PHASES = [
   { id: "preflight", label: "Preparación del teléfono" },
@@ -64,6 +64,9 @@ export const TEST_CASES = [
   {id:"EDT-006",phase:"edit",priority:"high",core:false,title:"Efectos no destructivos",expected:"Un título, fondo o transición puede eliminarse y volver a renderizarse."},
   {id:"EDT-007",phase:"edit",priority:"medium",core:false,title:"Pantalla partida de entrevista",expected:"Ambos videos respetan relación, nombres, ubicaciones y duración."},
   {id:"EDT-008",phase:"edit",priority:"high",core:false,title:"Exportación final",expected:"El archivo final reproduce completo, con audio, orientación y duración correctos."},
+  {id:"EDT-009",phase:"edit",priority:"high",core:false,title:"Preset Breaking News",expected:"Carga el plan A/dividido/B/dividido/A, permite editar placa y nombres, y los integra en la exportación."},
+  {id:"EDT-010",phase:"edit",priority:"high",core:false,title:"Preset Video Podcast",expected:"Carga plano de dos, primeros planos de host e invitado, rótulos editables y un audio estable."},
+  {id:"EDT-011",phase:"edit",priority:"high",core:false,title:"Persistir preset de producción",expected:"El archivo .uizador restaura preset, textos, estado urgente, segmentos divididos y fuente de audio."},
 
   {id:"REM-001",phase:"remote",priority:"blocker",core:false,title:"Ingresar desde otra red",expected:"Un participante entra mediante token temporal sin estar en la misma Wi-Fi."},
   {id:"REM-002",phase:"remote",priority:"blocker",core:false,title:"Estimar reloj común",expected:"Cada dispositivo informa offset, latencia y dispersión."},

@@ -4,7 +4,9 @@ import {readFile} from 'node:fs/promises';
 
 const html=await readFile(new URL('../web/sync-preview/index.html',import.meta.url),'utf8');
 const captureHtml=await readFile(new URL('../web/multicamera-session/index.html',import.meta.url),'utf8');
+const presetHtml=await readFile(new URL('../web/preset-library/index.html',import.meta.url),'utf8');
 const script=html.match(/<script>([\s\S]*)<\/script>/)?.[1]??'';
+const presetScript=presetHtml.match(/<script>([\s\S]*)<\/script>/)?.[1]??'';
 
 test('sync preview contains valid JavaScript',()=>{
   assert.ok(script.length>1000);
@@ -29,14 +31,39 @@ test('MVP batch controls remain connected',()=>{
 });
 
 test('project and export compatibility markers are present',()=>{
-  assert.ok(script.includes('uizador.multicam.project.v0.8'));
+  assert.ok(script.includes('uizador.multicam.project.v0.9'));
+  assert.ok(script.includes('uizador.multicam.edl.v0.5'));
   assert.ok(script.includes('legacyAudioMode'));
   assert.ok(script.includes("safeName(projectName,'uizador-project')+'.uizador'"));
   assert.ok(script.includes("safeName(exportName,'uizador-edited-video')+'.webm'"));
   for(const layout of ['landscape','portrait','square']) assert.ok(html.includes(`value="${layout}"`));
 });
 
+test('news and podcast presets are editable, persistent, and renderable',()=>{
+  for(const id of [
+    'productionPreset','applyProductionPreset','presetBrand','presetHeadline',
+    'presetNameA','presetNameB','presetUrgent','graphicsPreview','chooseSplit'
+  ]) assert.match(html,new RegExp(`id="${id}"`),`missing #${id}`);
+  for(const marker of [
+    "'breaking-news'","'video-podcast'",'productionState()',
+    "addCut('S')",'drawProgramFrame','drawProductionGraphics',
+    "['A','B','S'].includes",'report.production=productionState()'
+  ]) assert.ok(script.includes(marker),`missing production preset marker: ${marker}`);
+  assert.match(html,/Split A \+ B/);
+  assert.match(html,/\.cut\.s\{/);
+});
+
+test('preset library exposes the two production presets directly',()=>{
+  assert.doesNotThrow(()=>new Function(presetScript));
+  assert.ok(presetScript.includes("href:'../sync-preview/index.html?preset=breaking-news'"));
+  assert.ok(presetScript.includes("href:'../sync-preview/index.html?preset=video-podcast'"));
+  const sceneIds=[...presetScript.matchAll(/\{id:'([^']+)'/g)].map(x=>x[1]);
+  assert.equal(new Set(sceneIds).size,sceneIds.length);
+  assert.match(presetHtml,/Use preset/);
+});
+
 test('visible editor copy remains English',()=>{
+  assert.match(html,/<html lang="en">/);
   assert.doesNotMatch(html,/[áéíóúñ¿¡]/i);
   assert.doesNotMatch(html,/id="mute[AB]"/);
 });

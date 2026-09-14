@@ -9,10 +9,14 @@ main{width:min(1050px,100%);margin:auto;padding:16px}h1{font-size:1.4rem;margin:
 .card h2{font-size:1.08rem;margin:0 0 7px}.card p{color:var(--muted);font-size:.86rem;line-height:1.4;margin:0 0 14px}.meta{font-size:.76rem;color:#e9cbea;margin-top:auto}.actions{display:grid;grid-template-columns:1fr 42px;gap:7px;margin-top:11px}
 button,a{min-height:42px;border:1px solid #684f76;border-radius:10px;background:#2c1d38;color:#fff;padding:9px;text-decoration:none;font:inherit;font-weight:700;text-align:center;cursor:pointer}.start{background:linear-gradient(135deg,#e84f9a,#8568df)}.fav.on{color:#ff87c4;background:#4b2548}
 .empty{display:none;text-align:center;color:var(--muted);padding:70px 10px}@media(max-width:760px){.grid{grid-template-columns:1fr 1fr}}@media(max-width:480px){.grid{grid-template-columns:1fr}}
+.visual.has-guide{height:132px;overflow:hidden;border:1px solid #594466;border-radius:12px;background:#111923}
+.guide-preview{position:absolute;inset:0;width:100%;height:100%;border:0;background:transparent;pointer-events:none}
+.case-tag{position:absolute;left:7px;bottom:7px;z-index:2;padding:4px 7px;border-radius:999px;background:#111923dd;color:#ffd166;font-size:.66rem;font-weight:900;letter-spacing:.03em}
 </style></head><body><main><header><h1>Choose how you want to tell it</h1><p>Ready-made scenes you can adapt with your cast, words, and setting.</p></header>
 <div class="filters"><button class="filter on" data-filter="all">All</button><button class="filter" data-filter="one">1 phone</button><button class="filter" data-filter="multi">Multiple phones</button><button class="filter" data-filter="dialogue">Dialogue</button><button class="filter" data-filter="movement">Movement</button><button class="filter" data-filter="montage">Montage</button><button class="filter" data-filter="fantasy">Fantasy</button><button class="filter" data-filter="music">Music</button><button class="filter" data-filter="news">News & shows</button><button class="filter" data-filter="remote">Remote</button><button class="filter" data-filter="fav">Favorites</button></div>
 <section class="grid" id="grid"></section><div class="empty" id="empty">There are no presets in this filter yet.</div>
-</main><script>
+</main><script type="module">
+import{PREBUILT_GUIDES,prebuiltGuideUrl,rehearsalUrl}from'../../core/prebuilt-guides.js';
 const scenes=[
 {id:'two',title:'Two-shot push-in',desc:'Two people share the frame while the camera moves gradually closer.',tags:['one','multi','dialogue'],phones:'1 or more',move:'↔'},
 {id:'reverse',title:'Shot / reverse shot',desc:'Two people face each other while A and B alternate across a consistent 180° line.',tags:['one','multi','dialogue'],phones:'Ideal: 2',move:'A ⇆ B'},
@@ -30,6 +34,13 @@ const scenes=[
 {id:'choreography',title:'Music choreography',desc:'Guide audio marks steps, entrances, and movements; the final soundtrack can be added later.',tags:['one','multi','movement','music'],phones:'1 or more',move:'♪'},
 {id:'chroma',title:'Chroma scene',desc:'Framing prepared for a background replacement during later editing.',tags:['one','multi','movement'],phones:'1 or more',move:'◇'}
 ];
+const prebuiltCards=PREBUILT_GUIDES.map(guide=>({id:guide.id,title:guide.cardTitle,desc:guide.description,tags:guide.tags,phones:guide.phones,move:guide.move,href:rehearsalUrl(guide),guide}));
+scenes.splice(2,0,...prebuiltCards);
+function sceneVisual(scene){
+ if(!scene.guide)return `<div class="visual">${humanFigure('a')}<span class="arrow">${scene.move}</span>${humanFigure('b')}</div>`;
+ const src=prebuiltGuideUrl(scene.guide,{embed:true,autoplay:false});
+ return `<div class="visual has-guide"><iframe class="guide-preview" src="${src}" title="Vista previa: ${scene.guide.reference}" loading="lazy" sandbox="allow-scripts"></iframe><span class="case-tag">${scene.guide.specialLabel}</span></div>`;
+}
 function humanFigure(position){return `<svg class="figure ${position}" viewBox="-115 -355 230 380" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><g>
 <path class="figure-limb" d="M-34 -206 Q-56 -178 -44 -140 Q-33 -117 -12 -111"/><path class="figure-limb" d="M34 -206 Q56 -178 44 -140 Q33 -117 12 -111"/>
 <path class="figure-limb" d="M-18 -95 L-25 0"/><path class="figure-limb" d="M18 -95 L26 0"/><ellipse class="figure-shoe" cx="-34" cy="8" rx="23" ry="8"/><ellipse class="figure-shoe" cx="38" cy="8" rx="23" ry="8"/>
@@ -37,7 +48,7 @@ function humanFigure(position){return `<svg class="figure ${position}" viewBox="
 </g></svg>`}
 let active='all';const favs=new Set(JSON.parse(localStorage.getItem('uizador-favs')||'[]'));
 function key(s,i){return s.title+'-'+i}
-function render(){const box=document.querySelector('#grid');box.innerHTML='';let count=0;scenes.forEach((s,i)=>{const k=key(s,i),show=active==='all'||(active==='fav'?favs.has(k):s.tags.includes(active));if(!show)return;count++;const href=s.href||'../scene-rehearsal/index.html?preset='+s.id+'&theme='+(s.theme||'pop'),e=document.createElement('article');e.className='card';e.innerHTML=`<div class="visual">${humanFigure('a')}<span class="arrow">${s.move}</span>${humanFigure('b')}</div><h2>${s.title}</h2><p>${s.desc}</p><div class="meta">📱 ${s.phones}</div><div class="actions"><a class="start" href="${href}">Use preset</a><button class="fav ${favs.has(k)?'on':''}" aria-label="Favorite">♥</button></div>`;e.querySelector('.fav').onclick=()=>{favs.has(k)?favs.delete(k):favs.add(k);localStorage.setItem('uizador-favs',JSON.stringify([...favs]));render()};box.appendChild(e)});document.querySelector('#empty').style.display=count?'none':'block'}
+function render(){const box=document.querySelector('#grid');box.innerHTML='';let count=0;scenes.forEach((s,i)=>{const k=key(s,i),show=active==='all'||(active==='fav'?favs.has(k):s.tags.includes(active));if(!show)return;count++;const href=s.href||'../scene-rehearsal/index.html?preset='+s.id+'&theme='+(s.theme||'pop'),e=document.createElement('article');e.className='card';e.innerHTML=`${sceneVisual(s)}<h2>${s.title}</h2><p>${s.desc}</p><div class="meta">📱 ${s.phones}</div><div class="actions"><a class="start" href="${href}">Use preset</a><button class="fav ${favs.has(k)?'on':''}" aria-label="Favorite">♥</button></div>`;e.querySelector('.fav').onclick=()=>{favs.has(k)?favs.delete(k):favs.add(k);localStorage.setItem('uizador-favs',JSON.stringify([...favs]));render()};e.querySelector('.start').onclick=()=>localStorage.setItem('uizador-active-preset',s.id);box.appendChild(e)});document.querySelector('#empty').style.display=count?'none':'block'}
 document.querySelectorAll('.filter').forEach(b=>b.onclick=()=>{active=b.dataset.filter;document.querySelectorAll('.filter').forEach(x=>x.classList.toggle('on',x===b));render()});render();
 </script></body></html>
 

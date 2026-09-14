@@ -49,6 +49,11 @@ body.shooting #configBtn{display:block}
 #configBtn{display:none;padding:7px}
 .hint{color:#8fa0b2;font-size:.78rem;margin-top:6px}
 @media(max-width:560px){.wizard-card{padding:16px}.wizard{min-height:76vh}body.shooting .actions{grid-template-columns:1fr 1fr 44px}.actions button:last-child{grid-column:auto}}
+.prebuilt-info{margin-top:10px;padding:10px 12px;border:1px solid rgba(231,185,95,.45);border-radius:10px;background:rgba(231,185,95,.09);color:#e9edf3;font-size:.8rem;line-height:1.4}
+.scene-guide{position:absolute;inset:0;z-index:1;width:100%;height:100%;border:0;background:transparent;pointer-events:none;display:none;opacity:.74}
+body.prebuilt-active .scene-guide{display:block}
+body.prebuilt-active .subject,body.prebuilt-active .horizon,body.prebuilt-active .move,body.prebuilt-active .direction,body.prebuilt-active .path-guide,body.prebuilt-active .hud{display:none}
+.reference-frame{z-index:2}.count,.prompt{z-index:4}
 </style>
 </head>
 <body><main>
@@ -62,6 +67,7 @@ body.shooting #configBtn{display:block}
 <p>Esto define las líneas punteadas, el encuadre y el movimiento que vas a seguir.</p>
 <label>Tipo de escena
 <select id="wPreset"><option value="two">Plano de dos · acercamiento</option><option value="reverse">Enfrentados · plano / contraplano</option><option value="moveab">Marca A → B</option><option value="followback">Seguimiento por espalda</option><option value="walkfront">Caminata frontal</option><option value="sidetrack">Seguimiento lateral</option><option value="walktalk">Dos caminando y hablando</option><option value="orbit">Rotación alrededor de protagonista</option><option value="montage">Montaje breve</option><option value="fantasy">Mundo dibujado</option><option value="sitcom">Sitcom multicámara</option></select></label>
+<div id="prebuiltInfo" class="prebuilt-info" hidden></div>
 <label style="margin-top:10px">Imagen de referencia del plano
 <input id="wReference" type="file" accept="image/*"></label>
 <label style="margin-top:10px">Transparencia de la referencia
@@ -75,7 +81,7 @@ body.shooting #configBtn{display:block}
 <h2>2 · Prepará la toma</h2>
 <p>Indicá cuánto dura la actuación, cuánto tiempo necesitás para acomodarte y cómo cambia el zoom.</p>
 <div class="grid">
-<label>Duración de la escena<input id="wDuration" type="number" min="6" max="60" value="15"></label>
+<label>Duración de la escena<input id="wDuration" type="number" min="6" max="60" step="0.1" value="15"></label>
 <label>Cuenta regresiva<input id="wCountdown" type="number" min="0" max="10" value="3"></label>
 <label>Zoom
 <select id="wZoom"><option value="1.0">Fijo 1.0×</option><option value="1.5" selected>1.0× → 1.5×</option><option value="2.0">1.0× → 2.0×</option></select></label>
@@ -111,6 +117,7 @@ A|13|Mirá a cámara.</textarea>
 <section class="stage">
 <video id="camera" autoplay muted playsinline></video>
 <div class="overlay">
+<iframe id="prebuiltGuide" class="scene-guide" title="" sandbox="allow-scripts"></iframe>
 <img id="referenceOverlay" class="reference-frame" alt="">
 <div class="subject a"></div><div class="subject b"></div><div class="horizon"></div>
 <div class="direction" id="direction">Mantené a las dos personas dentro de sus guías.</div><div class="path-guide" id="pathGuide"><span>A</span><i></i><span>B</span></div><div class="move" id="move">↔</div><div class="hud"><span id="shot">Plano de dos</span><span id="zoom">1.0×</span></div>
@@ -125,7 +132,7 @@ A|13|Mirá a cámara.</textarea>
 <label>Preset
 <select id="preset"><option value="two">Plano de dos · acercamiento</option><option value="reverse">Enfrentados · plano / contraplano</option><option value="moveab">Marca A → B</option><option value="followback">Seguimiento por espalda</option><option value="walkfront">Caminata frontal</option><option value="sidetrack">Seguimiento lateral</option><option value="walktalk">Dos caminando y hablando</option><option value="orbit">Rotación alrededor de protagonista</option><option value="montage">Montaje breve</option><option value="fantasy">Mundo dibujado</option><option value="sitcom">Sitcom multicámara</option></select></label>
 <label>Duración
-<input id="duration" type="number" min="6" max="60" value="15"></label>
+<input id="duration" type="number" min="6" max="60" step="0.1" value="15"></label>
 <label>Cuenta regresiva
 <input id="countdown" type="number" min="0" max="10" value="3"></label>
 <label>Zoom previsto
@@ -149,7 +156,8 @@ A|13|Mirá a cámara.</textarea></label>
 </section>
 <audio id="guideAudio" playsinline></audio>
 </main>
-<script>
+<script type="module">
+import{PREBUILT_GUIDES,getPrebuiltGuide,prebuiltGuideUrl}from'../../core/prebuilt-guides.js';
 const $=s=>document.querySelector(s),video=$('#camera'),promptBox=$('#prompt'),countBox=$('#count'),statusBox=$('#status');
 let stream=null,runTimer=null,recorder=null,chunks=[],startedAt=0;
 const presets={
@@ -165,14 +173,24 @@ const presets={
  fantasy:{name:'Mundo dibujado',move:'◇ fondo',help:'Grabá con separación clara del fondo. El escenario ilustrado se aplica después.',cue:p=>p<.2?'Separación del fondo · luz pareja':p<.8?'Actuá mirando las marcas imaginarias':'Sostené para el recorte final',apply:p=>{document.querySelector('.a').style.left='13%';document.querySelector('.b').style.right='13%'}},
  sitcom:{name:'Sitcom multicámara',move:'A · G · B',help:'Actuación continua con plano general y coberturas de cada personaje.',cue:p=>p<.25?'Plano general':p<.62?'Cobertura de diálogo':'Reacciones y cierre',apply:p=>{document.querySelector('.a').style.left='12%';document.querySelector('.b').style.right='12%'}}
 };
+const DEFAULT_WIZARD={duration:'15',zoom:'1.5',theme:'pop',script:$('#wScript').value};
+let previousPrebuiltId=null;
+function installPrebuiltOptions(){for(const guide of PREBUILT_GUIDES){for(const select of[$('#wPreset'),$('#preset')]){if([...select.options].some(option=>option.value===guide.id))continue;const option=document.createElement('option');option.value=guide.id;option.textContent=guide.title;select.append(option)}}}
+function renderPrebuiltInfo(guide){const box=$('#prebuiltInfo');box.hidden=!guide;if(!guide){box.textContent='';return}box.innerHTML=`<strong>${guide.reference}</strong><br>${guide.span} · guía HTML/SVG pregrabada`}
+function applyPrebuiltDefaults(){const guide=getPrebuiltGuide($('#wPreset').value);if(guide){$('#wDuration').value=guide.durationSec;$('#wZoom').value='1.0';$('#wTheme').value=guide.theme;$('#wScript').value=guide.script;previousPrebuiltId=guide.id}else if(previousPrebuiltId){$('#wDuration').value=DEFAULT_WIZARD.duration;$('#wZoom').value=DEFAULT_WIZARD.zoom;$('#wTheme').value=DEFAULT_WIZARD.theme;$('#wScript').value=DEFAULT_WIZARD.script;previousPrebuiltId=null}renderPrebuiltInfo(guide);document.body.dataset.theme=$('#wTheme').value;updatePresetHelp()}
+function activePrebuilt(){return getPrebuiltGuide($('#preset').value)}
+function sendPrebuiltGuide(action){const frame=$('#prebuiltGuide');frame.dataset.pendingAction=action;if(frame.contentWindow)frame.contentWindow.postMessage({type:'uizador-guide',action},'*')}
+function loadPrebuiltGuide(autoplay=false){const guide=activePrebuilt(),frame=$('#prebuiltGuide');document.body.classList.toggle('prebuilt-active',Boolean(guide));if(!guide){frame.dataset.guideId='';frame.dataset.pendingAction='';frame.src='about:blank';frame.title='';return}frame.title='Guía '+guide.reference;if(frame.dataset.guideId!==guide.id){frame.dataset.guideId=guide.id;frame.dataset.pendingAction=autoplay?'restart':'reset';frame.src=prebuiltGuideUrl(guide,{embed:true,autoplay:false})}else sendPrebuiltGuide(autoplay?'restart':'reset')}
+function pausePrebuiltGuide(){sendPrebuiltGuide('pause')}
+$('#prebuiltGuide').addEventListener('load',()=>{const frame=$('#prebuiltGuide'),action=frame.dataset.pendingAction;if(!action||!frame.dataset.guideId)return;frame.contentWindow.postMessage({type:'uizador-guide',action},'*');frame.dataset.pendingAction=''})
 function resetGuides(){const a=document.querySelector('.a'),b=document.querySelector('.b');for(const x of[a,b]){x.style.left='';x.style.right='';x.style.opacity=1;x.style.transform='scale(1)'}$('#pathGuide').style.display='none'}
-function updatePresetHelp(){const p=presets[$('#wPreset').value]||presets.two;$('#movementHint').textContent=p.help}
+function updatePresetHelp(){const guide=getPrebuiltGuide($('#wPreset').value),p=presets[$('#wPreset').value]||presets.two;$('#movementHint').textContent=guide?'La escena ya está preparada: Uizador la reinicia al comenzar el ensayo o la grabación.':p.help}
 function lines(){return $('#script').value.split('\n').map(x=>{const [who,t,...rest]=x.split('|');return{who:(who||'').trim(),t:Number(t)||0,text:rest.join('|').trim()}}).filter(x=>x.text).sort((a,b)=>a.t-b.t)}
 function renderTimeline(){const d=+$('#duration').value||15,ls=lines(),box=$('#timeline');box.innerHTML='';ls.forEach((x,i)=>{const end=ls[i+1]?.t??d,b=document.createElement('button');b.className='seg';b.style.flex=Math.max(.2,end-x.t);b.textContent=`${x.who} · ${x.t}s`;box.appendChild(b)})}
 async function enableCamera(){try{stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:'environment'},audio:true});video.srcObject=stream;statusBox.textContent='Cámara preparada.'}catch(e){statusBox.textContent='No se pudo abrir la cámara: '+e.message}}
-function setAt(t){const d=+$('#duration').value||15,p=Math.min(1,t/d),ls=lines();let current=ls[0];ls.forEach(x=>{if(x.t<=t)current=x});promptBox.innerHTML=`<small>${current?.who||'—'} · ${Math.max(0,(ls.find(x=>x.t>t)?.t??d)-t).toFixed(1)} s</small>${current?.text||''}`;$('#clock').textContent=`00:${t.toFixed(1).padStart(4,'0')}`;const z=1+(Number($('#zoomTarget').value)-1)*p;$('#zoom').textContent=z.toFixed(2)+'×';const pr=presets[$('#preset').value]||presets.two;resetGuides();$('#shot').textContent=pr.name;$('#move').textContent=pr.move;$('#direction').textContent=pr.cue(p);$('#pathGuide').style.display=pr.marks?'flex':'none';pr.apply(p);document.querySelectorAll('.seg').forEach((e,i)=>e.classList.toggle('active',ls[i]===current))}
-async function start(recording=false){clearInterval(runTimer);renderTimeline();if(recording&&!stream){await enableCamera();if(!stream)return}const cd=Math.max(0,+$('#countdown').value||0);for(let i=cd;i>0;i--){countBox.textContent=i;await new Promise(r=>setTimeout(r,1000))}countBox.textContent='';if(recording){chunks=[];recorder=new MediaRecorder(stream);recorder.ondataavailable=e=>e.data.size&&chunks.push(e.data);recorder.onstop=download;recorder.start(500);$('#record').classList.add('recording');$('#record').textContent='Grabando…'}const guide=$('#guideAudio');if(guide.src){guide.currentTime=0;guide.play().catch(()=>{});}
-startedAt=performance.now();const d=+$('#duration').value||15;runTimer=setInterval(()=>{const t=(performance.now()-startedAt)/1000;setAt(Math.min(t,d));if(t>=d){clearInterval(runTimer);guide.pause();if(recorder?.state==='recording')recorder.stop();$('#record').classList.remove('recording');$('#record').textContent='Grabar toma';statusBox.textContent='Toma terminada.'}},50)}
+function setAt(t){const d=+$('#duration').value||15,p=Math.min(1,t/d),ls=lines();let current=ls[0];ls.forEach(x=>{if(x.t<=t)current=x});promptBox.innerHTML=`<small>${current?.who||'—'} · ${Math.max(0,(ls.find(x=>x.t>t)?.t??d)-t).toFixed(1)} s</small>${current?.text||''}`;$('#clock').textContent=`00:${t.toFixed(1).padStart(4,'0')}`;const z=1+(Number($('#zoomTarget').value)-1)*p;$('#zoom').textContent=z.toFixed(2)+'×';const guide=activePrebuilt(),pr=guide?{name:guide.title,move:guide.move,marks:false,cue:()=>guide.span,apply:()=>{}}:(presets[$('#preset').value]||presets.two);resetGuides();$('#shot').textContent=pr.name;$('#move').textContent=pr.move;$('#direction').textContent=pr.cue(p);$('#pathGuide').style.display=pr.marks?'flex':'none';pr.apply(p);document.querySelectorAll('.seg').forEach((e,i)=>e.classList.toggle('active',ls[i]===current))}
+async function start(recording=false){clearInterval(runTimer);renderTimeline();if(recording&&!stream){await enableCamera();if(!stream)return}const cd=Math.max(0,+$('#countdown').value||0);for(let i=cd;i>0;i--){countBox.textContent=i;await new Promise(r=>setTimeout(r,1000))}countBox.textContent='';if(recording){chunks=[];recorder=new MediaRecorder(stream);recorder.ondataavailable=e=>e.data.size&&chunks.push(e.data);recorder.onstop=download;recorder.start(500);$('#record').classList.add('recording');$('#record').textContent='Grabando…'}loadPrebuiltGuide(true);const guide=$('#guideAudio');if(guide.src){guide.currentTime=0;guide.play().catch(()=>{});}
+startedAt=performance.now();const d=+$('#duration').value||15;runTimer=setInterval(()=>{const t=(performance.now()-startedAt)/1000;setAt(Math.min(t,d));if(t>=d){clearInterval(runTimer);guide.pause();pausePrebuiltGuide();if(recorder?.state==='recording')recorder.stop();$('#record').classList.remove('recording');$('#record').textContent='Grabar toma';statusBox.textContent='Toma terminada.'}},50)}
 function download(){const blob=new Blob(chunks,{type:recorder.mimeType}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`uizador-toma-${Date.now()}.webm`;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000)}
 $('#cameraBtn').onclick=enableCamera;$('#rehearse').onclick=()=>start(false);$('#record').onclick=()=>start(true);
 ['script','duration','preset'].forEach(id=>$('#'+id).addEventListener('input',renderTimeline));
@@ -187,13 +205,13 @@ function syncWizard(){
  document.body.dataset.theme=$('#wTheme').value;
  const ref=$('#wReference').files?.[0];if(ref){const oldRef=$('#referenceOverlay').dataset.url;if(oldRef)URL.revokeObjectURL(oldRef);const refUrl=URL.createObjectURL(ref);$('#referenceOverlay').src=refUrl;$('#referenceOverlay').dataset.url=refUrl;$('#referenceOverlay').style.display='block';}$('#referenceOverlay').style.opacity=(Number($('#wReferenceOpacity').value)||28)/100;
  const file=$('#wGuideFile').files?.[0];if(file){const old=$('#guideAudio').dataset.url;if(old)URL.revokeObjectURL(old);const url=URL.createObjectURL(file);$('#guideAudio').src=url;$('#guideAudio').dataset.url=url;}
- renderTimeline();setAt(0)
+ renderTimeline();setAt(0);loadPrebuiltGuide(false);localStorage.setItem('uizador-active-preset',$('#preset').value)
 }
-$('#wTheme').onchange=()=>document.body.dataset.theme=$('#wTheme').value;$('#wPreset').onchange=updatePresetHelp;
-function presetData(){return{schema:'uizador.scene-preset.v0.1',scene_type:$('#wPreset').value,duration_sec:Number($('#wDuration').value),countdown_sec:Number($('#wCountdown').value),zoom_target:Number($('#wZoom').value),guide_mode:$('#wGuideMode').value,theme:$('#wTheme').value,script:$('#wScript').value}}
+$('#wTheme').onchange=()=>document.body.dataset.theme=$('#wTheme').value;$('#wPreset').onchange=applyPrebuiltDefaults;
+function presetData(){const guide=getPrebuiltGuide($('#wPreset').value);return{schema:'uizador.scene-preset.v0.2',scene_type:$('#wPreset').value,prebuilt_guide_id:guide?.id||null,duration_sec:Number($('#wDuration').value),countdown_sec:Number($('#wCountdown').value),zoom_target:Number($('#wZoom').value),guide_mode:$('#wGuideMode').value,theme:$('#wTheme').value,script:$('#wScript').value}}
 $('#savePreset').onclick=()=>{const blob=new Blob([JSON.stringify(presetData(),null,2)],{type:'application/json'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='uizador-preset-'+$('#wPreset').value+'.json';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000)}
-$('#loadPreset').onchange=async()=>{const file=$('#loadPreset').files?.[0];if(!file)return;try{const x=JSON.parse(await file.text());$('#wPreset').value=x.scene_type||'two';$('#wDuration').value=x.duration_sec||15;$('#wCountdown').value=x.countdown_sec??3;$('#wZoom').value=String(x.zoom_target||1.5);$('#wGuideMode').value=x.guide_mode||'choreo';$('#wTheme').value=x.theme||'pop';$('#wScript').value=x.script||'';document.body.dataset.theme=$('#wTheme').value;}catch(e){alert('El preset no parece válido.')}}
+$('#loadPreset').onchange=async()=>{const file=$('#loadPreset').files?.[0];if(!file)return;try{const x=JSON.parse(await file.text());$('#wPreset').value=x.prebuilt_guide_id||x.scene_type||'two';$('#wDuration').value=x.duration_sec||15;$('#wCountdown').value=x.countdown_sec??3;$('#wZoom').value=String(x.zoom_target||1.5);$('#wGuideMode').value=x.guide_mode||'choreo';$('#wTheme').value=x.theme||'pop';$('#wScript').value=x.script||'';document.body.dataset.theme=$('#wTheme').value;previousPrebuiltId=getPrebuiltGuide($('#wPreset').value)?.id||null;renderPrebuiltInfo(getPrebuiltGuide($('#wPreset').value));}catch(e){alert('El preset no parece válido.')}}
 $('#startCamera').onclick=async()=>{syncWizard();await enableCamera();if(stream){document.body.classList.add('shooting');statusBox.textContent='Cámara lista. Podés ensayar o grabar.'}};
-$('#configBtn').onclick=()=>{document.body.classList.remove('shooting');showWizardStep(0)};
-const launch=new URLSearchParams(location.search);if(launch.get('preset')&&[...$('#wPreset').options].some(o=>o.value===launch.get('preset')))$('#wPreset').value=launch.get('preset');if(launch.get('theme')&&[...$('#wTheme').options].some(o=>o.value===launch.get('theme')))$('#wTheme').value=launch.get('theme');document.body.dataset.theme=$('#wTheme').value;updatePresetHelp();renderTimeline();setAt(0);
+$('#configBtn').onclick=()=>{document.body.classList.remove('shooting');loadPrebuiltGuide(false);showWizardStep(0)};
+installPrebuiltOptions();const launch=new URLSearchParams(location.search);if(launch.get('preset')&&[...$('#wPreset').options].some(o=>o.value===launch.get('preset')))$('#wPreset').value=launch.get('preset');if(launch.get('theme')&&[...$('#wTheme').options].some(o=>o.value===launch.get('theme')))$('#wTheme').value=launch.get('theme');applyPrebuiltDefaults();document.body.dataset.theme=$('#wTheme').value;renderTimeline();setAt(0);
 </script></body></html>

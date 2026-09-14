@@ -16,6 +16,7 @@ This index separates the current product contract, operational testing material,
 
 - [Shot and movement library](shot-and-movement-library.md)
 - [Breaking News and Video Podcast presets](production-presets.md)
+- [Human-form guides: decisions, status, and next steps](human-figure-guides.md)
 - [Remote session concept](remote-session-concept.md)
 - [Localization](localization.md)
 
@@ -42,3 +43,4 @@ This index separates the current product contract, operational testing material,
 - Production graphics are static and use one global audio mode per edit.
 - Chroma key, animated transitions, and background replacement are later phases.
 - Physical Android tests must verify split-screen framing and safe text areas in every export orientation.
+

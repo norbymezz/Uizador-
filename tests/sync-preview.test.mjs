@@ -23,7 +23,8 @@ test('MVP batch controls remain connected',()=>{
   for(const id of [
     'projectName','exportName','outputLayout','prevCut','nextCut','undoCut',
     'setTrimStart','setTrimEnd','clearTrim','audioA','audioB','audioMix',
-    'audioNone','exportSummary','exportVideo'
+    'audioNone','exportSummary','exportVideo','musicFile','musicAudition','musicWave',
+    'musicStartRange','musicEndRange','musicVolume','musicLoop','previewMusic'
   ]) assert.match(html,new RegExp(`id="${id}"`),`missing #${id}`);
   for(const handler of [
     "$('#prevCut').onclick","$('#nextCut').onclick","$('#undoCut').onclick",
@@ -32,8 +33,8 @@ test('MVP batch controls remain connected',()=>{
 });
 
 test('project and export compatibility markers are present',()=>{
-  assert.ok(script.includes('uizador.multicam.project.v0.9'));
-  assert.ok(script.includes('uizador.multicam.edl.v0.5'));
+  assert.ok(script.includes('uizador.multicam.project.v1.0'));
+  assert.ok(script.includes('uizador.multicam.edl.v0.6'));
   assert.ok(script.includes('legacyAudioMode'));
   assert.ok(script.includes("safeName(projectName,'uizador-project')+'.uizador'"));
   assert.ok(script.includes("safeName(exportName,'uizador-edited-video')+'.webm'"));
@@ -133,5 +134,40 @@ test('continuous audio is decoupled from low-rate phone preview',()=>{
   assert.ok(script.includes("const key=previewTurn++%2===0?'A':'B'"));
   assert.ok(script.includes('a.volume=1'));
   assert.ok(!script.includes('requestMediaPlay'));
-  assert.match(html,/Audio stays continuous; final export uses every original frame/);
+  assert.match(html,/Camera audio stays continuous and remains the synchronization clock/);
 });
+
+test('background music uses a selected fragment without becoming the sync clock',()=>{
+  for(const marker of [
+    'backgroundMusicState','selectBackgroundMusic','musicSourceTime','syncMusicPlayer',
+    "anchor:'export_start'","report.background_music=backgroundMusicState()",
+    'musicSource=ac.createBufferSource()','musicSource.loopStart','musicSource.loopEnd',
+    'musicGain.gain.value=musicVolume','musicSelectionDuration()'
+  ]) assert.ok(script.includes(marker),`missing background-music marker: ${marker}`);
+  const mediaClock=script.slice(script.indexOf('function mediaClock()'),script.indexOf('function commonTime()'));
+  assert.doesNotMatch(mediaClock,/musicPlayer|backgroundMusic/);
+  assert.match(html,/Repeat the selected fragment to fill the complete export range/);
+  assert.match(html,/Background music never changes the A\/B offset/);
+});
+
+test('background music mapping anchors, wraps, and stops exactly',()=>{
+  const source=script.match(/function mapMusicSourceTime\([^\n]+\}/)?.[0]??'';
+  const map=new Function(source+';return mapMusicSourceTime')();
+  assert.equal(map(5,5,20,10,14,true),10);
+  assert.equal(map(8,5,20,10,14,true),13);
+  assert.equal(map(9,5,20,10,14,true),10);
+  assert.equal(map(9,5,20,10,14,false),null);
+  assert.equal(map(4.99,5,20,10,14,true),null);
+  assert.equal(map(20,5,20,10,14,true),null);
+});
+
+test('background music selection and preview survive export decoder release',()=>{
+  for(const marker of [
+    "state={time:commonTime(),a:mediaUrls.A",
+    'music:musicUrl','music_audition_time','[musicPlayer,audition]',
+    "musicPlayer.addEventListener('loadedmetadata'","Reselect '+musicRef.name"
+  ]) assert.ok(script.includes(marker),`missing music recovery marker: ${marker}`);
+  assert.ok(script.includes("if(musicRef&&!musicFile)"));
+  assert.ok(html.includes('accept="audio/*"'));
+});
+

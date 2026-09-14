@@ -287,3 +287,20 @@ The following checks run after every media-library or project-format change:
 8. Export the edit and inspect motion in the downloaded file. Confirm it uses the original full frame rate rather than the three-updates-per-second phone preview.
 9. After export, rewind and play again without reloading; confirm audible playback and sampled A/B preview recover.
 10. If a track is reported near silent, play the original outside Uizador before filing a playback defect.
+
+## Background-music fragment regression
+
+Test source inspected for the first cycle: MP3, 151.562 seconds, 44.1 kHz, stereo, approximately 128 kb/s.
+
+1. Load a synchronized A/B pair and note its current offset.
+2. Select the music file and confirm its waveform and 2:31.562 duration appear.
+3. Scrub the music player, set fragment start and end, then adjust both boundaries with the sliders.
+4. Preview the fragment and confirm playback stays inside the selected interval.
+5. Leave **Repeat the selected fragment** enabled, set music volume to 25%, and play the camera edit across at least one fragment boundary.
+6. Confirm the background fragment starts at the export-range start and repeats without moving the common position or the B offset.
+7. Repeat preview with Camera Audio A, B, Mix, and None. Confirm those choices affect only camera audio.
+8. Export a WebM longer than the selected music fragment and confirm music fills the complete file while visual A/B cuts remain aligned.
+9. Save the `.uizador` project, reopen it, and confirm filename, boundaries, volume, repeat mode, and anchor return. Reselect the music file and export again.
+10. Export once with repeat disabled and confirm music stops after one selected interval while video and camera audio continue.
+11. Cancel an export, export again, and verify camera and music preview decoders recover without reloading.
+

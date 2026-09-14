@@ -17,7 +17,7 @@ A `.uizador` project preserves editable state rather than a rendered movie. It c
 
 ## Project and export metadata
 
-Project v0.9 stores human-readable naming, output layout, and an optional production preset without embedding or modifying media:
+Project v1.0 stores human-readable naming, output layout, and an optional production preset without embedding or modifying media:
 
 ```json
 {
@@ -134,10 +134,38 @@ The current checkpoint preserves:
 - all reversible A, B, and split-screen (`S`) visual decisions;
 - common playback position;
 - selected camera;
-- explicit audio source mode (A, B, Mix, or None);
+- explicit camera-audio source mode (A, B, Mix, or None);
+- optional background-music file identity, selected interval, volume, repeat mode, and export-start anchor;
 - media names, sizes, MIME types, timestamps, durations, and SHA-256 hashes.
 
 Canonical project time will use integer microseconds to avoid floating-point accumulation in long projects.
+
+
+## Background music checkpoint
+
+Background music is distinct from the A/B synchronization signal. Version 1.0 stores only the reference and edit decisions, never the audio bytes:
+
+```json
+{
+  "background_music": {
+    "enabled": true,
+    "file": {
+      "name": "music.mp3",
+      "size": 2425416,
+      "type": "audio/mpeg",
+      "last_modified": 1632003242402,
+      "duration_sec": 151.562
+    },
+    "start_sec": 18.4,
+    "end_sec": 31.9,
+    "volume": 0.25,
+    "fill_scene": true,
+    "anchor": "export_start"
+  }
+}
+```
+
+The user must authorize or reselect the original music file after reopening a lightweight project. The selected fragment begins at the export start; when `fill_scene` is true, it repeats until the export ends. It never participates in camera-offset estimation.
 
 ## Capture identity when filenames change
 

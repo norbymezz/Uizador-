@@ -22,6 +22,12 @@ The news-studio prototype now represents the planned composition with the same r
 
 The current implementation, explicit exclusions, next step, and later animation ideas are tracked in [Human-form guides](human-figure-guides.md).
 
+### Prebuilt HTML/SVG scene loop
+
+`core/prebuilt-guides.js` registers scene guides that were created beforehand in Norberta Chatelli. A catalog card previews the original HTML/SVG, **Use preset** opens rehearsal with its identifier, and the rehearsal screen loads the same artifact over the camera. Starting rehearsal or recording resets the scene clock; finishing pauses it.
+
+The first connected case is `friends-front-back`, explicitly labeled **Friends · S04E01 · “For the record…” → “front and back”**. It remains an HTML/SVG guide; no runtime scene generation and no video conversion are required.
+
 ## Breaking News
 
 Default plan:

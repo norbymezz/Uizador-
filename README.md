@@ -11,6 +11,7 @@
 - [Synchronize and select two recordings](https://norbymezz.github.io/Uizador-/web/sync-preview/)
 - [Open the test center](https://norbymezz.github.io/Uizador-/web/test-center/)
 - [Browse scene presets](https://norbymezz.github.io/Uizador-/web/preset-library/)
+- [Try the Friends prebuilt scene guide](https://norbymezz.github.io/Uizador-/web/scene-rehearsal/?preset=friends-front-back&theme=cinema)
 - [Try the news-studio human guide](https://norbymezz.github.io/Uizador-/web/news-studio/?template=correspondent)
 - [Try the Breaking News preset](https://norbymezz.github.io/Uizador-/web/sync-preview/?preset=breaking-news)
 - [Try the Video Podcast preset](https://norbymezz.github.io/Uizador-/web/sync-preview/?preset=video-podcast)
@@ -49,6 +50,7 @@ The screenshots show real files recorded during the first two-phone test: audio-
 - Continuous selectable audio with a lightweight 3-updates-per-second A/B orientation preview, reversible cuts, precise paused seeking, cut navigation, and cut undo
 - Breaking News and Video Podcast presets with normalized shot plans, split-screen segments, editable titles/lower thirds, and graphics rendered into the final video
 - Human-form scene guides: one full-body studio composition, a two-person waist-up split composition, and human figures on every preset-selection card
+- End-to-end prebuilt HTML/SVG guide flow: catalog preview, preset application, rehearsal, synchronized clock restart, and camera overlay; Friends S04E01 is the first specific case
 - One ordered, collapsible mobile page: project/media, synchronization, shared preview/editing, then export
 - Multi-file media library with selectable active A/B pairs
 - Independent synchronization and montage profiles for every ordered A/B pair
@@ -65,7 +67,8 @@ The screenshots show real files recorded during the first two-phone test: audio-
 - Validate multi-file project reopen and automatic media relinking
 - Confirm that camera switching, audio source, trim, naming, and output layout survive save/reopen
 - Validate both production presets in landscape and portrait exports, including split-screen framing and text safe areas
-- Validate the human-form guides on phones in landscape and portrait, then connect their shot changes to the rehearsal/recording timeline
+- Validate the human-form guides on phones in landscape and portrait
+- Validate the complete Friends prebuilt-guide loop, then add the A Few Good Men case through the same catalog
 - Improve remote-camera transfer to the director and final batch-download verification
 
 ## Test evidence

@@ -6,7 +6,8 @@ const html=await readFile(new URL('../web/sync-preview/index.html',import.meta.u
 const captureHtml=await readFile(new URL('../web/multicamera-session/index.html',import.meta.url),'utf8');
 const presetHtml=await readFile(new URL('../web/preset-library/index.html',import.meta.url),'utf8');
 const script=html.match(/<script>([\s\S]*)<\/script>/)?.[1]??'';
-const presetScript=presetHtml.match(/<script>([\s\S]*)<\/script>/)?.[1]??'';
+const presetScript=presetHtml.match(/<script(?:\s[^>]*)?>([\s\S]*)<\/script>/)?.[1]??'';
+const presetExecutable=presetScript.replace(/^\s*import[^\n]+\n/,'');
 
 test('sync preview contains valid JavaScript',()=>{
   assert.ok(script.length>1000);
@@ -54,7 +55,7 @@ test('news and podcast presets are editable, persistent, and renderable',()=>{
 });
 
 test('preset library exposes the two production presets directly',()=>{
-  assert.doesNotThrow(()=>new Function(presetScript));
+  assert.doesNotThrow(()=>new Function(presetExecutable));
   assert.ok(presetScript.includes("href:'../sync-preview/index.html?preset=breaking-news'"));
   assert.ok(presetScript.includes("href:'../sync-preview/index.html?preset=video-podcast'"));
   const sceneIds=[...presetScript.matchAll(/\{id:'([^']+)'/g)].map(x=>x[1]);

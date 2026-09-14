@@ -27,6 +27,30 @@ export const PREBUILT_GUIDES=Object.freeze([
    'RACHEL|9.5|Nueva reacción de Rachel.',
    'ROSS|11.4|Cierre en plano conjunto con reencuadre lateral.'
   ].join('\n')
+ }),
+ Object.freeze({
+  id:'few-good-men-courtroom',
+  title:'Plano/contraplano — A Few Good Men',
+  cardTitle:'A Few Good Men · tribunal',
+  description:'Caso específico de referencia: un plano general con tres figuras alterna con el primer plano del interlocutor.',
+  reference:'A Few Good Men · escena del tribunal',
+  span:'Plano general → contraplano → respuesta → contraplano',
+  specialLabel:'CASO ESPECÍFICO · TRIBUNAL',
+  sourceUrl:'../prebuilt-guides/courtroom-shot-reverse-shot.html',
+  sourceCodeUrl:'https://github.com/norbymezz/norbertachatelli/blob/main/examples/courtroom-shot-reverse-shot.html',
+  sourceRevision:'3a5a5471ae8b08bc7aae5557cb8221d5fda75ecf',
+  durationSec:6,
+  beatSec:1.5,
+  tags:Object.freeze(['one','multi','dialogue']),
+  phones:'1 or more',
+  move:'A ⇆ B',
+  theme:'cinema',
+  script:[
+   'GENERAL|0|Plano general · silencio.',
+   'CERCA|1.5|Contraplano · habla el personaje cercano.',
+   'FRENTE|3|Plano general · responde el personaje delantero.',
+   'CERCA|4.5|Contraplano · vuelve a hablar.'
+  ].join('\n')
  })
 ]);
 

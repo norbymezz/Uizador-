@@ -7,6 +7,7 @@ These files are release copies of finished HTML/SVG scenes used directly by Uiza
 - Each file must support a stopped embedded view and clock control before it is registered in `core/prebuilt-guides.js`.
 - `sourceCodeUrl` and `sourceRevision` in the catalog identify the exact origin of every bundled copy.
 
-Current guide:
+Current guides:
 
 - `friends-for-record-front-back.html` — Friends S04E01, “For the record…” → “front and back”.
+- `courtroom-shot-reverse-shot.html` — *A Few Good Men*, alternancia de tribunal en cuatro estados.

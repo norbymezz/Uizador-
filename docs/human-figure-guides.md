@@ -39,7 +39,7 @@ Los óvalos punteados de las tarjetas fueron reemplazados por la misma figura hu
 
 Archivos: `core/prebuilt-guides.js`, `web/preset-library/index.html` y `web/scene-rehearsal/index.html`.
 
-El primer caso completo es **Friends · S04E01 · “For the record…” → “front and back”**:
+Los dos primeros casos completos son **Friends · S04E01 · “For the record…” → “front and back”** y ***A Few Good Men* · escena del tribunal**. Ambos recorren el mismo circuito:
 
 1. aparece identificado como caso específico dentro de la biblioteca;
 2. su propio HTML/SVG funciona como vista previa de la tarjeta;
@@ -63,9 +63,9 @@ La fuente de la escena permanece en `norbertachatelli`. Uizador incluye una copi
 
 ## Próximo paso concreto
 
-1. Probar en un teléfono la vuelta completa del caso Friends: biblioteca → ensayo → cámara → grabación.
-2. Ajustar únicamente transparencia, tamaño o recorte si la guía tapa demasiado la imagen real.
-3. Incorporar el caso de *A Few Good Men* como segunda entrada pregrabada del catálogo.
+1. Probar en un teléfono la vuelta completa de Friends y *A Few Good Men*: biblioteca → ensayo → cámara → grabación.
+2. Ajustar únicamente transparencia, tamaño o recorte si alguna guía tapa demasiado la imagen real.
+3. Incorporar cada próxima escena mediante su copia HTML y una entrada de catálogo.
 4. Conectar la guía del estudio de noticias a su timeline automática.
 5. Guardar y restaurar los planes de guía dentro del proyecto `.uizador`.
 6. Extraer la figura genérica a un único componente para evitar divergencias entre pantallas.
@@ -95,6 +95,7 @@ Para animación futura, las partes del cuerpo podrán organizarse como una caden
 - 2026-09-11 — [PR #2](https://github.com/norbymezz/Uizador-/pull/2): figura humana aplicada al estudio de noticias; plano de cuerpo entero y pantalla partida de cintura para arriba.
 - 2026-09-11 — [PR #3](https://github.com/norbymezz/Uizador-/pull/3): figuras humanas aplicadas a las tarjetas del selector de presets.
 - 2026-09-14 — Primer circuito completo para una escena Chatelli pregrabada: selección, aplicación, ensayo y guía durante la grabación.
+- 2026-09-14 — *A Few Good Men* incorporada como segundo caso mediante el mismo catálogo y sin lógica especial adicional.
 
 Cada agregado posterior a esta línea de trabajo debe anotarse aquí bajo una de tres categorías: **implementado**, **próximo paso** o **idea posterior**.
 

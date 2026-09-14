@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<script>if(new URLSearchParams(location.search).get("embed")==="1")document.documentElement.classList.add("embed")</script>
+<title>A Few Good Men — plano y contraplano</title>
+<style>
+:root{color-scheme:dark;--ink:#202126;--skin:#d8a071;--uniform:#202936;--wall:#b99778;--wood:#563327}
+*{box-sizing:border-box}body{margin:0;min-height:100vh;display:grid;place-items:center;background:#111820;color:#eef3fa;font:15px system-ui,sans-serif}
+main{width:min(1050px,100%);padding:14px}.stage{overflow:hidden;border-radius:18px;background:#151b24;box-shadow:0 18px 48px #0008}
+svg{display:block;width:100%;height:auto}.shot{opacity:0;pointer-events:none;transition:opacity .22s ease}.shot.active{opacity:1}
+.bone{fill:none;stroke:var(--ink);stroke-width:13;stroke-linecap:round;stroke-linejoin:round}.joint{fill:#f1c45e;stroke:var(--ink);stroke-width:5}
+.head{fill:var(--skin);stroke:var(--ink);stroke-width:7}.hair{fill:#302a28;stroke:var(--ink);stroke-width:5}.eye{fill:#fff;stroke:var(--ink);stroke-width:5}.pupil{fill:var(--ink)}
+.face-line{fill:none;stroke:var(--ink);stroke-width:6;stroke-linecap:round;stroke-linejoin:round}.mouth-rest{opacity:1}.mouth-open{opacity:0;fill:#681f20;stroke:var(--ink);stroke-width:6;transform-box:fill-box;transform-origin:center}
+.speaker .mouth-rest{opacity:0}.speaker .mouth-open{opacity:1;animation:talk .22s ease-in-out infinite alternate}@keyframes talk{from{transform:scaleY(.55)}to{transform:scaleY(1.25)}}
+.caption{fill:#fff;font:800 18px system-ui,sans-serif;text-anchor:middle;paint-order:stroke;stroke:#111;stroke-width:6}
+.clock{display:flex;justify-content:center;gap:10px;padding:12px 10px 5px}.beat{width:13px;height:13px;border-radius:50%;background:#354052;border:2px solid #657187}.beat.on{background:#fff;border-color:#fff;box-shadow:0 0 13px #fff9}
+.status{text-align:center;min-height:23px;color:#cbd3df}.controls{display:flex;justify-content:center;gap:9px;padding:11px}button{padding:8px 15px;border:1px solid #526075;border-radius:999px;background:#263243;color:#fff;cursor:pointer}
+html.embed,html.embed body{background:transparent}
+html.embed body{min-height:100vh;display:block}
+html.embed main{width:100%;height:100vh;padding:0}
+html.embed .stage{height:100%;border-radius:0;background:transparent;box-shadow:none}
+html.embed .clock,html.embed .status,html.embed .controls{display:none}
+html.embed svg{width:100%;height:100%;background:transparent}
+html.embed #shotA>rect,html.embed #shotB>rect{opacity:.16}
+html.embed #shotA>path,html.embed #shotB>path{opacity:.22}
+</style>
+</head>
+<body><main><section class="stage" aria-label="Guía esquemática de A Few Good Men mediante plano y contraplano">
+<svg viewBox="0 0 1000 590" role="img" aria-labelledby="title desc">
+<title id="title">A Few Good Men — alternancia de plano y contraplano</title>
+<desc id="desc">Personajes geométricos de distintos tamaños representan un intercambio en la escena del tribunal. Sólo cambia la forma de sus bocas.</desc>
+
+<!-- PLANO A: figura principal adelante y dos figuras menores en profundidad -->
+<g id="shotA" class="shot active">
+ <rect width="1000" height="590" fill="#b99778"/><rect y="355" width="1000" height="235" fill="#563327"/>
+ <path d="M0 355H1000M0 474H1000" stroke="#202126" stroke-width="8"/><rect x="90" y="90" width="245" height="205" rx="8" fill="#624536" stroke="#202126" stroke-width="8"/>
+ <g transform="translate(225 423) scale(.48)">
+  <path class="bone" d="M0-100V65M0-55L-75 5M0-55L75 5M0 65L-50 165M0 65L50 165"/><circle class="joint" cy="-55" r="10"/><circle class="joint" cx="-75" cy="5" r="10"/><circle class="joint" cx="75" cy="5" r="10"/>
+  <ellipse class="head" cy="-180" rx="72" ry="82"/><path class="hair" d="M-66-202q15-79 70-76q58 3 67 78q-39-27-75-19q-37 6-62 17Z"/>
+  <ellipse class="eye" cx="-27" cy="-187" rx="13" ry="15"/><ellipse class="eye" cx="27" cy="-187" rx="13" ry="15"/><circle class="pupil" cx="-22" cy="-184" r="6"/><circle class="pupil" cx="32" cy="-184" r="6"/>
+  <path class="mouth-rest face-line" d="M-25-142q25 10 50 0"/><ellipse class="mouth-open" cy="-140" rx="27" ry="14"/>
+ </g>
+ <g transform="translate(435 425) scale(.7)">
+  <path class="bone" d="M0-100V65M0-55L-72 0M0-55L72 0M0 65L-48 165M0 65L48 165"/><circle class="joint" cy="-55" r="10"/><circle class="joint" cx="-72" r="10"/><circle class="joint" cx="72" r="10"/>
+  <ellipse class="head" cy="-180" rx="72" ry="82"/><path class="hair" d="M-66-202q15-79 70-76q58 3 67 78q-39-27-75-19q-37 6-62 17Z"/>
+  <ellipse class="eye" cx="-27" cy="-187" rx="13" ry="15"/><ellipse class="eye" cx="27" cy="-187" rx="13" ry="15"/><circle class="pupil" cx="-22" cy="-184" r="6"/><circle class="pupil" cx="32" cy="-184" r="6"/>
+  <path class="mouth-rest face-line" d="M-25-142q25 10 50 0"/><ellipse class="mouth-open" cy="-140" rx="27" ry="14"/>
+ </g>
+ <g id="frontSpeaker" transform="translate(725 505)">
+  <path class="bone" d="M0-120V35M0-82L-95-20M0-82L95-20M0 35L-55 125M0 35L55 125"/><circle class="joint" cy="-82" r="11"/><circle class="joint" cx="-95" cy="-20" r="11"/><circle class="joint" cx="95" cy="-20" r="11"/><circle class="joint" cy="35" r="11"/>
+  <ellipse class="head" cy="-225" rx="82" ry="94"/><path class="hair" d="M-76-250q16-88 76-86q67 1 80 87q-43-29-83-21q-43 6-73 20Z"/>
+  <ellipse class="eye" cx="-31" cy="-232" rx="15" ry="18"/><ellipse class="eye" cx="31" cy="-232" rx="15" ry="18"/><circle class="pupil" cx="-25" cy="-229" r="7"/><circle class="pupil" cx="37" cy="-229" r="7"/>
+  <path class="face-line" d="M4-224l-12 38h21"/>
+  <path class="mouth-rest face-line" d="M-31-169q31 12 62 0"/><ellipse class="mouth-open" cy="-167" rx="34" ry="20"/>
+ </g>
+</g>
+
+<!-- PLANO B: rostro cercano del interlocutor -->
+<g id="shotB" class="shot">
+ <rect width="1000" height="590" fill="#513125"/><rect x="0" width="315" height="590" fill="#94745b"/><path d="M315 0V590" stroke="#202126" stroke-width="10"/>
+ <g id="closeSpeaker" transform="translate(650 550)">
+  <path class="bone" d="M0-60V90M0-25L-190 65M0-25L190 65"/><circle class="joint" cy="-25" r="15"/><circle class="joint" cx="-190" cy="65" r="15"/><circle class="joint" cx="190" cy="65" r="15"/>
+  <ellipse class="head" cy="-300" rx="155" ry="178"/><path class="hair" d="M-145-345q28-146 149-143q125 4 151 140q-72-43-158-36q-86 6-142 39Z"/>
+  <ellipse class="eye" cx="-60" cy="-315" rx="27" ry="31"/><ellipse class="eye" cx="60" cy="-315" rx="27" ry="31"/><circle class="pupil" cx="-50" cy="-310" r="12"/><circle class="pupil" cx="70" cy="-310" r="12"/>
+  <path class="face-line" d="M8-295l-24 76h40"/>
+  <path class="mouth-rest face-line" d="M-60-190q60 20 120 0"/><path class="mouth-open" d="M-63-195Q0-222 65-194Q48-145 0-140Q-48-146-63-195Z"/>
+ </g>
+</g>
+</svg>
+<div class="clock"><i class="beat"></i><i class="beat"></i><i class="beat"></i><i class="beat"></i></div>
+<div id="status" class="status">Plano general · silencio</div>
+<div class="controls"><button id="toggle">Pausar</button><button id="restart">Reiniciar</button></div>
+</section></main>
+<script>
+(()=>{const shotA=document.querySelector("#shotA"),shotB=document.querySelector("#shotB"),front=document.querySelector("#frontSpeaker"),close=document.querySelector("#closeSpeaker"),dots=[...document.querySelectorAll(".beat")],status=document.querySelector("#status"),toggle=document.querySelector("#toggle");
+const states=[
+ {shot:"A",speaker:null,text:"Plano general · silencio"},
+ {shot:"B",speaker:"close",text:"Contraplano · habla el personaje cercano"},
+ {shot:"A",speaker:"front",text:"Plano general · habla el personaje delantero"},
+ {shot:"B",speaker:"close",text:"Contraplano · vuelve a hablar"}
+],launch=new URLSearchParams(location.search);let index=0,running=launch.get("autoplay")!=="0",timer;
+function render(){const s=states[index];shotA.classList.toggle("active",s.shot==="A");shotB.classList.toggle("active",s.shot==="B");front.classList.toggle("speaker",s.speaker==="front");close.classList.toggle("speaker",s.speaker==="close");dots.forEach((d,i)=>d.classList.toggle("on",i===index));status.textContent=s.text}
+function start(){clearInterval(timer);timer=setInterval(()=>{index=(index+1)%states.length;render()},1500)}
+function pause(){running=false;clearInterval(timer);toggle.textContent="Continuar"}
+function restart(){index=0;render();running=true;toggle.textContent="Pausar";start()}
+function reset(){pause();index=0;render()}
+toggle.onclick=()=>{running?pause():(running=true,toggle.textContent="Pausar",start())};
+document.querySelector("#restart").onclick=()=>{index=0;render();if(running)start()};
+toggle.textContent=running?"Pausar":"Continuar";render();if(running)start();
+window.addEventListener("message",event=>{const command=event.data;if(!command||command.type!=="uizador-guide")return;if(command.action==="start"||command.action==="restart")restart();else if(command.action==="pause")pause();else if(command.action==="reset")reset()});
+})();
+</script></body></html>

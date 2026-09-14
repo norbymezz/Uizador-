@@ -33,7 +33,8 @@ Ambas vistas reutilizan la misma geometría humana. La exportación del preset a
 
 Archivo: `web/preset-library/index.html`.
 
-Los óvalos punteados de las tarjetas fueron reemplazados por la misma figura humana mínima. La flecha o marca de movimiento propia de cada preset se mantiene. No cambiaron filtros, favoritos ni enlaces.
+Los óvalos punteados de las tarjetas fueron reemplazados por la misma figura humana mínima. La flecha o marca de movimiento propia de cada preset se mantiene. Los filtros y favoritos existentes se conservan.
+
 ### Circuito de escena HTML/SVG pregrabada
 
 Archivos: `core/prebuilt-guides.js`, `web/preset-library/index.html` y `web/scene-rehearsal/index.html`.

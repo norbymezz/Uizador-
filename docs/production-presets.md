@@ -21,6 +21,7 @@ Applying a preset replaces the current visual cut plan. The previous plan remain
 The news-studio prototype now represents the planned composition with the same reusable faceless human form: first one full-body studio figure, then two waist-up figures in split screen. This is a recording guide, separate from the post-recording A/B/S edit plan described below.
 
 The current implementation, explicit exclusions, next step, and later animation ideas are tracked in [Human-form guides](human-figure-guides.md).
+
 ### Prebuilt HTML/SVG scene loop
 
 `core/prebuilt-guides.js` registers scene guides that were created beforehand in Norberta Chatelli. A catalog card previews the original HTML/SVG, **Use preset** opens rehearsal with its identifier, and the rehearsal screen loads the same artifact over the camera. Starting rehearsal or recording resets the scene clock; finishing pauses it.

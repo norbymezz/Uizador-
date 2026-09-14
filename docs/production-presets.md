@@ -68,7 +68,7 @@ Included graphics:
 
 ## Project data
 
-Project checkpoint `uizador.multicam.project.v0.9` stores the production block both for the active edit and inside every ordered pair profile:
+Project checkpoint `uizador.multicam.project.v1.0` stores the production block both for the active edit and inside every ordered pair profile:
 
 ```json
 {
@@ -87,10 +87,16 @@ Project checkpoint `uizador.multicam.project.v0.9` stores the production block b
 
 Visual decision `S` means that the renderer places Camera A and Camera B side by side. The live phone preview remains lightweight at three sampled visual updates per second; the final local render uses the original video streams at full frame cadence.
 
+## Background music fragment
+
+The synchronized editor accepts a local audio file independently from Camera A/B audio. The user sees its waveform, selects fragment start and end, auditions that interval, chooses its volume, and can repeat it to fill the complete export range. The first music sample inspected for this flow is a 151.562-second stereo MP3 at 44.1 kHz and approximately 128 kb/s.
+
+The fragment is anchored to `export_range.start_sec`. Camera A/B audio remains the common synchronization clock and the music never changes `camera_b_offset_ms`. Final WebM rendering mixes the selected camera-audio mode and the chosen music interval through Web Audio. Details and acceptance checks are in [Background music](background-music.md).
+
 ## Current limits
 
 - Graphics are intentionally simple and static.
-- One global audio mode is selected for the edit: A, B, Mix, or None.
+- One global camera-audio mode is selected for the edit: A, B, Mix, or None. Background music has independent volume and one selected interval.
 - Chroma key, animated transitions, background replacement, and music licensing are separate later phases.
 - The first export format remains WebM.
 

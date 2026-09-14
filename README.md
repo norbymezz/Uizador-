@@ -48,20 +48,22 @@ The screenshots show real files recorded during the first two-phone test: audio-
 - Three-pulse start signature and end clap
 - Local take retention without download prompts between repetitions
 - Audio-envelope offset estimation and manual adjustment on a shared time grid
-- Continuous selectable audio with a lightweight 3-updates-per-second A/B orientation preview, reversible cuts, precise paused seeking, cut navigation, and cut undo
+- Continuous selectable camera audio with a lightweight 3-updates-per-second A/B orientation preview, reversible cuts, precise paused seeking, cut navigation, and cut undo
+- Local background-music selection with waveform, fragment boundaries, volume, repeated fill, synchronized preview, and final WebM mixing
 - Breaking News and Video Podcast presets with normalized shot plans, split-screen segments, editable titles/lower thirds, and graphics rendered into the final video
 - Human-form scene guides: one full-body studio composition, a two-person waist-up split composition, and human figures on every preset-selection card
 - End-to-end prebuilt HTML/SVG guide flow with bundled scene assets: catalog preview, preset application, rehearsal, synchronized clock restart, and camera overlay; Friends and A Few Good Men are the first two specific cases
 - One ordered, collapsible mobile page: project/media, synchronization, shared preview/editing, then export
 - Multi-file media library with selectable active A/B pairs
 - Independent synchronization and montage profiles for every ordered A/B pair
-- Portable non-destructive `.uizador` projects with media identity, hashes, offsets, cuts, explicit audio source, trim range, naming, output layout, and playback state
+- Portable non-destructive `.uizador` projects with media identity, hashes, offsets, cuts, explicit camera-audio source, background-music fragment, trim range, naming, output layout, and playback state
 - Local WebM rendering and download with landscape, portrait, or square output
 - Device diagnostics, a versioned test catalog, and automated sync-preview structure tests
 
 ## Immediate testing priorities
 
-- Validate continuous A/B/Mix audio and the lightweight sampled preview across different Android phones and browsers
+- Validate continuous A/B/Mix camera audio and the lightweight sampled preview across different Android phones and browsers
+- Select a fragment from the supplied 2:31 MP3, preview it across the export range, and verify the mixed WebM on Android
 - Measure offset and drift over longer recordings
 - Preserve complete evidence for each test run
 - Improve file transfer from remote cameras to the director

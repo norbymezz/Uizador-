@@ -16,6 +16,7 @@ This index separates the current product contract, operational testing material,
 
 - [Shot and movement library](shot-and-movement-library.md)
 - [Breaking News and Video Podcast presets](production-presets.md)
+- [Background music fragment: selection, timing, export, and tests](background-music.md)
 - [Human-form guides: decisions, status, and next steps](human-figure-guides.md)
 - [Remote session concept](remote-session-concept.md)
 - [Localization](localization.md)
@@ -40,7 +41,7 @@ This index separates the current product contract, operational testing material,
 
 ## Current known gaps
 
-- Production graphics are static and use one global audio mode per edit.
-- Chroma key, animated transitions, and background replacement are later phases.
+- Production graphics are static. Camera audio uses one global A/B/Mix/None mode; one independent music fragment can be mixed across the export range.
+- Beat detection, beat snapping, fades, ducking, chroma key, animated transitions, and background replacement are later phases.
 - Physical Android tests must verify split-screen framing and safe text areas in every export orientation.
 

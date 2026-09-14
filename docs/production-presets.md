@@ -16,6 +16,12 @@ Production presets apply a complete first edit to an already selected Camera A/B
 
 Applying a preset replaces the current visual cut plan. The previous plan remains available through **Undo cut**. Choosing **Free multicamera edit** removes preset graphics but leaves the current cuts intact.
 
+## Pre-recording human-form guide
+
+The news-studio prototype now represents the planned composition with the same reusable faceless human form: first one full-body studio figure, then two waist-up figures in split screen. This is a recording guide, separate from the post-recording A/B/S edit plan described below.
+
+The current implementation, explicit exclusions, next step, and later animation ideas are tracked in [Human-form guides](human-figure-guides.md).
+
 ## Breaking News
 
 Default plan:
@@ -90,3 +96,4 @@ Visual decision `S` means that the renderer places Camera A and Camera B side by
 - Export landscape and portrait samples and verify that no label is clipped.
 - Save the `.uizador` project, reopen it, relink media, and verify the preset and graphics.
 - Confirm that preview playback still works after export.
+

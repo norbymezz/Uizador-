@@ -150,6 +150,11 @@ test('background music uses a selected fragment without becoming the sync clock'
   assert.match(html,/Background music never changes the A\/B offset/);
 });
 
+test('background music status follows range changes',()=>{
+  const bounds=script.slice(script.indexOf('function setMusicBounds('),script.indexOf('function drawMusicWave'));
+  assert.ok(bounds.includes("$('#musicStatus').textContent=musicFile.name+' · '+format(musicDuration)+' · selected '+format(musicSelectionDuration())+'.'"));
+});
+
 test('background music mapping anchors, wraps, and stops exactly',()=>{
   const source=script.match(/function mapMusicSourceTime\([^\n]+\}/)?.[0]??'';
   const map=new Function(source+';return mapMusicSourceTime')();

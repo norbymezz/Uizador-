@@ -26,7 +26,7 @@ The current implementation, explicit exclusions, next step, and later animation 
 
 `core/prebuilt-guides.js` registers scene guides that were created beforehand in Norberta Chatelli. A catalog card previews the original HTML/SVG, **Use preset** opens rehearsal with its identifier, and the rehearsal screen loads the same artifact over the camera. Starting rehearsal or recording resets the scene clock; finishing pauses it.
 
-The first connected case is `friends-front-back`, explicitly labeled **Friends · S04E01 · “For the record…” → “front and back”**. It remains an HTML/SVG guide; no runtime scene generation and no video conversion are required.
+The first connected case is `friends-front-back`, explicitly labeled **Friends · S04E01 · “For the record…” → “front and back”**. Its source remains in `norbertachatelli`, while Uizador ships a release copy under `web/prebuilt-guides/`. It remains an HTML/SVG guide; no runtime scene generation, external scene hosting, or video conversion is required.
 
 ## Breaking News
 

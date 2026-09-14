@@ -12,7 +12,7 @@ test('el catálogo de guías pregrabadas tiene identificadores y fuentes válida
   assert.match(guide.id,/^[a-z0-9-]+$/);
   assert.ok(guide.durationSec>0);
   assert.ok(guide.beatSec>0);
-  assert.match(guide.sourceUrl,/^https:\/\/norbymezz\.github\.io\/norbertachatelli\/examples\/.+\.html$/);
+  assert.match(guide.sourceUrl,/^\.\.\/prebuilt-guides\/.+\.html$/);
  }
 });
 
@@ -21,7 +21,10 @@ test('Friends conserva el caso específico y su recorrido hasta grabación',asyn
  assert.ok(guide);
  assert.match(guide.reference,/S04E01/);
  assert.match(guide.span,/For the record/);
- assert.match(api.prebuiltGuideUrl(guide),/embed=1/);
+ assert.match(api.prebuiltGuideUrl(guide),/^https:\/\/norbymezz\.github\.io\/Uizador-\/web\/prebuilt-guides\/.+embed=1/);
+ const bundled=await readFile(new URL('../web/prebuilt-guides/friends-for-record-front-back.html',import.meta.url),'utf8');
+ assert.match(bundled,/uizador-guide/);
+ assert.match(bundled,/autoplay/);
  const library=await readFile(new URL('../web/preset-library/index.html',import.meta.url),'utf8');
  const rehearsal=await readFile(new URL('../web/scene-rehearsal/index.html',import.meta.url),'utf8');
  assert.match(library,/PREBUILT_GUIDES/);

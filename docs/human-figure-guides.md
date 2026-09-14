@@ -48,7 +48,7 @@ El primer caso completo es **Friends · S04E01 · “For the record…” → �
 5. al ensayar o grabar, Uizador reinicia el clock de la escena;
 6. al finalizar, la guía se detiene.
 
-La escena permanece preconstruida en `norbertachatelli`; Uizador no la vuelve a generar ni la convierte en video. Los próximos casos se agregan al catálogo con un identificador, URL, duración y metadatos.
+La fuente de la escena permanece en `norbertachatelli`. Uizador incluye una copia de distribución en `web/prebuilt-guides/` para que el preset no dependa de publicar otro sitio; no la vuelve a generar ni la convierte en video. Los próximos casos se agregan con su HTML y una entrada de catálogo que conserva origen, revisión, duración y metadatos.
 
 ## No implementado todavía
 

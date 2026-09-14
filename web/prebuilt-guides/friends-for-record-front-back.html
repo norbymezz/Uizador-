@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Friends · For the record / Front and back</title>
+<script>if(new URLSearchParams(location.search).get("embed")==="1")document.documentElement.classList.add("embed")</script>
+<style>
+:root{color-scheme:dark;--bg:#111923;--panel:#192538;--line:#f5f7fa;--skin:#d49b72;--ross:#496d91;--rachel:#b35663;--beat:#ffd166}
+*{box-sizing:border-box}body{margin:0;min-height:100vh;display:grid;place-items:center;background:var(--bg);color:#eef3f8;font:15px system-ui,sans-serif}
+main{width:min(1040px,100%);padding:14px}.card{overflow:hidden;border-radius:18px;background:var(--panel);box-shadow:0 18px 50px #0009}
+header{padding:15px 18px 10px}h1{font-size:clamp(18px,3vw,26px);margin:0}.sub{color:#bac5d4;margin-top:4px}
+svg{display:block;width:100%;height:auto;background:#a88970}.shot{opacity:0;transition:opacity .18s}.shot.active{opacity:1}.room{transition:transform 1s ease}
+.body{stroke:var(--line);stroke-width:8;stroke-linecap:round;stroke-linejoin:round}.head{fill:var(--skin);stroke:var(--line);stroke-width:6}.eye{fill:#19202a}.mouth{fill:none;stroke:#19202a;stroke-width:5;stroke-linecap:round}.talk .mouth{animation:talk .2s infinite alternate}@keyframes talk{to{transform:scaleY(1.9)}}.mouth{transform-box:fill-box;transform-origin:center}
+.tag{fill:#fff;font:800 20px system-ui;paint-order:stroke;stroke:#111;stroke-width:7}.note{font-size:14px;fill:#e7edf5}
+.clock{display:flex;gap:8px;justify-content:center;padding:12px 12px 4px}.dot{width:13px;height:13px;border-radius:50%;background:#3a485d}.dot.on{background:var(--beat);box-shadow:0 0 12px #ffd166aa}
+.info{display:grid;grid-template-columns:1fr auto;gap:10px;padding:8px 18px}.name{font-weight:800;font-size:18px}.dialog{color:#c5cfdd}.count{font-size:24px;color:var(--beat);font-weight:900}.controls{display:flex;gap:9px;padding:10px 18px 17px}button{border:1px solid #52637a;background:#29384c;color:white;border-radius:999px;padding:9px 16px}
+html.embed,html.embed body{background:transparent}
+html.embed body{min-height:100vh;display:block}
+html.embed main{width:100%;height:100vh;padding:0}
+html.embed .card{height:100%;border-radius:0;background:transparent;box-shadow:none}
+html.embed header,html.embed .clock,html.embed .info,html.embed .controls{display:none}
+html.embed svg{width:100%;height:100%;background:transparent}
+html.embed #wideRoom>rect,html.embed #rossClose>rect,html.embed #rachelClose>rect{opacity:.16}
+html.embed #wideRoom>path{opacity:.22}
+</style></head><body><main><section class="card">
+<header><h1>“For the record…” → “front and back”</h1><div class="sub">Alternancia esquemática de planos · dormitorio → living</div></header>
+<svg viewBox="0 0 1000 560" aria-label="Ross y Rachel discuten alternando planos">
+<defs><g id="person"><path class="body" d="M0 70V225M0 110L-78 178M0 110L78 178M0 225L-55 330M0 225L55 330" fill="none"/><circle class="head" cy="0" r="68"/><circle class="eye" cx="-24" cy="-10" r="6"/><circle class="eye" cx="24" cy="-10" r="6"/><path class="mouth" d="M-25 28Q0 38 25 28"/></g></defs>
+<g id="wide" class="shot active"><g id="wideRoom" class="room">
+ <rect width="1000" height="560" fill="#a98a70"/><rect y="390" width="1000" height="170" fill="#704934"/><rect x="90" y="78" width="290" height="240" fill="#795847" stroke="#2b2422" stroke-width="10"/><rect x="760" y="70" width="160" height="300" fill="#5c463a" stroke="#2b2422" stroke-width="9"/>
+ <g id="rossWide" transform="translate(650 210) scale(.9)" style="--line:#eff5fb"><use href="#person"/><path class="body" d="M-64 86Q0 48 64 86L60 230H-60Z" fill="var(--ross)"/></g>
+ <g id="rachelWide" transform="translate(350 220) scale(.88)"><use href="#person"/><path class="body" d="M-64 86Q0 50 64 86L60 230H-60Z" fill="var(--rachel)"/></g>
+</g></g>
+<g id="rossClose" class="shot"><rect width="1000" height="560" fill="#8c6d58"/><g id="rossFace" transform="translate(530 320) scale(2.05)"><use href="#person"/><path class="body" d="M-64 86Q0 48 64 86L60 230H-60Z" fill="var(--ross)"/></g></g>
+<g id="rachelClose" class="shot"><rect width="1000" height="560" fill="#9b7c64"/><g id="rachelFace" transform="translate(470 320) scale(2.05)"><use href="#person"/><path class="body" d="M-64 86Q0 50 64 86L60 230H-60Z" fill="var(--rachel)"/></g></g>
+<text id="plan" class="tag" x="34" y="43">Plano conjunto</text><text id="camera" class="tag note" x="34" y="70">Cámara fija</text>
+</svg>
+<div id="clock" class="clock"></div><div class="info"><div><div id="name" class="name"></div><div id="dialog" class="dialog"></div></div><div id="count" class="count">1</div></div>
+<div class="controls"><button id="toggle">Pausar</button><button id="restart">Reiniciar</button></div>
+</section></main>
+<script>
+(()=>{const states=[
+ {shot:"wide",speaker:"rossWide",plan:"Plano conjunto medio",camera:"Cámara fija",name:"Ross",dialog:"Defiende que la ruptura fue responsabilidad de los dos."},
+ {shot:"rachelClose",speaker:"rachelFace",plan:"Plano medio corto · Rachel",camera:"Corte directo",name:"Rachel",dialog:"Replica que la responsabilidad fue de Ross y la otra mujer."},
+ {shot:"rossClose",speaker:"rossFace",plan:"Plano medio corto · Ross",camera:"Corte directo",name:"Ross",dialog:"Admite que aceptó algo sin terminar de leer la carta."},
+ {shot:"rachelClose",speaker:"rachelFace",plan:"Primer plano · reacción",camera:"Corte directo",name:"Rachel",dialog:"Pregunta, incrédula, qué ocurrió con la lectura."},
+ {shot:"rossClose",speaker:"rossFace",plan:"Primer plano · Ross",camera:"Corte directo",name:"Ross",dialog:"Confiesa que se quedó dormido."},
+ {shot:"rachelClose",speaker:"rachelFace",plan:"Primer plano · Rachel",camera:"Corte directo",name:"Rachel",dialog:"Repite la confesión, cada vez más enojada."},
+ {shot:"wide",speaker:"rossWide",plan:"Plano conjunto en desplazamiento",camera:"Reencuadre lateral hacia el living",name:"Ross",dialog:"Se justifica por la hora y la extensión de la carta: dieciocho páginas, frente y dorso.",move:true}
+],shots=[...document.querySelectorAll(".shot")],clock=document.querySelector("#clock"),plan=document.querySelector("#plan"),camera=document.querySelector("#camera"),name=document.querySelector("#name"),dialog=document.querySelector("#dialog"),count=document.querySelector("#count"),wideRoom=document.querySelector("#wideRoom");states.forEach(()=>clock.append(Object.assign(document.createElement("i"),{className:"dot"})));const launch=new URLSearchParams(location.search);let i=0,running=launch.get("autoplay")!=="0",timer;
+function render(){const s=states[i];shots.forEach(x=>x.classList.toggle("active",x.id===s.shot));document.querySelectorAll("#rossWide,#rachelWide,#rossFace,#rachelFace").forEach(x=>x.classList.toggle("talk",x.id===s.speaker));[...clock.children].forEach((d,n)=>d.classList.toggle("on",n===i));plan.textContent=s.plan;camera.textContent=s.camera;name.textContent=s.name;dialog.textContent=s.dialog;count.textContent=i+1;wideRoom.style.transform=s.move?"translateX(-95px)":"translateX(0)"}
+function start(){clearInterval(timer);timer=setInterval(()=>{i=(i+1)%states.length;render()},1900)}document.querySelector("#toggle").onclick=e=>{running=!running;e.target.textContent=running?"Pausar":"Continuar";running?start():clearInterval(timer)};document.querySelector("#restart").onclick=()=>{i=0;render();if(running)start()};toggle.textContent=running?"Pausar":"Continuar";render();if(running)start();window.addEventListener("message",event=>{ const command=event.data;if(!command||command.type!=="uizador-guide")return; if(command.action==="start"||command.action==="restart"){i=0;render();running=true;toggle.textContent="Pausar";start()} else if(command.action==="pause"){running=false;clearInterval(timer);toggle.textContent="Continuar"} else if(command.action==="reset"){running=false;clearInterval(timer);i=0;render();toggle.textContent="Continuar"}});})();
+</script></body></html>

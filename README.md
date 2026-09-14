@@ -50,7 +50,7 @@ The screenshots show real files recorded during the first two-phone test: audio-
 - Continuous selectable audio with a lightweight 3-updates-per-second A/B orientation preview, reversible cuts, precise paused seeking, cut navigation, and cut undo
 - Breaking News and Video Podcast presets with normalized shot plans, split-screen segments, editable titles/lower thirds, and graphics rendered into the final video
 - Human-form scene guides: one full-body studio composition, a two-person waist-up split composition, and human figures on every preset-selection card
-- End-to-end prebuilt HTML/SVG guide flow: catalog preview, preset application, rehearsal, synchronized clock restart, and camera overlay; Friends S04E01 is the first specific case
+- End-to-end prebuilt HTML/SVG guide flow with bundled scene assets: catalog preview, preset application, rehearsal, synchronized clock restart, and camera overlay; Friends S04E01 is the first specific case
 - One ordered, collapsible mobile page: project/media, synchronization, shared preview/editing, then export
 - Multi-file media library with selectable active A/B pairs
 - Independent synchronization and montage profiles for every ordered A/B pair

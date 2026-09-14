@@ -1,4 +1,4 @@
-const CHATELLI_EXAMPLES='https://norbymezz.github.io/norbertachatelli/examples/';
+const UIZADOR_GUIDE_BASE='https://norbymezz.github.io/Uizador-/web/app-home/index.html';
 
 export const PREBUILT_GUIDES=Object.freeze([
  Object.freeze({
@@ -9,8 +9,9 @@ export const PREBUILT_GUIDES=Object.freeze([
   reference:'Friends · S04E01 · The One with the Jellyfish',
   span:'“For the record…” → “front and back”',
   specialLabel:'CASO ESPECÍFICO · S04E01',
-  sourceUrl:CHATELLI_EXAMPLES+'friends-for-record-front-back.html',
+  sourceUrl:'../prebuilt-guides/friends-for-record-front-back.html',
   sourceCodeUrl:'https://github.com/norbymezz/norbertachatelli/blob/main/examples/friends-for-record-front-back.html',
+  sourceRevision:'fd59ca3772e11a05ad2456af635c8484735fb045',
   durationSec:13.3,
   beatSec:1.9,
   tags:Object.freeze(['one','multi','dialogue']),
@@ -32,7 +33,8 @@ export const PREBUILT_GUIDES=Object.freeze([
 export function getPrebuiltGuide(id){return PREBUILT_GUIDES.find(guide=>guide.id===id)||null}
 
 export function prebuiltGuideUrl(guide,options={}){
- const url=new URL(guide.sourceUrl);
+ const base=typeof location==='undefined'?UIZADOR_GUIDE_BASE:location.href;
+ const url=new URL(guide.sourceUrl,base);
  url.searchParams.set('embed',options.embed===false?'0':'1');
  url.searchParams.set('autoplay',options.autoplay?'1':'0');
  if(options.run!==undefined)url.searchParams.set('run',String(options.run));

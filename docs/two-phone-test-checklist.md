@@ -28,17 +28,18 @@ On each phone, open the [preflight page](../web/preflight/index.html):
 11. Start the take.
 12. After the third beep, make one clearly visible hand clap in view of both cameras.
 13. Wait for the end signature, then download both locally retained recordings and their identification manifests.
+14. On the remote phone, follow the visible instruction to send its original recording and identification file to the director.
 
 The single physical sound emitted by the director is the synchronization reference captured by both microphones. Independent beeps on every phone would include network latency and are not the primary local-session reference.
 
 ## File handling
 
-The current prototype saves each recording locally. Transfer the remote camera file to the director without transcoding it—for example, Quick Share or WhatsApp as a document. Preserve both originals.
+The current prototype saves each recording locally. Transfer the remote camera file and its identification JSON to the director without transcoding—for example, with Quick Share or WhatsApp as documents. Preserve both originals. On the director phone, the completed recording screen now continues directly to file loading and synchronization.
 
 ## Synchronization check
 
-1. Open [Synchronize recordings](../web/sync-preview/index.html).
-2. Load the director file as Camera A and the remote file as Camera B.
+1. On the director phone, tap **Agregar archivos y sincronizar**. If the recording was made earlier, use **Ya grabé y tengo los archivos** on the initial screen.
+2. Add the director and remote files together, then assign the director file to Camera A and the remote file to Camera B.
 3. Run audio analysis.
 4. Record the estimated offset and confidence.
 5. Play from before the start signature.

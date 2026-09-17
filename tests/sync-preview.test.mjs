@@ -5,6 +5,8 @@ import {readFile} from 'node:fs/promises';
 const html=await readFile(new URL('../web/sync-preview/index.html',import.meta.url),'utf8');
 const captureHtml=await readFile(new URL('../web/multicamera-session/index.html',import.meta.url),'utf8');
 const presetHtml=await readFile(new URL('../web/preset-library/index.html',import.meta.url),'utf8');
+const rootHtml=await readFile(new URL('../index.html',import.meta.url),'utf8');
+const guidedTestDoc=await readFile(new URL('../docs/guided-end-to-end-test.md',import.meta.url),'utf8');
 const script=html.match(/<script>([\s\S]*)<\/script>/)?.[1]??'';
 const presetScript=presetHtml.match(/<script(?:\s[^>]*)?>([\s\S]*)<\/script>/)?.[1]??'';
 const presetExecutable=presetScript.replace(/^\s*import[^\n]+\n/,'');
@@ -121,6 +123,30 @@ test('capture page produces shareable named files and SHA manifests',()=>{
   assert.doesNotThrow(()=>new Function(captureScript));
   for(const marker of ['shareTake','captureManifest','blobSha256','uizador.capture.manifest.v0.1'])
     assert.ok(captureScript.includes(marker),`missing capture marker: ${marker}`);
+});
+
+test('recording completion continues to synchronization on the director phone',()=>{
+  const captureScript=captureHtml.match(/<script>([\s\S]*)<\/script>/)?.[1]??'';
+  for(const id of ['directorNext','remoteNext','continueSync'])
+    assert.match(captureHtml,new RegExp(`id="${id}"`),`missing handoff control #${id}`);
+  for(const marker of ['synchronizationContinuationUrl','updateContinuation',"from:'capture'","query.set('capturePreset',id)"])
+    assert.ok(captureScript.includes(marker),`missing capture continuation marker: ${marker}`);
+  assert.match(captureHtml,/Ya grabé y tengo los archivos/);
+  assert.match(captureHtml,/Agregar archivos y sincronizar/);
+});
+
+test('sync editor explains the remaining guided steps after capture',()=>{
+  for(const id of ['captureFlow','capturePresetLabel','hideCaptureFlow','setupSummary','syncSummary','previewSummary','exportPanelSummary'])
+    assert.match(html,new RegExp(`id="${id}"`),`missing guided-sync control #${id}`);
+  for(const marker of ['configureCaptureContinuation','fromCapture','CAPTURE_PRESET_NAMES',"'3 · Add recordings'","'6 · Export final video'"])
+    assert.ok(script.includes(marker),`missing guided-sync marker: ${marker}`);
+});
+
+test('repository root is the clean shareable guided entry',()=>{
+  assert.match(rootHtml,/url=\.\/web\/multicamera-session\//);
+  assert.match(rootHtml,/location\.replace\('\.\/web\/multicamera-session\/'\)/);
+  assert.match(guidedTestDoc,/https:\/\/norbymezz\.github\.io\/Uizador-\//);
+  for(const step of ['preset','QR','sincronización','export']) assert.ok(guidedTestDoc.includes(step));
 });
 
 test('a director chooses a detailed preset before creating the session',()=>{

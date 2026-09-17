@@ -6,6 +6,7 @@ This index separates the current product contract, operational testing material,
 
 | Document | Purpose | Status |
 |---|---|---|
+| [Complete guided test](guided-end-to-end-test.md) | One shareable link and the full preset-to-export route for a new user. | Ready |
 | [Multicamera concept](multicamera-concept.md) | Director/camera flow, audible timing marks, repeated takes, and local recording. | Core |
 | [Master test plan](test-plan.md) | Test phases, evidence, acceptance criteria, and defect reporting. | Core |
 | [Two-phone test checklist](two-phone-test-checklist.md) | Exact procedure for the first physical session. | Ready |
@@ -35,7 +36,7 @@ This index separates the current product contract, operational testing material,
 - Test IDs and cases: `core/test-catalog.js`
 - Test execution and exported results: `web/test-center/index.html`
 - Portable project validation: `schemas/uizador-project-v1.schema.json`
-- Public prototype: [Uizador on GitHub Pages](https://norbymezz.github.io/Uizador-/web/app-home/)
+- Public guided prototype: [Uizador on GitHub Pages](https://norbymezz.github.io/Uizador-/)
 - The first validation cycle does not require chroma key, virtual backgrounds, remote sessions, or store publication.
 - Store copy must never promise a capability that the published build does not perform.
 
@@ -44,4 +45,3 @@ This index separates the current product contract, operational testing material,
 - Production graphics are static. Camera audio uses one global A/B/Mix/None mode; one independent music fragment can be mixed across the export range.
 - Beat detection, beat snapping, fades, ducking, chroma key, animated transitions, and background replacement are later phases.
 - Physical Android tests must verify split-screen framing and safe text areas in every export orientation.
-

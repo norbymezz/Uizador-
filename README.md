@@ -6,6 +6,7 @@
 
 ## Try it now
 
+- [Start the complete guided test](https://norbymezz.github.io/Uizador-/) — preset, QR recording, file handoff, synchronization, cuts, and export in one route
 - [Open the multicamera session](https://norbymezz.github.io/Uizador-/web/multicamera-session/)
 - [Run the device preflight check](https://norbymezz.github.io/Uizador-/web/preflight/)
 - [Synchronize and select two recordings](https://norbymezz.github.io/Uizador-/web/sync-preview/)
@@ -29,6 +30,8 @@
 8. Audio envelopes estimate the offset; the user can refine it manually and choose camera A, camera B, or a split A+B composition.
 9. The user can edit freely or apply a ready-made news or podcast production preset with an initial cut plan and editable graphics.
 10. The user trims the export range, selects a stable audio source, and downloads one locally rendered WebM.
+
+The recording-complete screen now links directly to file loading and synchronization. A user who already has recordings can choose **Ya grabé y tengo los archivos** on the first screen and enter the same route at that point.
 
 ## Prototype screenshots
 
@@ -89,6 +92,7 @@ Additional scene templates, teleprompter guidance, remote sessions, chroma key, 
 - [Multicamera concept](docs/multicamera-concept.md)
 - [Master test plan](docs/test-plan.md)
 - [Two-phone test checklist](docs/two-phone-test-checklist.md)
+- [Complete guided end-to-end test](docs/guided-end-to-end-test.md)
 - [Shot and movement library](docs/shot-and-movement-library.md)
 - [Production presets](docs/production-presets.md)
 - [Human-form guides: decisions, status, and next steps](docs/human-figure-guides.md)
@@ -109,4 +113,3 @@ Uizador provides original camera, staging, and editing templates. It is not inte
 The repository also preserves Uizador's earlier audiovisual-reinterpretation experiments. The multicamera prototype is the current product-validation track.
 
 Contributions, reproducible bug reports, device information, and test evidence are welcome.
-

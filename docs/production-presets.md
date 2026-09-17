@@ -16,6 +16,23 @@ Production presets apply a complete first edit to an already selected Camera A/B
 
 Applying a preset replaces the current visual cut plan. The previous plan remains available through **Undo cut**. Choosing **Free multicamera edit** removes preset graphics but leaves the current cuts intact.
 
+## Session-opening preset selector
+
+Opening **Multicamera session** as the director now begins with an explicit preset choice. No session or QR exists before that choice. Each card states the intended scene, people, recommended phone count, recording duration, shot structure, and the route the user is about to execute.
+
+The available recording entries are:
+
+- synchronization test;
+- shot / reverse shot;
+- *Friends* · “We were on a break”;
+- *A Few Good Men* · courtroom;
+- three-shot sitcom;
+- Breaking News;
+- Video Podcast;
+- walk and talk.
+
+Selecting a card loads duration, pre-roll, repetitions, pause, movement, and the recording prompt. The selected preset name and plan remain visible in the lobby and camera screen, are sent to invited phones, and are stored in the capture manifest. A phone entering through the QR does not choose independently: it receives the director's selection.
+
 ## Pre-recording human-form guide
 
 The news-studio prototype now represents the planned composition with the same reusable faceless human form: first one full-body studio figure, then two waist-up figures in split screen. This is a recording guide, separate from the post-recording A/B/S edit plan described below.
@@ -108,4 +125,3 @@ The fragment is anchored to `export_range.start_sec`. Camera A/B audio remains t
 - Export landscape and portrait samples and verify that no label is clipped.
 - Save the `.uizador` project, reopen it, relink media, and verify the preset and graphics.
 - Confirm that preview playback still works after export.
-

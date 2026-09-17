@@ -142,6 +142,19 @@ test('a director chooses a detailed preset before creating the session',()=>{
   ]) assert.ok(captureScript.includes(marker),`missing session preset marker: ${marker}`);
 });
 
+test('plain shot reverse shot uses one subject per camera frame',()=>{
+  const captureScript=captureHtml.match(/<script>([\s\S]*)<\/script>/)?.[1]??'';
+  const reverse=captureScript.slice(captureScript.indexOf("{id:'reverse'"),captureScript.indexOf("{id:'friends-front-back'"));
+  for(const marker of [
+    "people:'1 persona por plano'","visual:'single-per-shot'","guideMode:'single-subject'",
+    "promptA:'Encuadrá solamente al personaje A.'","promptB:'Encuadrá solamente al personaje B.'"
+  ]) assert.ok(reverse.includes(marker),`missing reverse-shot marker: ${marker}`);
+  for(const marker of ['presetVisual','single-per-shot','single-shot','promptForCamera'])
+    assert.ok(captureScript.includes(marker),`missing single-subject rendering marker: ${marker}`);
+  assert.match(captureHtml,/\.stage\.single-subject \.face\.b\{display:none\}/);
+  assert.match(captureHtml,/\.stage\.single-subject \.face\.a\{left:34%\}/);
+});
+
 
 test('continuous audio is decoupled from low-rate phone preview',()=>{
   for(const marker of [

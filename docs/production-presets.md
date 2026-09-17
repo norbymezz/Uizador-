@@ -33,6 +33,8 @@ The available recording entries are:
 
 Selecting a card loads duration, pre-roll, repetitions, pause, movement, and the recording prompt. The selected preset name and plan remain visible in the lobby and camera screen, are sent to invited phones, and are stored in the capture manifest. A phone entering through the QR does not choose independently: it receives the director's selection.
 
+The plain **shot / reverse shot** preset represents two separate frames, not two people sharing one frame. Its A card contains one human form and its B card contains one human form. During capture, Camera A receives one centered subject guide for character A and Camera B receives one centered subject guide for character B.
+
 ## Pre-recording human-form guide
 
 The news-studio prototype now represents the planned composition with the same reusable faceless human form: first one full-body studio figure, then two waist-up figures in split screen. This is a recording guide, separate from the post-recording A/B/S edit plan described below.

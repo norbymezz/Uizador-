@@ -123,6 +123,25 @@ test('capture page produces shareable named files and SHA manifests',()=>{
     assert.ok(captureScript.includes(marker),`missing capture marker: ${marker}`);
 });
 
+test('a director chooses a detailed preset before creating the session',()=>{
+  const captureScript=captureHtml.match(/<script>([\s\S]*)<\/script>/)?.[1]??'';
+  const ids=[...captureHtml.matchAll(/\sid="([^"]+)"/g)].map(x=>x[1]);
+  assert.equal(new Set(ids).size,ids.length);
+  for(const id of ['presetGrid','create','lobbyPresetName','lobbyPresetPlan','cameraPreset'])
+    assert.match(captureHtml,new RegExp(`id="${id}"`),`missing session preset control #${id}`);
+  assert.ok(captureHtml.indexOf('id="presetGrid"')<captureHtml.indexOf('id="qr"'));
+  assert.match(captureHtml,/id="create"[^>]+disabled>Elegí un preset para continuar/);
+  for(const title of [
+    'Prueba de sincronización','Plano / contraplano','Friends · “We were on a break”',
+    'A Few Good Men · tribunal','Sitcom de tres planos','Breaking News','Video Podcast','Caminata con diálogo'
+  ]) assert.ok(captureScript.includes(title),`missing session preset: ${title}`);
+  for(const marker of [
+    'SESSION_PRESETS','renderPresetChooser','selectPreset','presetFromConfig','applyPresetToCamera',
+    "if(joinId)join(joinId);else renderPresetChooser()",'presetId:preset?.id',
+    'preset_id:item.presetId','preset:{id:currentCfg?.presetId'
+  ]) assert.ok(captureScript.includes(marker),`missing session preset marker: ${marker}`);
+});
+
 
 test('continuous audio is decoupled from low-rate phone preview',()=>{
   for(const marker of [
@@ -175,4 +194,3 @@ test('background music selection and preview survive export decoder release',()=
   assert.ok(script.includes("if(musicRef&&!musicFile)"));
   assert.ok(html.includes('accept="audio/*"'));
 });
-

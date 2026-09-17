@@ -16,16 +16,18 @@ On each phone, open the [preflight page](../web/preflight/index.html):
 ## Short synchronization run
 
 1. Open the [multicamera session](../web/multicamera-session/index.html) on the director phone.
-2. Create a session.
-3. Scan the QR code with the second phone.
-4. Confirm that Camera B appears connected.
-5. Set duration to **5 seconds**, pre-roll to **2 seconds**, takes to **1**, and movement to **Fixed camera**.
-6. Set the director phone's media volume high. The remote phone does not need to emit a separate timing sound.
-7. Prepare both cameras and grant permissions.
-8. Wait for **All cameras are ready**.
-9. Start the take.
-10. After the third beep, make one clearly visible hand clap in view of both cameras.
-11. Wait for the end clap and both local downloads.
+2. Confirm that the preset selector appears before any QR or camera controls.
+3. Select **Prueba de sincronización**. Check that its card says two phones, one five-second take, fixed cameras, and the complete QR-to-download route.
+4. Select **Crear sesión · Prueba de sincronización**.
+5. Scan the QR code with the second phone.
+6. Confirm that Camera B appears connected and both phones show the same selected preset.
+7. Confirm that duration is **5 seconds**, pre-roll is **2 seconds**, takes is **1**, and movement is **Fixed camera**. These values should already be loaded by the preset.
+8. Set the director phone's media volume high. The remote phone does not need to emit a separate timing sound.
+9. Prepare both cameras and grant permissions.
+10. Wait for **All cameras are ready**.
+11. Start the take.
+12. After the third beep, make one clearly visible hand clap in view of both cameras.
+13. Wait for the end signature, then download both locally retained recordings and their identification manifests.
 
 The single physical sound emitted by the director is the synchronization reference captured by both microphones. Independent beeps on every phone would include network latency and are not the primary local-session reference.
 

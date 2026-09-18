@@ -125,6 +125,18 @@ test('capture page produces shareable named files and SHA manifests',()=>{
     assert.ok(captureScript.includes(marker),`missing capture marker: ${marker}`);
 });
 
+test('camera preparation retries until every connected phone confirms readiness',()=>{
+  const captureScript=captureHtml.match(/<script>([\s\S]*)<\/script>/)?.[1]??'';
+  for(const marker of [
+    'prepareRetryTimer','sendPrepareToPending','ensurePrepareRetry','updateReadyState',
+    'preparationActive','remoteRequiredForTake',"type:'prepare-error'",
+    "conn?.send({type:'ready'})",'Esperando confirmación:'
+  ]) assert.ok(captureScript.includes(marker),`missing resilient preparation marker: ${marker}`);
+  assert.match(captureHtml,/button:disabled\{/);
+  assert.match(captureHtml,/Mantener cámara fija/);
+  assert.match(captureHtml,/no bloquea ni estabiliza el teléfono/);
+});
+
 test('recording completion continues to synchronization on the director phone',()=>{
   const captureScript=captureHtml.match(/<script>([\s\S]*)<\/script>/)?.[1]??'';
   for(const id of ['directorNext','remoteNext','continueSync'])

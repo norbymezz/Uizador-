@@ -12,7 +12,7 @@ main{width:min(780px,100%);margin:auto;padding:12px}h1{font-size:1.08rem;margin:
 .card{padding:16px;border:1px solid #323b48;border-radius:16px;background:var(--panel);margin-bottom:10px}
 h2{font-size:1.15rem;margin:0 0 7px}p{color:#b6c0cb;line-height:1.38;margin:5px 0 14px}
 button,input{width:100%;min-height:46px;border:1px solid #3b4654;border-radius:10px;background:#1b222c;color:#fff;padding:9px;font:inherit}
-button{font-weight:700;cursor:pointer}.primary{background:linear-gradient(135deg,#e84f9a,#8b69e8);border-color:#ff8cc6}.danger{background:#811a26}.grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+button{font-weight:700;cursor:pointer}button:disabled{cursor:not-allowed;opacity:.42;filter:saturate(.35)}.primary{background:linear-gradient(135deg,#e84f9a,#8b69e8);border-color:#ff8cc6}.danger{background:#811a26}.grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}.field-help{display:block;margin-top:5px;color:#9facb9;font-size:.72rem;line-height:1.3}
 .screen{display:none}.screen.on{display:block}.status{font-size:.84rem;color:#aeb9c6;margin-top:9px;min-height:1.2em}
 #qr{width:230px;height:230px;margin:14px auto;background:#fff;padding:10px;border-radius:10px}#qr img,#qr canvas{width:100%!important;height:100%!important}
 .code{text-align:center;font-size:1.25rem;letter-spacing:.12em;color:var(--a);word-break:break-all}
@@ -56,7 +56,7 @@ video{width:100%;height:56vh;object-fit:cover}.guide{position:absolute;inset:0;p
 <label>Margen antes del clock<input id="preroll" type="number" min="1" max="8" value="2"></label>
 <label>Cantidad de tomas<input id="repetitions" type="number" min="1" max="10" value="3"></label>
 <label>Pausa entre tomas<input id="pauseBetween" type="number" min="2" max="30" value="5"></label>
-<label>Movimiento guiado<select id="movement"><option value="fixed">Cámara fija</option><option value="pan-right">Paneo hacia la derecha</option><option value="approach">Acercamiento</option><option value="retreat">Alejamiento</option></select></label>
+<label>Guía de movimiento<select id="movement"><option value="fixed">Mantener cámara fija</option><option value="pan-right">Paneo hacia la derecha</option><option value="approach">Acercamiento</option><option value="retreat">Alejamiento</option></select><span class="field-help">Es una indicación para quien filma; no bloquea ni estabiliza el teléfono.</span></label>
 </div>
 <button id="prepare" class="primary" style="margin-top:10px">Preparar cámaras</button>
 <div class="status" id="lobbyStatus">Esperando conexiones…</div></div>
@@ -89,11 +89,16 @@ const SESSION_PRESETS=Object.freeze([
  {id:'video-podcast',eyebrow:'PROGRAMA',title:'Video Podcast',summary:'Plano de ambos y primeros planos separados para conductor e invitado.',phones:'Ideal: 2',people:'Conductor + invitado',shots:'Dos + A + B',plan:'Conversación continua con cobertura para cortes',symbol:'A │ B',duration:30,preroll:3,repetitions:1,pauseBetween:5,movement:'fixed',prompt:'Cubrí al conductor o al invitado sin cambiar el eje.'},
  {id:'walktalk',eyebrow:'MOVIMIENTO',title:'Caminata con diálogo',summary:'Dos personas avanzan mientras la cámara retrocede y conserva tamaño y altura.',phones:'1 o más',people:'2 personas',shots:'Frontal en movimiento',plan:'Inicio marcado → recorrido → final marcado',symbol:'A+B →',duration:15,preroll:3,repetitions:2,pauseBetween:8,movement:'retreat',prompt:'Retrocedé de forma pareja y mantené a las dos personas dentro de la guía.'}
 ]);
-let peer=null,connections=[],director=false,stream=null,recorder=null,chunks=[],take=0,currentCfg=null,audioCtx=null,recordedTakes=[],stopPromise=Promise.resolve(),stopResolve=null,currentSequenceIndex=0,currentSequenceTotal=0,selectedPresetId=null;const readyPeers=new Set();let motionTimer=null;
+let peer=null,connections=[],director=false,stream=null,recorder=null,chunks=[],take=0,currentCfg=null,audioCtx=null,recordedTakes=[],stopPromise=Promise.resolve(),stopResolve=null,currentSequenceIndex=0,currentSequenceTotal=0,selectedPresetId=null;const readyPeers=new Set(),prepareFailures=new Map();let motionTimer=null,prepareRetryTimer=null,cameraOpenPromise=null,preparationActive=false,remoteRequiredForTake=false,lastCameraError='';
 const params=new URLSearchParams(location.search),joinId=params.get('join'),requestedPresetId=params.get('preset');
 function show(id){screens.forEach(x=>x.classList.toggle('on',x.id===id))}
 function short(id){return id?String(id).slice(-8).toUpperCase():'—'}
 function sendAll(msg){connections.filter(c=>c.open).forEach(c=>c.send(msg))}
+function onlineConnections(){return connections.filter(c=>c.open)}
+function stopPrepareRetry(){if(prepareRetryTimer)clearInterval(prepareRetryTimer);prepareRetryTimer=null}
+function sendPrepareToPending(){if(!director||!preparationActive||!currentCfg)return;onlineConnections().filter(c=>!readyPeers.has(c.peer)&&!prepareFailures.has(c.peer)).forEach(c=>c.send({type:'prepare',cfg:currentCfg}))}
+function ensurePrepareRetry(){if(prepareRetryTimer||!preparationActive)return;sendPrepareToPending();prepareRetryTimer=setInterval(sendPrepareToPending,1500)}
+function updateReadyState(){if(!director||!preparationActive)return;const online=onlineConnections(),failed=online.find(c=>prepareFailures.has(c.peer)),allRemoteReady=online.length>0&&online.every(c=>readyPeers.has(c.peer));if(failed){$('#startTake').disabled=true;$('#startTake').textContent='Revisá la otra cámara';$('#cameraStatus').textContent='La cámara '+short(failed.peer)+' no pudo prepararse: '+prepareFailures.get(failed.peer);stopPrepareRetry();return}if(remoteRequiredForTake&&!online.length){$('#startTake').disabled=true;$('#startTake').textContent='Cámara desconectada';$('#cameraStatus').textContent='La cámara remota se desconectó. Volvé a unirla a esta sesión.';ensurePrepareRetry();return}const canStart=!remoteRequiredForTake&&!online.length||allRemoteReady;$('#startTake').disabled=!canStart;$('#startTake').textContent=canStart?'Iniciar toma':'Esperando cámaras ('+readyPeers.size+'/'+online.length+')';$('#cameraStatus').textContent=canStart?(online.length?'Todas las cámaras están listas.':'Lista para grabar sólo en este teléfono.'):'Esperando confirmación: '+readyPeers.size+' de '+online.length+' cámaras listas.';if(canStart)stopPrepareRetry();else ensurePrepareRetry()}
 function getPreset(id=selectedPresetId){return SESSION_PRESETS.find(p=>p.id===id)||null}
 function miniFigure(position){return `<svg class="mini-figure ${position}" viewBox="-45 -92 90 112" aria-hidden="true"><circle cx="0" cy="-75" r="13"/><path d="M0 -61 L0 -26 M0 -52 L-22 -36 M0 -52 L22 -36 M0 -26 L-17 8 M0 -26 L17 8"/></svg>`}
 function presetVisual(preset){if(preset.visual==='single-per-shot')return `<div class="preset-visual single-per-shot"><span class="single-shot"><b>A</b>${miniFigure('a')}</span><span class="single-shot"><b>B</b>${miniFigure('b')}</span></div>`;return `<div class="preset-visual">${miniFigure('a')}<span class="preset-arrow">${preset.symbol}</span>${miniFigure('b')}</div>`}
@@ -105,12 +110,12 @@ function promptForCamera(cfg,action=false){const preset=presetFromConfig(cfg),te
 function applyPresetToCamera(cfg){const preset=presetFromConfig(cfg),single=preset.guideMode==='single-subject';$('#stage').classList.toggle('single-subject',single);$('#stage').classList.toggle('camera-b',single&&!director);$('#cameraPreset').textContent=preset.title;$('#prompt').textContent=promptForCamera(cfg);setLobbyPreset(preset)}
 function addConnection(conn){
  if(connections.some(x=>x.peer===conn.peer))return;
- connections.push(conn);conn.on('data',m=>handleMessage(m,conn));conn.on('close',()=>{readyPeers.delete(conn.peer);renderDevices()});
- conn.on('open',()=>{if(director)conn.send({type:'welcome',role:'Cámara '+String.fromCharCode(65+connections.indexOf(conn)+1),preset:getPreset()});renderDevices()});
+ connections.push(conn);conn.on('data',m=>handleMessage(m,conn));conn.on('close',()=>{readyPeers.delete(conn.peer);prepareFailures.delete(conn.peer);renderDevices();updateReadyState()});
+ conn.on('open',()=>{if(director){conn.send({type:'welcome',role:'Cámara '+String.fromCharCode(65+connections.indexOf(conn)+1),preset:getPreset()});if(preparationActive){remoteRequiredForTake=true;readyPeers.delete(conn.peer);conn.send({type:'prepare',cfg:currentCfg});ensurePrepareRetry();updateReadyState()}}renderDevices()});
 }
 function renderDevices(){
  const box=$('#devices');box.innerHTML='<div class="device"><span>Este teléfono · '+(director?'Director':'Cámara')+'</span><span class="ready">conectado</span></div>';
- connections.filter(c=>c.open).forEach((c,i)=>{const d=document.createElement('div');d.className='device';const ok=readyPeers.has(c.peer);d.innerHTML='<span>Cámara '+String.fromCharCode(66+i)+' · '+short(c.peer)+'</span><span class="ready">'+(ok?'lista':'conectada')+'</span>';box.appendChild(d)})
+ connections.filter(c=>c.open).forEach((c,i)=>{const d=document.createElement('div');d.className='device';const ok=readyPeers.has(c.peer),failed=prepareFailures.has(c.peer);d.innerHTML='<span>Cámara '+String.fromCharCode(66+i)+' · '+short(c.peer)+'</span><span class="ready">'+(failed?'revisar':ok?'lista':'conectada')+'</span>';box.appendChild(d)})
 }
 function makePeer(id){
  peer=new Peer(id||undefined);
@@ -132,18 +137,20 @@ function join(id){
 if(joinId)join(joinId);else renderPresetChooser();
 async function openCamera(){
  if(stream)return true;
- try{stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:'environment'},audio:{echoCancellation:false,noiseSuppression:false,autoGainControl:false}});$('#video').srcObject=stream;return true}
- catch(e){$('#lobbyStatus').textContent='No se pudo abrir cámara/micrófono: '+e.message;return false}
+ if(cameraOpenPromise)return cameraOpenPromise;
+ cameraOpenPromise=(async()=>{try{stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:'environment'},audio:{echoCancellation:false,noiseSuppression:false,autoGainControl:false}});$('#video').srcObject=stream;lastCameraError='';return true}catch(e){lastCameraError=e.message||'permiso o dispositivo no disponible';$('#lobbyStatus').textContent='No se pudo abrir cámara/micrófono: '+lastCameraError;return false}finally{cameraOpenPromise=null}})();
+ return cameraOpenPromise
 }
 $('#prepare').onclick=async()=>{
  if(!director)return;const ok=await openCamera();if(!ok)return;
- const preset=getPreset();readyPeers.clear();currentCfg={duration:Math.max(5,+$('#duration').value||12),preroll:Math.max(1,+$('#preroll').value||2),repetitions:Math.max(1,Math.min(10,+$('#repetitions').value||1)),pauseBetween:Math.max(2,+$('#pauseBetween').value||5),movement:$('#movement').value,presetId:preset?.id||'custom',presetTitle:preset?.title||'Preset personalizado',presetPlan:preset?.plan||'',prompt:preset?.prompt||'Seguí la guía de la sesión.'};
- applyPresetToCamera(currentCfg);sendAll({type:'prepare',cfg:currentCfg});show('cameraScreen');$('#role').textContent='Director';$('#startTake').disabled=connections.some(c=>c.open);$('#cameraStatus').textContent=connections.some(c=>c.open)?'Esperando confirmación de las cámaras…':'No hay cámaras remotas conectadas.'
+ const preset=getPreset();readyPeers.clear();prepareFailures.clear();remoteRequiredForTake=onlineConnections().length>0;preparationActive=true;currentCfg={duration:Math.max(5,+$('#duration').value||12),preroll:Math.max(1,+$('#preroll').value||2),repetitions:Math.max(1,Math.min(10,+$('#repetitions').value||1)),pauseBetween:Math.max(2,+$('#pauseBetween').value||5),movement:$('#movement').value,presetId:preset?.id||'custom',presetTitle:preset?.title||'Preset personalizado',presetPlan:preset?.plan||'',prompt:preset?.prompt||'Seguí la guía de la sesión.'};
+ applyPresetToCamera(currentCfg);show('cameraScreen');$('#role').textContent='Director';updateReadyState()
 };
 async function handleMessage(m,conn){
  if(m.type==='welcome'){$('#role').textContent=m.role;if(m.preset){selectedPresetId=m.preset.id;setLobbyPreset(m.preset)}}
- if(m.type==='prepare'){currentCfg=m.cfg;applyPresetToCamera(currentCfg);const ok=await openCamera();if(ok){show('cameraScreen');$('#startTake').style.display='none';$('#role').textContent='Cámara remota';connections[0]?.send({type:'ready'})}}
- if(m.type==='ready'&&director){if(conn)readyPeers.add(conn.peer);renderDevices();const online=connections.filter(c=>c.open);const all=online.length>0&&online.every(c=>readyPeers.has(c.peer));$('#startTake').disabled=!all;$('#cameraStatus').textContent=all?'Todas las cámaras están listas.':'Preparadas '+readyPeers.size+' de '+online.length+'.'}
+ if(m.type==='prepare'){currentCfg=m.cfg;applyPresetToCamera(currentCfg);$('#lobbyStatus').textContent='El director está preparando esta cámara…';const ok=await openCamera();if(ok){show('cameraScreen');$('#startTake').style.display='none';$('#role').textContent='Cámara remota';conn?.send({type:'ready'})}else conn?.send({type:'prepare-error',message:lastCameraError||'No se pudo abrir cámara/micrófono.'})}
+ if(m.type==='ready'&&director){if(conn){prepareFailures.delete(conn.peer);readyPeers.add(conn.peer)}renderDevices();updateReadyState()}
+ if(m.type==='prepare-error'&&director){if(conn){readyPeers.delete(conn.peer);prepareFailures.set(conn.peer,m.message||'No se pudo abrir cámara/micrófono.')}renderDevices();updateReadyState()}
  if(m.type==='record'){if(m.sequenceIndex===1){recordedTakes=[];$('#savedPanel').hidden=true}currentSequenceIndex=m.sequenceIndex||1;currentSequenceTotal=m.total||1;await beginRecording(m.take);$('#state').textContent='Grabando'}
  if(m.type==='action'){startMotion(m.duration,m.movement);$('#prompt').textContent=promptForCamera(currentCfg,true);$('#state').textContent='ACCIÓN'}
  if(m.type==='stop'){stopMotion();await stopRecording();$('#state').textContent='Finalizada';if(currentSequenceIndex>=currentSequenceTotal)showSavedTakes()}
@@ -188,7 +195,7 @@ async function runOneTake(sequenceIndex,total){
  await wait(800);sendAll({type:'stop',take,sequenceIndex,total});await stopRecording();$('#state').textContent='Toma '+sequenceIndex+' terminada'
 }
 $('#startTake').onclick=async()=>{
- if(!director||!currentCfg)return;$('#startTake').disabled=true;recordedTakes=[];$('#savedPanel').hidden=true;
+ if(!director||!currentCfg)return;const online=onlineConnections();if(remoteRequiredForTake&&(!online.length||!online.every(c=>readyPeers.has(c.peer)))){updateReadyState();return}preparationActive=false;stopPrepareRetry();$('#startTake').disabled=true;recordedTakes=[];$('#savedPanel').hidden=true;
  const total=currentCfg.repetitions||1;
  for(let i=1;i<=total;i++){
   await runOneTake(i,total);
@@ -196,6 +203,6 @@ $('#startTake').onclick=async()=>{
  }
  $('#big').textContent='';$('#prompt').textContent='Secuencia completa';$('#state').textContent='Finalizada';showSavedTakes();$('#startTake').disabled=false;$('#startTake').textContent='Grabar otra secuencia'
 };
-$('#backLobby').onclick=()=>show('lobby');
+$('#backLobby').onclick=()=>{preparationActive=false;stopPrepareRetry();show('lobby')};
 renderDevices();
 </script></body></html>

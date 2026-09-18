@@ -24,11 +24,12 @@ On each phone, open the [preflight page](../web/preflight/index.html):
 7. Confirm that duration is **5 seconds**, pre-roll is **2 seconds**, takes is **1**, and movement is **Fixed camera**. These values should already be loaded by the preset.
 8. Set the director phone's media volume high. The remote phone does not need to emit a separate timing sound.
 9. Prepare both cameras and grant permissions.
-10. Wait for **All cameras are ready**.
-11. Start the take.
-12. After the third beep, make one clearly visible hand clap in view of both cameras.
-13. Wait for the end signature, then download both locally retained recordings and their identification manifests.
-14. On the remote phone, follow the visible instruction to send its original recording and identification file to the director.
+10. Confirm that the remote phone leaves the session screen and shows its live camera. If the first preparation message is missed, it should receive an automatic retry without rescanning the QR.
+11. Wait for **All cameras are ready**. Until then, **Start take** must look disabled and report how many remote cameras confirmed.
+12. Start the take.
+13. After the third beep, make one clearly visible hand clap in view of both cameras.
+14. Wait for the end signature, then download both locally retained recordings and their identification manifests.
+15. On the remote phone, follow the visible instruction to send its original recording and identification file to the director.
 
 The single physical sound emitted by the director is the synchronization reference captured by both microphones. Independent beeps on every phone would include network latency and are not the primary local-session reference.
 

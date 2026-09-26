@@ -13,7 +13,7 @@
 - [Open the test center](https://norbymezz.github.io/Uizador-/web/test-center/)
 - [Browse scene presets](https://norbymezz.github.io/Uizador-/web/preset-library/)
 - [Try blue-point camera detection](https://norbymezz.github.io/Uizador-/web/blue-point/)
-- [Try the two/three-video permutation container](https://norbymezz.github.io/Uizador-/web/combined-permutation/)
+- [Try live hand skeleton and three MIDI notes](https://norbymezz.github.io/Uizador-/web/hand-live/)
 - [Try the Friends prebuilt scene guide](https://norbymezz.github.io/Uizador-/web/scene-rehearsal/?preset=friends-front-back&theme=cinema)
 - [Try the A Few Good Men prebuilt scene guide](https://norbymezz.github.io/Uizador-/web/scene-rehearsal/?preset=few-good-men-courtroom&theme=cinema)
 - [Try the news-studio human guide](https://norbymezz.github.io/Uizador-/web/news-studio/?template=correspondent)

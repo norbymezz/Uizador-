@@ -32,7 +32,7 @@ const scenes=[
 {id:'montage',title:'Short montage',desc:'Wide, medium action, detail, and reaction shots compress a sequence.',tags:['one','multi','montage'],phones:'1 or more',move:'W · M · D · R'},
 {id:'fantasy',title:'Illustrated world',desc:'A guided performance designed for a drawn or fantasy background added later.',tags:['one','multi','fantasy','movement'],phones:'1 or more',move:'◇ background',theme:'pastel'},
 {id:'blue-points',title:'Blue point gesture test',desc:'Rear camera, five blue measurement points, background reference, and a live gesture log.',tags:['one','music'],phones:'1',move:'● ● ●',href:'../blue-point/'},
-{id:'combined-permutation',title:'Combined video permutation',desc:'Play two or three videos in one divided container; reorder and reconstruct its columns with a key.',tags:['multi','montage'],phones:'2 or 3 files',move:'2·0·3·1',href:'../combined-permutation/'},
+{id:'hand-live',title:'Hand LIVE · three MIDI notes',desc:'Rear camera tracks a real 21-point hand skeleton. Three notes sound and hand height controls their volume.',tags:['one','music'],phones:'1',move:'✋ ♪♪♪',href:'../hand-live/'},
 {id:'choreography',title:'Music choreography',desc:'Guide audio marks steps, entrances, and movements; the final soundtrack can be added later.',tags:['one','multi','movement','music'],phones:'1 or more',move:'♪'},
 {id:'chroma',title:'Chroma scene',desc:'Framing prepared for a background replacement during later editing.',tags:['one','multi','movement'],phones:'1 or more',move:'◇'}
 ];
@@ -53,4 +53,3 @@ function key(s,i){return s.title+'-'+i}
 function render(){const box=document.querySelector('#grid');box.innerHTML='';let count=0;scenes.forEach((s,i)=>{const k=key(s,i),show=active==='all'||(active==='fav'?favs.has(k):s.tags.includes(active));if(!show)return;count++;const href=s.href||'../scene-rehearsal/index.html?preset='+s.id+'&theme='+(s.theme||'pop'),e=document.createElement('article');e.className='card';e.innerHTML=`${sceneVisual(s)}<h2>${s.title}</h2><p>${s.desc}</p><div class="meta">📱 ${s.phones}</div><div class="actions"><a class="start" href="${href}">Use preset</a><button class="fav ${favs.has(k)?'on':''}" aria-label="Favorite">♥</button></div>`;e.querySelector('.fav').onclick=()=>{favs.has(k)?favs.delete(k):favs.add(k);localStorage.setItem('uizador-favs',JSON.stringify([...favs]));render()};e.querySelector('.start').onclick=()=>localStorage.setItem('uizador-active-preset',s.id);box.appendChild(e)});document.querySelector('#empty').style.display=count?'none':'block'}
 document.querySelectorAll('.filter').forEach(b=>b.onclick=()=>{active=b.dataset.filter;document.querySelectorAll('.filter').forEach(x=>x.classList.toggle('on',x===b));render()});render();
 </script></body></html>
-

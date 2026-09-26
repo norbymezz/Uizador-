@@ -76,7 +76,7 @@ test('visible editor copy remains English',()=>{
 test('export releases and restores every preview decoder',()=>{
   for(const marker of [
     'releasePreviewForExport','restorePreviewAfterExport','renderStream?.getTracks()',
-    '[videos.A,videos.B,audioPlayers.A,audioPlayers.B]',
+    '[videos.A,videos.B,videoC,audioPlayers.A,audioPlayers.B]',
     "media.removeAttribute('src')",'a.src=url',
     "audioPlayers[key].addEventListener('loadedmetadata'",
     'setExportLock(true)','setExportLock(false)'
@@ -201,10 +201,20 @@ test('continuous audio is decoupled from low-rate phone preview',()=>{
     'PREVIEW_SAMPLE_MS=1000/PREVIEW_SAMPLE_HZ','setInterval(syncLoop,100)',
     'videos.A.muted=videos.B.muted=true'
   ]) assert.ok(script.includes(marker),`missing lightweight-preview marker: ${marker}`);
-  assert.ok(script.includes("const key=previewTurn++%2===0?'A':'B'"));
+  assert.ok(script.includes("for(const key of ['A','B'])placeMedia(key,t)"));
+  assert.ok(script.includes("placePreviewC(t)"));
   assert.ok(script.includes('a.volume=1'));
   assert.ok(!script.includes('requestMediaPlay'));
   assert.match(html,/Camera audio stays continuous and remains the synchronization clock/);
+});
+
+test('combined edit preview shows selected videos without permuting columns',()=>{
+  assert.ok(script.includes("const sources=previewCItem?.file?[videos.A,videos.B,videoC]:[videos.A,videos.B]"));
+  assert.ok(script.includes("w=combinedSource.width/sources.length"));
+  assert.ok(script.includes("drawMediaRegion(combinedCtx,sources[i],i*w,0,w,combinedSource.height)"));
+  assert.ok(!script.includes('drawPermutedFrame'));
+  assert.match(html,/Third video in preview/);
+  assert.match(html,/C is for simultaneous inspection/);
 });
 
 test('background music uses a selected fragment without becoming the sync clock',()=>{

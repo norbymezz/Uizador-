@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="es"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Uizador · Puntos azules</title>
+<style>
+:root{color-scheme:dark;font-family:system-ui,sans-serif;background:#071018;color:#e8f8ff}*{box-sizing:border-box}body{margin:0;max-width:780px;margin:auto;padding:12px}h1{font-size:1.3rem;margin:8px 0}.muted{color:#9db4c1;font-size:.86rem}button,input{font:inherit}button{background:#123645;color:#e8f8ff;border:1px solid #2d798c;border-radius:9px;padding:10px;min-height:44px}.buttons{display:flex;gap:7px;flex-wrap:wrap;margin:10px 0}.stage{position:relative;aspect-ratio:4/3;border:1px solid #32677a;border-radius:12px;overflow:hidden;background:#03080a}video{width:100%;height:100%;object-fit:cover}svg{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}.zone{fill:#197bfa;stroke:white;stroke-width:.004;filter:drop-shadow(0 0 7px #126bff)}.zone.on{fill:#ffbd4b}.zone.uncertain{fill:#657e90}.panel{display:flex;gap:10px;margin:12px 0}.panel>div{flex:1;background:#12232c;padding:10px;border-radius:9px}strong{font-size:1.4rem}label{display:block;margin:10px 0}input[type=range]{width:100%}ol{max-height:150px;overflow:auto;padding-left:28px}.error{color:#ffbd86}
+</style>
+<h1>LIVE · puntos azules</h1>
+<p class="muted">Prueba de cámara trasera y resta de fondo. Fijá el teléfono; calibrá sin mano y luego cubrí los puntos. El color ámbar indica cambio detectado.</p>
+<div class="stage"><video id="camera" autoplay muted playsinline></video><svg viewBox="0 0 1 1" preserveAspectRatio="none" aria-label="Cinco zonas de medición">
+<circle class="zone" cx=".23" cy=".68" r=".025"/><circle class="zone" cx=".40" cy=".32" r=".025"/><circle class="zone" cx=".53" cy=".26" r=".025"/><circle class="zone" cx=".66" cy=".33" r=".025"/><circle class="zone" cx=".77" cy=".47" r=".025"/>
+</svg></div>
+<div class="buttons"><button id="start">Activar cámara trasera</button><button id="calibrate" disabled>Fijar fondo sin mano</button><button id="reset">Reiniciar secuencia</button></div>
+<label>Sensibilidad de cambio <input id="threshold" type="range" min="10" max="100" value="38"><output id="thresholdValue">38</output></label>
+<div class="panel"><div>Tapados<br><strong id="count">—</strong> / 5</div><div>Estado<br><strong id="state">Sin cámara</strong></div></div>
+<p id="status" class="muted" role="status">Permisos pendientes. Se necesita HTTPS y acceso a cámara.</p>
+<ol id="events" aria-label="Registro de eventos"></ol>
+<canvas id="sample" width="320" height="240" hidden></canvas>
+<script>
+const v=document.querySelector('#camera'),canvas=document.querySelector('#sample'),ctx=canvas.getContext('2d',{willReadFrequently:true}),zones=[ [.23,.68],[.40,.32],[.53,.26],[.66,.33],[.77,.47] ],dots=[...document.querySelectorAll('.zone')],status=document.querySelector('#status'),events=document.querySelector('#events');let stream,base=null,history=Array.from({length:5},()=>[]),armed=false,phase=0,lastChange=0,held=Array(5).fill(false),lastCount=-1;
+const log=s=>{const li=document.createElement('li');li.textContent=new Date().toLocaleTimeString()+' · '+s;events.prepend(li);while(events.children.length>30)events.lastChild.remove()};
+function reset(){phase=0;armed=false;lastChange=performance.now();document.querySelector('#state').textContent='Esperando pulgar';log('Secuencia reiniciada')}
+document.querySelector('#reset').onclick=reset;
+document.querySelector('#threshold').oninput=e=>document.querySelector('#thresholdValue').textContent=e.target.value;
+document.querySelector('#start').onclick=async()=>{try{stream?.getTracks().forEach(t=>t.stop());stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:'environment'},width:{ideal:640},height:{ideal:480}},audio:false});v.srcObject=stream;await v.play();document.querySelector('#calibrate').disabled=false;status.textContent='Cámara activa. Quitá la mano y fijá el fondo.';log('Cámara activada');requestAnimationFrame(loop)}catch(e){status.textContent='No se pudo activar la cámara: '+e.message;status.className='error'}};
+document.querySelector('#calibrate').onclick=()=>{if(v.readyState<2)return;ctx.drawImage(v,0,0,320,240);base=ctx.getImageData(0,0,320,240).data.slice();history=Array.from({length:5},()=>[]);held=Array(5).fill(false);lastCount=-1;reset();status.textContent='Fondo fijado. Cambios en cada zona se marcan en ámbar.';log('Fondo calibrado')};
+function score(data,i){const x=Math.round(zones[i][0]*320),y=Math.round(zones[i][1]*240);let sum=0,n=0;for(let dy=-6;dy<=6;dy+=2)for(let dx=-6;dx<=6;dx+=2){const p=4*((y+dy)*320+x+dx);sum+=(Math.abs(data[p]-base[p])+Math.abs(data[p+1]-base[p+1])+Math.abs(data[p+2]-base[p+2]))/3;n++}return sum/n}
+function sequence(now,count){if(count!==lastCount){lastCount=count;lastChange=now;log(count+' / 5 zonas con cambio')}const quiet=now-lastChange>500;
+ // Las pausas de la secuencia son estabilidad visual; no se analiza el micrófono.
+ if(phase===0&&held[0]&&count===1&&quiet){phase=1;log('1: pulgar');document.querySelector('#state').textContent='1 · pulgar'}
+ else if(phase===1&&count===0&&quiet){phase=2;log('Pausa');document.querySelector('#state').textContent='Pausa'}
+ else if(phase===2&&held[1]&&count===1&&quiet){phase=3;log('2: índice');document.querySelector('#state').textContent='2 · índice'}
+ else if(phase===3&&count===0&&quiet){phase=4;log('Pausa');document.querySelector('#state').textContent='Pausa'}
+ else if(phase===4&&count===5&&quiet){phase=5;log('Comando local confirmado');document.querySelector('#state').textContent='CONFIRMADO';window.dispatchEvent(new CustomEvent('uizador-gesture',{detail:{command:'confirm',points:5}}))}
+ if(phase>0&&phase<5&&now-lastChange>4500){reset()}
+}
+function loop(){if(!stream?.active)return;if(v.readyState>=2&&base){ctx.drawImage(v,0,0,320,240);const data=ctx.getImageData(0,0,320,240).data,threshold=Number(document.querySelector('#threshold').value);held=zones.map((_,i)=>{const h=history[i];h.push(score(data,i)>threshold);if(h.length>5)h.shift();return h.filter(Boolean).length>=3});dots.forEach((d,i)=>d.classList.toggle('on',held[i]));const count=held.filter(Boolean).length;document.querySelector('#count').textContent=count;sequence(performance.now(),count)}requestAnimationFrame(loop)}
+window.addEventListener('pagehide',()=>stream?.getTracks().forEach(t=>t.stop()));
+</script></html>

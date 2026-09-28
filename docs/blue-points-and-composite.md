@@ -14,8 +14,17 @@ El tercer archivo es por ahora **sólo una fuente candidata para inspección**: 
 
 La antigua demostración de permutaciones permanece en `web/encoder-preview/` y `core/permutation.js`. Reordena columnas y las reconstruye mediante una clave inversa. No se aplica al montaje multipantalla. El SHA-256 del proyecto identifica archivos y tampoco altera el orden visual.
 
-## Mano real y tres flautas
+## Mano, máscara radial y sonido
 
-Abrir [LIVE · mano y tres flautas](../web/hand-live/). **Iniciar cámara y flautas** solicita cámara trasera y carga el detector de 21 puntos. Muestra el esqueleto y registra aparición/desaparición de manos. Inicia tres notas C4, E4 y G4 en canales MIDI 1, 2 y 3, con sonido local sintetizado. La altura de la palma controla el volumen de las tres mediante CC7; el botón de modo alterna entre tres notas simultáneas y una por vez. **Detener** envía Note Off y apaga el audio. Si el navegador ofrece una salida MIDI, puede elegirse en el selector; si no, los mensajes quedan registrados y se oye la síntesis local. La cámara se procesa en el dispositivo.
+Abrir [LIVE · mano, sonido y máscara](../web/hand-live/). La prueba separa cuatro módulos:
 
-El detector usa MediaPipe Hand Landmarker con un modelo externo que se descarga al iniciar. Se requiere Internet la primera vez, HTTPS y permiso de cámara. Es una prueba real de landmarks y de orden de eventos; todavía no define la gramática de pulgar, índice, pausas y confirmación. Las tres ondas senoidales son un sonido provisional para escuchar las notas, no instrumentos de flauta muestreados. Probar latencia, orientación de cámara, estabilidad y salida MIDI física en los dispositivos antes de usarlo en directo.
+1. **Captura.** La cámara trasera puede iniciarse y detenerse sin modificar el sonido. El usuario solicita entre 10 y 60 FPS. La pantalla muestra el valor informado por la cámara, los cuadros de video medidos y los cuadros realmente procesados por el detector.
+2. **Detección.** MediaPipe Hand Landmarker devuelve 21 coordenadas por mano, hasta dos manos. La confianza mínima modifica los umbrales de detección, presencia y seguimiento. La estabilidad temporal interpola posiciones consecutivas para reducir temblor gráfico.
+3. **Representación.** Puntos y esqueleto muestran las coordenadas directas. Anillos de máscara convierten cada punto en centro, zona de validación y halo. Cuerpo gráfico `1/d` dibuja bandas alrededor de puntos y segmentos cuya influencia disminuye con la distancia; el radio y el exponente `p` son regulables.
+4. **Sonido.** Puede comenzar sin cámara. Se elige instrumento sintetizado, frecuencia base, relación entre tres tonos, tempo, beat, notas juntas o alternadas y volumen manual o gobernado por la altura de la mano. La salida MIDI continúa siendo opcional.
+
+La máscara radial se construye después de la detección. Sirve para inspeccionar las coordenadas, definir tolerancias y dar un contorno gráfico al esqueleto; sus colores no vuelven a entrar en MediaPipe y por sí solos no aumentan la precisión del modelo. Los controles que sí afectan el comportamiento son la confianza mínima, el FPS de captura y la estabilidad temporal. Una futura etapa puede usar las zonas radiales como criterio de asociación o validación, pero debe medirse antes de atribuirle una mejora.
+
+El sonido local sigue siendo síntesis Web Audio, no una biblioteca de muestras. La opción **Flauta sintética** usa una onda senoidal con vibrato; seno, órgano y cuerda cambian la forma de onda y el filtrado. El tempo gobierna el cambio de voz en modo alternado y el beat audible cuando está encendido. La frecuencia base se convierte a la nota MIDI más cercana para los tres canales.
+
+El detector usa un modelo externo que se descarga al iniciar. Se requiere Internet la primera vez, HTTPS y permiso de cámara. Todo el procesamiento de video ocurre en el dispositivo. Antes de uso en directo se deben medir latencia, FPS sostenido, estabilidad, temperatura y salida MIDI física en los teléfonos elegidos.

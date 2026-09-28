@@ -16,14 +16,19 @@ La antigua demostración de permutaciones permanece en `web/encoder-preview/` y 
 
 ## Mano, máscara radial y sonido
 
-Abrir [LIVE · mano, sonido y máscara](../web/hand-live/). La prueba separa cuatro módulos:
+Abrir [LIVE · mano, sonido y máscara](../web/hand-live/). La prueba separa cinco módulos:
 
-1. **Captura.** La cámara trasera puede iniciarse y detenerse sin modificar el sonido. El usuario solicita entre 10 y 60 FPS. La pantalla muestra el valor informado por la cámara, los cuadros de video medidos y los cuadros realmente procesados por el detector.
-2. **Detección.** MediaPipe Hand Landmarker devuelve 21 coordenadas por mano, hasta dos manos. La confianza mínima modifica los umbrales de detección, presencia y seguimiento. La estabilidad temporal interpola posiciones consecutivas para reducir temblor gráfico.
-3. **Representación.** Puntos y esqueleto muestran las coordenadas directas. Anillos de máscara convierten cada punto en centro, zona de validación y halo. Cuerpo gráfico `1/d` dibuja bandas alrededor de puntos y segmentos cuya influencia disminuye con la distancia; el radio y el exponente `p` son regulables.
-4. **Sonido.** Puede comenzar sin cámara. Se elige instrumento sintetizado, frecuencia base, relación entre tres tonos, tempo, beat, notas juntas o alternadas y volumen manual o gobernado por la altura de la mano. La salida MIDI continúa siendo opcional.
+1. **Captura.** Después del primer permiso se enumeran las cámaras disponibles y el usuario puede cambiar entre ellas. La captura se inicia y se detiene sin modificar el sonido. El usuario solicita entre 10 y 60 FPS. La pantalla muestra el valor informado por la cámara, los cuadros medidos y los cuadros realmente procesados por el detector.
+2. **Detección y realimentación.** MediaPipe Hand Landmarker devuelve 21 coordenadas por mano, hasta dos manos. Si la realimentación está activa, las coordenadas anteriores generan una región suave que oscurece el exterior del siguiente fotograma antes de enviarlo al detector. La fuerza y el margen son regulables. Cada 12 cuadros se procesa una imagen completa para recuperar una mano que abandone la región.
+3. **Representación.** Puntos y esqueleto muestran las coordenadas directas. Anillos de máscara convierten cada punto en centro, zona de validación y halo. Cuerpo gráfico `1/d` dibuja bandas alrededor de puntos y segmentos cuya influencia disminuye con la distancia. El radio, el exponente `p`, la confianza mínima y la estabilidad temporal son regulables.
+4. **Superficie sonora.** Al ocultar la cámara, o si la cámara termina, el fondo negro muestra un teclado cromático C4–B4 de doce notas. La punta del índice ilumina y ejecuta la tecla que atraviesa. Puede mantenerse siempre visible o apagarse. Requiere haber iniciado el sonido para oír las notas.
+5. **Sonido y comandos.** Se elige instrumento sintetizado, frecuencia base, relación entre tres tonos, tempo, beat, notas juntas o alternadas y volumen manual o gobernado por la altura de la mano. La salida MIDI continúa siendo opcional.
 
-La máscara radial se construye después de la detección. Sirve para inspeccionar las coordenadas, definir tolerancias y dar un contorno gráfico al esqueleto; sus colores no vuelven a entrar en MediaPipe y por sí solos no aumentan la precisión del modelo. Los controles que sí afectan el comportamiento son la confianza mínima, el FPS de captura y la estabilidad temporal. Una futura etapa puede usar las zonas radiales como criterio de asociación o validación, pero debe medirse antes de atribuirle una mejora.
+Los colores visibles se construyen después de la detección y no entran en MediaPipe. La realimentación usa la geometría de la mano anterior, no esos colores. Es experimental: puede estabilizar una mano ya localizada, pero también puede perjudicar la recuperación; por eso se conserva el retorno periódico a imagen completa y debe compararse encendida y apagada.
+
+La regla de confirmación anterior queda reconstruida con anatomía: **pulgar → pausa visual → índice → pausa visual → mano abierta**. Cada estado debe mantenerse 500 ms. Emite `uizador-gesture` con `{command:"confirm", points:5}` y se reinicia si un paso tarda más de 4,5 s o aparece un gesto incorrecto. Como alternativa se puede elegir pulgar arriba sostenido durante 1,5 s.
+
+Cuando el índice queda extendido horizontalmente, el pulgar está abierto y los otros dedos están plegados, la representación se transforma en una pistola esquemática. La orientación produce `aim-left` o `aim-right`. Es un cambio del dibujo y un comando local; no altera el video original.
 
 El sonido local sigue siendo síntesis Web Audio, no una biblioteca de muestras. La opción **Flauta sintética** usa una onda senoidal con vibrato; seno, órgano y cuerda cambian la forma de onda y el filtrado. El tempo gobierna el cambio de voz en modo alternado y el beat audible cuando está encendido. La frecuencia base se convierte a la nota MIDI más cercana para los tres canales.
 
